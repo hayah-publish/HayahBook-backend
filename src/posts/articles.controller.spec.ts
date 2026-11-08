@@ -40,8 +40,7 @@ describe('ArticlesController', () => {
       category: 'تطوير الذات',
       categoryId: '1a31fd07-744e-4896-b787-b1d4c96ea222',
       content: 'نص المقال الكامل...',
-      cleanContent: 'نص المقال الكامل...',
-      htmlContent: '<p>نص المقال الكامل...</p>',
+      agreeToTerms: true,
       images: [],
       videoUrl: null,
       link: null,
@@ -130,6 +129,9 @@ describe('ArticlesController', () => {
     expect(result.data.coverImageUrl).toBeTruthy();
     expect(result.data.category).toBe('تطوير الذات');
     expect(result.data.content).toBe('نص المقال الكامل...');
+    expect(result.data.agreeToTerms).toBe(true);
+    expect(result.data.cleanContent).toBeUndefined();
+    expect(result.data.htmlContent).toBeUndefined();
   });
 
   it('POST /v1/articles fails if agreeToTerms is missing or false', async () => {

@@ -66,9 +66,10 @@ export interface FormattedPost {
   category?: string | null;
   categoryId?: string | null;
   categoryDetails?: any;
+  agreeToTerms?: boolean;
   content: string;
-  cleanContent: string;
-  htmlContent: string;
+  cleanContent?: string;
+  htmlContent?: string;
   images: string[];
   videoUrl: string | null;
   link: {
@@ -695,7 +696,9 @@ export class PostsService {
         }
       : null;
 
-    return {
+    const isArticle = post.type === 'article';
+
+    const formatted: FormattedPost = {
       id: post.id,
       type: post.type,
       title: post.title || null,
@@ -703,9 +706,14 @@ export class PostsService {
       category: post.category || null,
       categoryId: post.categoryId || null,
       categoryDetails,
+      ...(isArticle ? { agreeToTerms: true } : {}),
       content: post.content,
-      cleanContent: parsedLinksInfo.cleanContent,
-      htmlContent: parsedLinksInfo.htmlContent,
+      ...(!isArticle
+        ? {
+            cleanContent: parsedLinksInfo.cleanContent,
+            htmlContent: parsedLinksInfo.htmlContent,
+          }
+        : {}),
       images: post.images || [],
       videoUrl: post.videoUrl,
       link: formattedLink,
@@ -724,6 +732,8 @@ export class PostsService {
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
     };
+
+    return formatted;
   }
 
   /**
