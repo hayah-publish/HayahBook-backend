@@ -68,8 +68,6 @@ export interface FormattedPost {
   categoryDetails?: any;
   agreeToTerms?: boolean;
   content: string;
-  cleanContent?: string;
-  htmlContent?: string;
   images: string[];
   videoUrl: string | null;
   link: {
@@ -701,19 +699,17 @@ export class PostsService {
     const formatted: FormattedPost = {
       id: post.id,
       type: post.type,
-      title: post.title || null,
-      coverImageUrl: post.coverImageUrl || null,
-      category: post.category || null,
-      categoryId: post.categoryId || null,
-      categoryDetails,
-      ...(isArticle ? { agreeToTerms: true } : {}),
-      content: post.content,
-      ...(!isArticle
+      ...(isArticle
         ? {
-            cleanContent: parsedLinksInfo.cleanContent,
-            htmlContent: parsedLinksInfo.htmlContent,
+            title: post.title || null,
+            coverImageUrl: post.coverImageUrl || null,
+            category: post.category || null,
+            categoryId: post.categoryId || null,
+            categoryDetails,
+            agreeToTerms: true,
           }
         : {}),
+      content: post.content,
       images: post.images || [],
       videoUrl: post.videoUrl,
       link: formattedLink,

@@ -68,15 +68,12 @@ describe('PostsService public post formatting', () => {
 
       const response = await (service as any).formatPost(post);
 
-      // 1. cleanContent displays the title instead of the URL
-      expect(response.cleanContent).toBe(
-        'مرحباً بكم، يمكنكم زيارة موقعنا الرسمي لمزيد من التفاصيل.',
-      );
+      // 1. content is returned as-is
+      expect(response.content).toBe(post.content);
 
-      // 2. htmlContent renders clickable <a> tag targeting the URL
-      expect(response.htmlContent).toContain(
-        '<a href="https://hayahbook.com" target="_blank" rel="noopener noreferrer">موقعنا الرسمي</a>',
-      );
+      // 2. cleanContent and htmlContent are omitted to unify with single editor model
+      expect((response as any).cleanContent).toBeUndefined();
+      expect((response as any).htmlContent).toBeUndefined();
 
       // 3. links array contains parsed link metadata
       expect(response.links).toHaveLength(1);
@@ -87,14 +84,6 @@ describe('PostsService public post formatting', () => {
         startIndex: 25,
         endIndex: 38,
       });
-
-      // Verification: cleanContent substring at indices matches displayText
-      expect(
-        response.cleanContent.slice(
-          response.links[0].startIndex,
-          response.links[0].endIndex,
-        ),
-      ).toBe('موقعنا الرسمي');
 
       // 4. Primary link object is populated
       expect(response.link).toEqual({
@@ -127,27 +116,14 @@ describe('PostsService public post formatting', () => {
 
       const response = await (service as any).formatPost(post);
 
-      expect(response.cleanContent).toBe(
-        'تابعونا على منصة إكس وعلى قناة يوتيوب للمزيد.',
-      );
+      expect(response.content).toBe(post.content);
+      expect((response as any).cleanContent).toBeUndefined();
+      expect((response as any).htmlContent).toBeUndefined();
       expect(response.links).toHaveLength(2);
       expect(response.links[0].title).toBe('منصة إكس');
       expect(response.links[0].url).toBe('https://x.com/hayah');
       expect(response.links[1].title).toBe('قناة يوتيوب');
       expect(response.links[1].url).toBe('https://youtube.com/c/hayah');
-
-      expect(
-        response.cleanContent.slice(
-          response.links[0].startIndex,
-          response.links[0].endIndex,
-        ),
-      ).toBe('منصة إكس');
-      expect(
-        response.cleanContent.slice(
-          response.links[1].startIndex,
-          response.links[1].endIndex,
-        ),
-      ).toBe('قناة يوتيوب');
     });
 
     it('supports the Facebook way: pasting raw URLs in content without custom names', async () => {
@@ -175,14 +151,11 @@ describe('PostsService public post formatting', () => {
       const response = await (service as any).formatPost(post);
 
       // In Facebook style, raw URL remains in the text with its punctuation
-      expect(response.cleanContent).toBe(
+      expect(response.content).toBe(
         'منشور عادي برابط فيسبوك ستايل تفضلوا بزيارة https://hayahbook.com/books، نتمنى أن ينال إعجابكم!',
       );
-
-      // In HTML, the URL itself is clickable
-      expect(response.htmlContent).toContain(
-        '<a href="https://hayahbook.com/books" target="_blank" rel="noopener noreferrer">https://hayahbook.com/books</a>،',
-      );
+      expect((response as any).cleanContent).toBeUndefined();
+      expect((response as any).htmlContent).toBeUndefined();
 
       // Auto-detected Facebook-style preview card link
       expect(response.link).toEqual({
@@ -218,17 +191,9 @@ describe('PostsService public post formatting', () => {
 
       const response = await (service as any).formatPost(post);
 
-      // Custom link shows custom name, raw link shows raw URL
-      expect(response.cleanContent).toBe(
-        'زوروا موقعنا الرسمي أو تابعوا حسابنا المباشر https://x.com/hayahbook وشكراً.',
-      );
-
-      expect(response.htmlContent).toContain(
-        '<a href="https://hayahbook.com" target="_blank" rel="noopener noreferrer">موقعنا الرسمي</a>',
-      );
-      expect(response.htmlContent).toContain(
-        '<a href="https://x.com/hayahbook" target="_blank" rel="noopener noreferrer">https://x.com/hayahbook</a>',
-      );
+      expect(response.content).toBe(post.content);
+      expect((response as any).cleanContent).toBeUndefined();
+      expect((response as any).htmlContent).toBeUndefined();
 
       expect(response.links).toHaveLength(2);
       expect(response.links[0].title).toBe('موقعنا الرسمي');
@@ -237,33 +202,14 @@ describe('PostsService public post formatting', () => {
       expect(response.links[1].displayText).toBe('https://x.com/hayahbook');
     });
 
-    it('escapes HTML special characters in htmlContent to prevent XSS', async () => {
-      const post = {
-        id: 'post-4',
-        type: 'post',
-        content:
-          '<script>alert("hack")</script> زوروا [موقع آمن](https://safe.com?a=1&b=2)',
-        images: [],
-        videoUrl: null,
-        linkUrl: null,
-        linkTitle: null,
-        mentions: [],
-        likesCount: 0,
-        commentsCount: 0,
-        sharesCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: 'user-1',
-        user: { id: 'user-1', name: 'Person', profileUrl: null, role: 'user' },
-        book: null,
-        audiobook: null,
-      } as any;
+    it('escapes HTML special characters in parseContentLinks to prevent XSS', () => {
+      const parsed = (service as any).parseContentLinks(
+        '<script>alert("hack")</script> زوروا [موقع آمن](https://safe.com?a=1&b=2)',
+      );
 
-      const response = await (service as any).formatPost(post);
-
-      expect(response.htmlContent).not.toContain('<script>');
-      expect(response.htmlContent).toContain('&lt;script&gt;');
-      expect(response.htmlContent).toContain(
+      expect(parsed.htmlContent).not.toContain('<script>');
+      expect(parsed.htmlContent).toContain('&lt;script&gt;');
+      expect(parsed.htmlContent).toContain(
         '<a href="https://safe.com?a=1&amp;b=2" target="_blank" rel="noopener noreferrer">موقع آمن</a>',
       );
     });
@@ -412,12 +358,11 @@ describe('PostsService public post formatting', () => {
       );
 
       // Verify formatted response
-      expect(result.data.cleanContent).toBe(
-        'تفضلوا بزيارة منصة حياة بوك للحصول على الكتب',
+      expect(result.data.content).toBe(
+        'تفضلوا بزيارة [منصة حياة بوك](https://hayahbook.com) للحصول على الكتب',
       );
-      expect(result.data.htmlContent).toContain(
-        '<a href="https://hayahbook.com" target="_blank" rel="noopener noreferrer">منصة حياة بوك</a>',
-      );
+      expect((result.data as any).cleanContent).toBeUndefined();
+      expect((result.data as any).htmlContent).toBeUndefined();
       expect(result.data.links[0].title).toBe('منصة حياة بوك');
       expect(result.data.links[0].url).toBe('https://hayahbook.com');
       expect(result.data.link).toEqual({
