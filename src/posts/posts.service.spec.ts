@@ -262,4 +262,81 @@ describe('PostsService public post formatting', () => {
       expect(errors[0].property).toBe('links');
     });
   });
+
+  describe('PostsService.createPost with links integration', () => {
+    it('creates and saves a post transforming plain URL and title into inline markdown link', async () => {
+      let savedPostData: any = null;
+
+      const mockPostsRepo: any = {
+        create: jest.fn().mockImplementation((data) => ({ ...data, id: 'post-uuid-1', createdAt: new Date(), updatedAt: new Date() })),
+        save: jest.fn().mockImplementation(async (entity) => {
+          savedPostData = entity;
+          return { ...entity, id: 'post-uuid-1', createdAt: new Date(), updatedAt: new Date() };
+        }),
+      };
+
+      const mockUsersRepo: any = {
+        findOne: jest.fn().mockResolvedValue({
+          id: 'user-uuid-1',
+          name: 'علي أحمد',
+          profileUrl: 'https://cdn.example.com/avatar.jpg',
+          role: 'user',
+        }),
+        find: jest.fn().mockResolvedValue([]),
+      };
+
+      const mockBooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue(null),
+      };
+
+      const mockAudiobooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue(null),
+      };
+
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn(),
+        uploadPostVideo: jest.fn(),
+        deleteFileByUrl: jest.fn(),
+      };
+
+      const mockI18n: any = {
+        t: jest.fn().mockImplementation((key) => key),
+      };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      const dto: CreatePostDto = {
+        content: 'تفضلوا بزيارة https://hayahbook.com للحصول على الكتب',
+        link: { url: 'https://hayahbook.com', title: 'منصة حياة بوك' },
+      };
+
+      const result = await postService.createPost('user-uuid-1', dto);
+
+      // Verify saved in repository with inline markdown link
+      expect(savedPostData.content).toBe(
+        'تفضلوا بزيارة [منصة حياة بوك](https://hayahbook.com) للحصول على الكتب',
+      );
+
+      // Verify formatted response
+      expect(result.data.cleanContent).toBe(
+        'تفضلوا بزيارة منصة حياة بوك للحصول على الكتب',
+      );
+      expect(result.data.htmlContent).toContain(
+        '<a href="https://hayahbook.com" target="_blank" rel="noopener noreferrer">منصة حياة بوك</a>',
+      );
+      expect(result.data.links[0].title).toBe('منصة حياة بوك');
+      expect(result.data.links[0].url).toBe('https://hayahbook.com');
+      expect(result.data.link).toEqual({
+        url: 'https://hayahbook.com',
+        title: 'منصة حياة بوك',
+      });
+    });
+  });
 });
