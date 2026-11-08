@@ -737,5 +737,73 @@ describe('PostsService public post formatting', () => {
         postService.createPost('user-1', { content: 'test' }, fakeVideoFiles),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('normalizes feed tab types for English and Arabic', () => {
+      const mockPostsRepo: any = {};
+      const mockUsersRepo: any = {};
+      const mockBooksRepo: any = {};
+      const mockAudiobooksRepo: any = {};
+      const mockUploadService: any = {};
+      const mockI18n: any = {};
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      expect(postService.normalizeFeedType()).toBe('all');
+      expect(postService.normalizeFeedType('all')).toBe('all');
+      expect(postService.normalizeFeedType('الكل')).toBe('all');
+
+      expect(postService.normalizeFeedType('posts')).toBe('posts');
+      expect(postService.normalizeFeedType('المنشورات')).toBe('posts');
+
+      expect(postService.normalizeFeedType('articles')).toBe('articles');
+      expect(postService.normalizeFeedType('المقالات')).toBe('articles');
+
+      expect(postService.normalizeFeedType('visuals')).toBe('visuals');
+      expect(postService.normalizeFeedType('المرئيات')).toBe('visuals');
+
+      expect(postService.normalizeFeedType('snippets')).toBe('snippets');
+      expect(postService.normalizeFeedType('المقتطفات')).toBe('snippets');
+    });
+
+    it('getFeedCounts calculates correct counts across all 5 tabs', async () => {
+      const qb: any = {
+        select: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([
+          { post_type: 'post', post_video_url: null, post_category: null },
+          { post_type: 'article', post_video_url: null, post_category: 'تطوير الذات' },
+          { post_type: 'visual', post_video_url: 'https://cdn.example.com/v.mp4', post_category: null },
+          { post_type: 'snippet', post_video_url: null, post_category: 'مقتطفات' },
+        ]),
+      };
+      const mockPostsRepo: any = { createQueryBuilder: jest.fn().mockReturnValue(qb) };
+      const mockUsersRepo: any = {};
+      const mockBooksRepo: any = {};
+      const mockAudiobooksRepo: any = {};
+      const mockUploadService: any = {};
+      const mockI18n: any = {};
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      const counts = await postService.getFeedCounts();
+      expect(counts.all).toBe(4);
+      expect(counts.posts).toBe(1);
+      expect(counts.articles).toBe(1);
+      expect(counts.visuals).toBe(1);
+      expect(counts.snippets).toBe(1);
+    });
   });
 });

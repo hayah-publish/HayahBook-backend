@@ -36,3 +36,4 @@ export class UserBookmark {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
+

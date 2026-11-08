@@ -3,11 +3,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { UserBookmark } from './bookmark.entity';
 import { Post } from '../posts/post.entity';
-import { User } from '../users/user.entity';
-import { FormattedMentionUser, FormattedPost, PostsService } from '../posts/posts.service';
+import { FormattedPost, PostsService } from '../posts/posts.service';
 import { I18nService } from '../i18n/i18n.service';
 import { BookmarksQueryDto } from './dto/bookmarks-query.dto';
 
@@ -33,8 +32,6 @@ export class BookmarksService {
     private readonly bookmarksRepository: Repository<UserBookmark>,
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
     private readonly postsService: PostsService,
     private readonly i18n: I18nService,
   ) {}
@@ -47,22 +44,10 @@ export class BookmarksService {
     const val = input.trim().toLowerCase();
 
     if (val === 'all' || val === 'الكل') return 'all';
-    if (
-      val === 'posts' ||
-      val === 'post' ||
-      val === 'المنشورات' ||
-      val === 'منشورات' ||
-      val === 'منشور'
-    ) {
+    if (val === 'posts' || val === 'post' || val === 'المنشورات' || val === 'منشورات') {
       return 'posts';
     }
-    if (
-      val === 'articles' ||
-      val === 'article' ||
-      val === 'المقالات' ||
-      val === 'مقالات' ||
-      val === 'مقال'
-    ) {
+    if (val === 'articles' || val === 'article' || val === 'المقالات' || val === 'مقالات') {
       return 'articles';
     }
     if (
@@ -81,9 +66,7 @@ export class BookmarksService {
       val === 'snippet' ||
       val === 'المقتطفات' ||
       val === 'مقتطفات' ||
-      val === 'اقتباسات' ||
-      val === 'مقتطف' ||
-      val === 'اقتباس'
+      val === 'اقتباسات'
     ) {
       return 'snippets';
     }
@@ -92,22 +75,22 @@ export class BookmarksService {
   }
 
   /**
-   * Apply category/type filter to the bookmark query builder
+   * Apply category/type filter to the bookmark query
    */
   private applyFilter(qb: SelectQueryBuilder<UserBookmark>, tab: BookmarkTabType) {
     if (tab === 'articles') {
       qb.andWhere("post.type = 'article'");
     } else if (tab === 'visuals') {
       qb.andWhere(
-        "(post.type = 'visual' OR (post.videoUrl IS NOT NULL AND post.videoUrl != '') OR post.category ILIKE '%مرئيات%' OR post.category ILIKE '%visual%')",
+        "(post.type = 'visual' OR (post.videoUrl IS NOT NULL AND post.videoUrl != '') OR post.category ILIKE 'المرئيات' OR post.category ILIKE 'Visuals')",
       );
     } else if (tab === 'snippets') {
       qb.andWhere(
-        "(post.type = 'snippet' OR post.category ILIKE '%مقتطف%' OR post.category ILIKE '%snippet%' OR post.category ILIKE '%اقتباس%')",
+        "(post.type = 'snippet' OR post.category ILIKE 'المقتطفات' OR post.category ILIKE 'Snippets')",
       );
     } else if (tab === 'posts') {
       qb.andWhere(
-        "post.type = 'post' AND (post.videoUrl IS NULL OR post.videoUrl = '') AND (post.category NOT ILIKE '%مقتطف%' AND post.category NOT ILIKE '%snippet%' AND post.category NOT ILIKE '%مرئيات%' AND post.category NOT ILIKE '%visual%' OR post.category IS NULL)",
+        "post.type = 'post' AND (post.videoUrl IS NULL OR post.videoUrl = '') AND (post.category NOT IN ('المقتطفات', 'Snippets', 'المرئيات', 'Visuals') OR post.category IS NULL)",
       );
     }
     // 'all' requires no extra conditions
@@ -115,7 +98,7 @@ export class BookmarksService {
 
   /**
    * GET /v1/bookmarks or GET /v1/saved
-   * Returns user's saved items with tab filters, pagination, and tab item counts
+   * Returns user's saved items with tab filters and pagination
    */
   async findAll(
     userId: string,
@@ -156,32 +139,9 @@ export class BookmarksService {
     const [items, total] = await qb.getManyAndCount();
     const counts = await this.getCounts(userId);
 
-    // Pre-fetch all mentions in a single query to eliminate N+1 overhead
-    const allMentionIds = Array.from(
-      new Set(
-        items.flatMap((item) =>
-          Array.isArray(item.post?.mentions) ? item.post.mentions : [],
-        ),
-      ),
-    );
-    const mentionsMap = new Map<string, FormattedMentionUser>();
-    if (allMentionIds.length > 0) {
-      const mentionUsers = await this.usersRepository.find({
-        where: { id: In(allMentionIds) },
-        select: { id: true, name: true, profileUrl: true },
-      });
-      for (const u of mentionUsers) {
-        mentionsMap.set(u.id, {
-          id: u.id,
-          name: u.name,
-          profileUrl: u.profileUrl,
-        });
-      }
-    }
-
     const data: FormattedPost[] = await Promise.all(
       items.map(async (item) => {
-        const formatted = await this.postsService.formatPost(item.post, mentionsMap);
+        const formatted = await this.postsService.formatPost(item.post);
         return {
           ...formatted,
           isSaved: true,
@@ -229,13 +189,12 @@ export class BookmarksService {
       const isVisual =
         pType === 'visual' ||
         hasVideo ||
-        cat.includes('مرئيات') ||
-        cat.includes('visual');
+        cat === 'المرئيات' ||
+        cat === 'visuals';
       const isSnippet =
         pType === 'snippet' ||
-        cat.includes('مقتطف') ||
-        cat.includes('snippet') ||
-        cat.includes('اقتباس');
+        cat === 'المقتطفات' ||
+        cat === 'snippets';
       const isArticle = pType === 'article';
 
       if (isVisual) visuals++;
@@ -358,3 +317,4 @@ export class BookmarksService {
     };
   }
 }
+

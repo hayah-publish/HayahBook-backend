@@ -105,3 +105,4 @@ export class BookmarksController {
     return this.bookmarksService.removeBookmark(req.user.userId, postId);
   }
 }
+

@@ -61,11 +61,20 @@ export class PostsController {
 
   /**
    * GET /v1/posts
-   * Get paginated posts feed with filters
+   * Get paginated posts feed (posts only, excluding articles)
    */
   @Get()
   async getPosts(@Query() query: PostsQueryDto) {
-    return this.postsService.findAll(query);
+    return this.postsService.findAll({ ...query, type: 'post' });
+  }
+
+  /**
+   * GET /v1/posts/feed
+   * Combined feed for the home screen (posts, articles, visuals, and snippets)
+   */
+  @Get('feed')
+  async getHomeFeed(@Query() query: PostsQueryDto) {
+    return this.postsService.getHomeFeed(query);
   }
 
   /**

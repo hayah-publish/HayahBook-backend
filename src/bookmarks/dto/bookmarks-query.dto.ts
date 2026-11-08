@@ -23,3 +23,4 @@ export class BookmarksQueryDto {
   @IsString()
   search?: string;
 }
+

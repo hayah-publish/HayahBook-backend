@@ -6,7 +6,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, FindOptionsWhere } from 'typeorm';
+import { In, Repository, FindOptionsWhere, SelectQueryBuilder } from 'typeorm';
 import { Post } from './post.entity';
 import { User } from '../users/user.entity';
 import { Book } from '../books/book.entity';
@@ -456,6 +456,161 @@ export class PostsService {
     };
   }
 
+  /**
+   * Normalize input tab string from English or Arabic into standard canonical tab key
+   */
+  normalizeFeedType(input?: string): 'all' | 'posts' | 'articles' | 'visuals' | 'snippets' {
+    if (!input) return 'all';
+    const val = input.trim().toLowerCase();
+
+    if (val === 'all' || val === 'الكل') return 'all';
+    if (
+      val === 'posts' ||
+      val === 'post' ||
+      val === 'المنشورات' ||
+      val === 'منشورات' ||
+      val === 'منشور'
+    ) {
+      return 'posts';
+    }
+    if (
+      val === 'articles' ||
+      val === 'article' ||
+      val === 'المقالات' ||
+      val === 'مقالات' ||
+      val === 'مقال'
+    ) {
+      return 'articles';
+    }
+    if (
+      val === 'visuals' ||
+      val === 'visual' ||
+      val === 'المرئيات' ||
+      val === 'مرئيات' ||
+      val === 'video' ||
+      val === 'videos' ||
+      val === 'فيديو'
+    ) {
+      return 'visuals';
+    }
+    if (
+      val === 'snippets' ||
+      val === 'snippet' ||
+      val === 'المقتطفات' ||
+      val === 'مقتطفات' ||
+      val === 'اقتباسات' ||
+      val === 'مقتطف' ||
+      val === 'اقتباس'
+    ) {
+      return 'snippets';
+    }
+
+    return 'all';
+  }
+
+  /**
+   * Apply category/type filter to post query builder
+   */
+  private applyFeedTabFilter(qb: SelectQueryBuilder<Post>, tab: string) {
+    if (tab === 'articles') {
+      qb.andWhere("post.type = 'article'");
+    } else if (tab === 'visuals') {
+      qb.andWhere(
+        "(post.type = 'visual' OR (post.videoUrl IS NOT NULL AND post.videoUrl != '') OR post.category ILIKE '%مرئيات%' OR post.category ILIKE '%visual%')",
+      );
+    } else if (tab === 'snippets') {
+      qb.andWhere(
+        "(post.type = 'snippet' OR post.category ILIKE '%مقتطف%' OR post.category ILIKE '%snippet%' OR post.category ILIKE '%اقتباس%')",
+      );
+    } else if (tab === 'posts') {
+      qb.andWhere("post.type = 'post'");
+    }
+  }
+
+  /**
+   * Calculate item counts for the 5 tabs in the feed
+   */
+  async getFeedCounts(): Promise<{
+    all: number;
+    posts: number;
+    articles: number;
+    visuals: number;
+    snippets: number;
+  }> {
+    const rawList = await this.postsRepository
+      .createQueryBuilder('post')
+      .select([
+        'post.id AS id',
+        'post.type AS post_type',
+        'post.videoUrl AS post_video_url',
+        'post.category AS post_category',
+      ])
+      .getRawMany();
+
+    let posts = 0;
+    let articles = 0;
+    let visuals = 0;
+    let snippets = 0;
+
+    for (const row of rawList) {
+      const pType = row.post_type;
+      const hasVideo = !!row.post_video_url;
+      const cat = (row.post_category || '').toLowerCase();
+
+      const isVisual =
+        pType === 'visual' ||
+        hasVideo ||
+        cat.includes('مرئيات') ||
+        cat.includes('visual');
+      const isSnippet =
+        pType === 'snippet' ||
+        cat.includes('مقتطف') ||
+        cat.includes('snippet') ||
+        cat.includes('اقتباس');
+      const isArticle = pType === 'article';
+
+      if (isVisual) visuals++;
+      if (isSnippet) snippets++;
+      if (isArticle) articles++;
+      if (pType === 'post') {
+        posts++;
+      }
+    }
+
+    return {
+      all: rawList.length,
+      posts,
+      articles,
+      visuals,
+      snippets,
+    };
+  }
+
+  /**
+   * Home Feed combining posts, articles, visuals, and snippets
+   */
+  async getHomeFeed(query: PostsQueryDto): Promise<{
+    counts: {
+      all: number;
+      posts: number;
+      articles: number;
+      visuals: number;
+      snippets: number;
+    };
+    data: FormattedPost[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const feed = await this.findAll(query);
+    const counts = await this.getFeedCounts();
+    return {
+      counts,
+      ...feed,
+    };
+  }
+
   async findAll(query: PostsQueryDto): Promise<{
     data: FormattedPost[];
     total: number;
@@ -472,8 +627,9 @@ export class PostsService {
       .leftJoinAndSelect('post.book', 'book')
       .leftJoinAndSelect('post.audiobook', 'audiobook');
 
-    if (query.type && query.type !== 'all') {
-      qb.andWhere('post.type = :type', { type: query.type });
+    const tab = this.normalizeFeedType(query.type);
+    if (tab !== 'all') {
+      this.applyFeedTabFilter(qb, tab);
     }
 
     if (query.userId) {
@@ -481,7 +637,7 @@ export class PostsService {
     }
 
     if (query.search?.trim()) {
-      qb.andWhere('post.content ILIKE :search', {
+      qb.andWhere('(post.content ILIKE :search OR post.title ILIKE :search)', {
         search: `%${query.search.trim()}%`,
       });
     }

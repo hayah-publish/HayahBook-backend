@@ -24,3 +24,4 @@ describe('CreateBookmarksTable1762400000000 migration', () => {
     expect(sql).toContain('ALTER TABLE posts DROP COLUMN IF EXISTS bookmarks_count');
   });
 });
+

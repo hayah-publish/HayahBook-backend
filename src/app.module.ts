@@ -14,6 +14,7 @@ import { CreatorsModule } from './creators/creators.module';
 import { UploadModule } from './upload/upload.module';
 import { PostsModule } from './posts/posts.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { HomeModule } from './home/home.module';
 import { I18nModule } from './i18n/i18n.module';
 import { I18nMiddleware } from './i18n/i18n.middleware';
 import { I18nValidationExceptionFilter } from './i18n/i18n-validation.filter';
@@ -86,6 +87,7 @@ import { CreateBookmarksTable1762400000000 } from './database/migrations/1762400
     UploadModule,
     PostsModule,
     BookmarksModule,
+    HomeModule,
   ],
   controllers: [AppController],
   providers: [

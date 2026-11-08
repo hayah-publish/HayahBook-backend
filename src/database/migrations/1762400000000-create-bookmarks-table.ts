@@ -68,3 +68,4 @@ export class CreateBookmarksTable1762400000000 implements MigrationInterface {
     `);
   }
 }
+

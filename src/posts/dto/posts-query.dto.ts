@@ -24,8 +24,8 @@ export class PostsQueryDto {
   limit?: number = 20;
 
   @IsOptional()
-  @IsIn(['post', 'article', 'all'])
-  type?: 'post' | 'article' | 'all';
+  @IsString()
+  type?: string = 'all';
 
   @IsOptional()
   @IsUUID()
