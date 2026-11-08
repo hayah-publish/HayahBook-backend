@@ -136,6 +136,21 @@ describe('ArticlesController', () => {
     expect(result.data.htmlContent).toBeUndefined();
   });
 
+  it('POST /v1/articles succeeds when sending only categoryId and returns displayName in category', async () => {
+    const req: any = { user: { userId: 'user-1', role: 'user' } };
+    const dto: any = {
+      title: 'قوة العادات',
+      content: 'نص المقال الكامل...',
+      categoryId: '1a31fd07-744e-4896-b787-b1d4c96ea222',
+      coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/user1_cover.jpg',
+      agreeToTerms: true,
+    };
+
+    const result = await controller.createArticle(req, dto);
+    expect(result.data.category).toBe('تطوير الذات');
+    expect(result.data.categoryId).toBe('1a31fd07-744e-4896-b787-b1d4c96ea222');
+  });
+
   it('POST /v1/articles fails if agreeToTerms is missing or false', async () => {
     const req: any = { user: { userId: 'user-1', role: 'user' } };
     const dto: any = {

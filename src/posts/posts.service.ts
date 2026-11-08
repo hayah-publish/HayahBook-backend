@@ -15,6 +15,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { PostsQueryDto } from './dto/posts-query.dto';
 import { I18nService } from '../i18n/i18n.service';
+import { SupportedLanguage } from '../i18n/i18n.types';
 import { UploadService } from '../upload/upload.service';
 import { UploadFile } from '../upload/upload-file.interface';
 import { InterestsService } from '../interests/interests.service';
@@ -304,6 +305,13 @@ export class PostsService {
       }
       finalCategoryId = matched.id;
       finalCategory = matched.name_ar;
+    } else {
+      const meta = this.getArticleCategoryMeta(dto.categoryId, dto.category);
+      if (!meta) {
+        throw new BadRequestException(this.i18n.t('articles.category_invalid'));
+      }
+      finalCategoryId = meta.id;
+      finalCategory = meta.name_ar;
     }
 
     // 4. Cover Image validation (إجباري)
@@ -638,6 +646,72 @@ export class PostsService {
     return { book, audiobook };
   }
 
+  /**
+   * Resolve category metadata for an article, providing localized displayName, name_ar, and name_en
+   */
+  private getArticleCategoryMeta(
+    categoryId?: string | null,
+    categoryName?: string | null,
+    lang?: SupportedLanguage,
+  ) {
+    const currentLang = lang || (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
+    const ARTICLE_CATEGORIES_MAP: { id: string; name_ar: string; name_en: string }[] = [
+      { id: '9ad36706-9991-4fc0-a66e-c65c034acf71', name_ar: 'احداث حالية', name_en: 'Current events' },
+      { id: '3422405a-c14c-47af-aaf1-75cf49196639', name_ar: 'تاريخ وتراث', name_en: 'History and heritage' },
+      { id: '4451e686-627b-4e2f-9745-d5ace26b29e5', name_ar: 'ثقافة وفنون', name_en: 'Culture and arts' },
+      { id: '490ac292-16ad-4d1d-bb42-0015a2bb6ce5', name_ar: 'معرفة وتعليم', name_en: 'Knowledge and education' },
+      { id: 'bff3eb45-94dc-4e57-917e-fbbc374295d5', name_ar: 'أعمال ومهارات', name_en: 'Business and skills' },
+      { id: '1a31fd07-744e-4896-b787-b1d4c96ea222', name_ar: 'تطوير الذات', name_en: 'Self development' },
+      { id: '30cae856-e68c-406c-a1b5-791b54e7c775', name_ar: 'مجتمع وحياة', name_en: 'Society and life' },
+      { id: '576a9263-cc32-41f0-90a0-240d9797dd22', name_ar: 'مقالات حرة', name_en: 'Free articles' },
+      { id: 'c68594ac-6d35-4f70-9766-d801ccee387f', name_ar: 'سفر وأماكن', name_en: 'Travel and places' },
+    ];
+
+    const targetId = categoryId?.trim().toLowerCase();
+    const targetName = categoryName?.trim().toLowerCase();
+
+    const normalize = (s: string) =>
+      s.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').trim().toLowerCase();
+
+    const matched = ARTICLE_CATEGORIES_MAP.find((c) => {
+      if (targetId && c.id.toLowerCase() === targetId) return true;
+      if (targetName) {
+        if (c.name_ar.toLowerCase() === targetName || normalize(c.name_ar) === normalize(targetName)) return true;
+        if (c.name_en.toLowerCase() === targetName) return true;
+        if (c.id.toLowerCase() === targetName) return true;
+      }
+      return false;
+    });
+
+    if (matched) {
+      const displayName = currentLang === 'en' ? matched.name_en : matched.name_ar;
+      return {
+        id: matched.id,
+        displayName,
+        name_ar: matched.name_ar,
+        name_en: matched.name_en,
+        category: currentLang === 'en' ? 'Articles' : 'المقالات',
+        category_ar: 'المقالات',
+        category_en: 'Articles',
+      };
+    }
+
+    if (categoryName || categoryId) {
+      const name = categoryName || categoryId || '';
+      return {
+        id: categoryId || null,
+        displayName: name,
+        name_ar: name,
+        name_en: name,
+        category: currentLang === 'en' ? 'Articles' : 'المقالات',
+        category_ar: 'المقالات',
+        category_en: 'Articles',
+      };
+    }
+
+    return null;
+  }
+
   private async formatPost(
     post: Post,
     preloadedMentions?: Map<string, FormattedMentionUser>,
@@ -726,17 +800,13 @@ export class PostsService {
     }
 
     const currentLang = this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar';
-    const categoryDetails = (post.categoryId || post.category)
-      ? {
-          id: post.categoryId || null,
-          displayName: post.category,
-          name_ar: post.category,
-          name_en: post.category,
-          category: currentLang === 'en' ? 'Articles' : 'المقالات',
-          category_ar: 'المقالات',
-          category_en: 'Articles',
-        }
-      : null;
+    const categoryMeta = this.getArticleCategoryMeta(
+      post.categoryId,
+      post.category,
+      currentLang,
+    );
+    const categoryDetails = categoryMeta || null;
+    const resolvedCategory = categoryMeta?.displayName || post.category || null;
 
     const isArticle = post.type === 'article';
 
@@ -747,8 +817,8 @@ export class PostsService {
         ? {
             title: post.title || null,
             coverImageUrl: post.coverImageUrl || null,
-            category: post.category || null,
-            categoryId: post.categoryId || null,
+            category: resolvedCategory,
+            categoryId: post.categoryId || categoryMeta?.id || null,
             categoryDetails,
             agreeToTerms: true,
           }
