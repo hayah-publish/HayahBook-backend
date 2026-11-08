@@ -26,9 +26,32 @@ export class CreatePostDto {
   @IsIn(['post', 'article'])
   type?: 'post' | 'article' = 'post';
 
-  @IsNotEmpty({ message: 'posts.content_required' })
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsString()
-  content: string;
+  @MaxLength(255)
+  title?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  categoryId?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  cover?: any;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  agreeToTerms?: any;
+
+  @IsOptional()
+  @IsString()
+  content?: string;
 
   @IsOptional()
   @Transform(({ value }) => {

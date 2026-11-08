@@ -47,7 +47,7 @@ export class PostsController {
     AnyFilesInterceptor({
       limits: {
         fileSize: 500 * 1024 * 1024,
-        files: 11,
+        files: 20,
       },
     }),
   )

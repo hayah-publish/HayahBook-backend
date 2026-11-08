@@ -135,9 +135,9 @@ export const en = {
   'upload.payload_too_large': 'Payload size exceeds the maximum allowed limit',
   'upload.post_images_success': 'Images uploaded successfully',
   'upload.post_video_success': 'Video uploaded successfully',
-  'upload.images_limit_exceeded': 'Maximum 10 images allowed',
+  'upload.images_limit_exceeded': 'Maximum allowed is 10 images per post',
   'upload.image_size_exceeded': 'Image size exceeds maximum limit (20MB)',
-  'upload.video_limit_exceeded': 'Maximum 1 video allowed',
+  'upload.video_limit_exceeded': 'Only one video is allowed per post',
   'upload.video_size_exceeded': 'Video size exceeds maximum limit (500MB)',
   'upload.invalid_video_type': 'Unsupported video format. Allowed: MP4, MOV, WEBM, MKV',
 

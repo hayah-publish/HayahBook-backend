@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 
@@ -516,6 +517,225 @@ describe('PostsService public post formatting', () => {
       expect(result.data.book?.type).toBe('audiobook');
       expect(result.data.book?.hasAudio).toBe(true);
       expect(result.data.book?.hasEbook).toBe(false);
+    });
+
+    it('rejects if all keys are empty or content has only whitespace', async () => {
+      const mockPostsRepo: any = { create: jest.fn(), save: jest.fn() };
+      const mockUsersRepo: any = { findOne: jest.fn(), find: jest.fn() };
+      const mockBooksRepo: any = { findOne: jest.fn() };
+      const mockAudiobooksRepo: any = { findOne: jest.fn() };
+      const mockUploadService: any = { uploadPostImages: jest.fn(), uploadPostVideo: jest.fn() };
+      const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      // Empty object
+      await expect(
+        postService.createPost('user-1', {} as any),
+      ).rejects.toThrow(BadRequestException);
+
+      // Whitespace only
+      await expect(
+        postService.createPost('user-1', { content: '     ' } as any),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('allows publishing a post with only images and no content', async () => {
+      let savedPostData: any = null;
+      const mockPostsRepo: any = {
+        create: jest.fn().mockImplementation((data) => ({
+          ...data,
+          id: 'post-uuid-images',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          likesCount: 0,
+          commentsCount: 0,
+          sharesCount: 0,
+        })),
+        save: jest.fn().mockImplementation((post) => {
+          savedPostData = post;
+          return Promise.resolve(post);
+        }),
+      };
+      const mockUsersRepo: any = {
+        findOne: jest.fn().mockResolvedValue({ id: 'user-1', name: 'User 1' }),
+        find: jest.fn().mockResolvedValue([]),
+      };
+      const mockBooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
+      const mockAudiobooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn().mockResolvedValue({
+          urls: ['https://cdn.example.com/img1.jpg'],
+          message: 'ok',
+        }),
+        uploadPostVideo: jest.fn(),
+      };
+      const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      const fakeImageFile = {
+        buffer: Buffer.from('fake'),
+        mimetype: 'image/jpeg',
+        fieldname: 'images',
+        originalname: 'img.jpg',
+        size: 1024,
+      } as any;
+
+      const result = await postService.createPost(
+        'user-1',
+        {},
+        [fakeImageFile],
+      );
+
+      expect(result.data.images).toContain('https://cdn.example.com/img1.jpg');
+      expect(result.data.content).toBe('');
+      expect(savedPostData.content).toBe('');
+    });
+
+    it('allows publishing a post with only video and whitespace content', async () => {
+      let savedPostData: any = null;
+      const mockPostsRepo: any = {
+        create: jest.fn().mockImplementation((data) => ({
+          ...data,
+          id: 'post-uuid-video',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          likesCount: 0,
+          commentsCount: 0,
+          sharesCount: 0,
+        })),
+        save: jest.fn().mockImplementation((post) => {
+          savedPostData = post;
+          return Promise.resolve(post);
+        }),
+      };
+      const mockUsersRepo: any = {
+        findOne: jest.fn().mockResolvedValue({ id: 'user-1', name: 'User 1' }),
+        find: jest.fn().mockResolvedValue([]),
+      };
+      const mockBooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
+      const mockAudiobooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn(),
+        uploadPostVideo: jest.fn().mockResolvedValue({
+          videoUrl: 'https://cdn.example.com/video.mp4',
+          message: 'ok',
+        }),
+      };
+      const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      const fakeVideoFile = {
+        buffer: Buffer.from('fake'),
+        mimetype: 'video/mp4',
+        fieldname: 'video',
+        originalname: 'vid.mp4',
+        size: 2048,
+      } as any;
+
+      const result = await postService.createPost(
+        'user-1',
+        { content: '   ' },
+        [fakeVideoFile],
+      );
+
+      expect(result.data.videoUrl).toBe('https://cdn.example.com/video.mp4');
+      expect(result.data.content).toBe('');
+    });
+
+    it('rejects if total images exceed 10', async () => {
+      const mockPostsRepo: any = { create: jest.fn(), save: jest.fn() };
+      const mockUsersRepo: any = { findOne: jest.fn(), find: jest.fn() };
+      const mockBooksRepo: any = { findOne: jest.fn() };
+      const mockAudiobooksRepo: any = { findOne: jest.fn() };
+      const mockUploadService: any = { uploadPostImages: jest.fn(), uploadPostVideo: jest.fn() };
+      const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      const fakeFiles = Array.from({ length: 11 }).map(
+        (_, i) =>
+          ({
+            buffer: Buffer.from('f'),
+            mimetype: 'image/jpeg',
+            fieldname: 'images',
+            originalname: `img${i}.jpg`,
+            size: 100,
+          }) as any,
+      );
+
+      await expect(
+        postService.createPost('user-1', { content: 'test' }, fakeFiles),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects if more than 1 video is uploaded', async () => {
+      const mockPostsRepo: any = { create: jest.fn(), save: jest.fn() };
+      const mockUsersRepo: any = { findOne: jest.fn(), find: jest.fn() };
+      const mockBooksRepo: any = { findOne: jest.fn() };
+      const mockAudiobooksRepo: any = { findOne: jest.fn() };
+      const mockUploadService: any = { uploadPostImages: jest.fn(), uploadPostVideo: jest.fn() };
+      const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      const fakeVideoFiles = [
+        {
+          buffer: Buffer.from('v1'),
+          mimetype: 'video/mp4',
+          fieldname: 'video',
+          originalname: 'v1.mp4',
+          size: 100,
+        },
+        {
+          buffer: Buffer.from('v2'),
+          mimetype: 'video/mp4',
+          fieldname: 'video',
+          originalname: 'v2.mp4',
+          size: 100,
+        },
+      ] as any;
+
+      await expect(
+        postService.createPost('user-1', { content: 'test' }, fakeVideoFiles),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

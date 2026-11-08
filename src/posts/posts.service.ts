@@ -111,51 +111,6 @@ export class PostsService {
     dto: CreatePostDto,
     files?: UploadFile[],
   ): Promise<{ message: string; data: FormattedPost }> {
-    let linkUrl = dto.link?.url || dto.linkUrl || null;
-    let linkTitle = dto.link?.title || dto.linkTitle || null;
-
-    if (!linkUrl && Array.isArray(dto.links) && dto.links.length > 0) {
-      linkUrl = dto.links[0].url || null;
-      linkTitle = dto.links[0].title || null;
-    }
-
-    if (!dto.content || !dto.content.trim()) {
-      throw new BadRequestException(
-        this.i18n.t('posts.content_required'),
-      );
-    }
-
-    // Collect all explicit links provided in DTO
-    const explicitLinks: { url: string; title?: string | null }[] = [];
-    if (dto.link?.url) {
-      explicitLinks.push({ url: dto.link.url, title: dto.link.title });
-    }
-    if (dto.linkUrl) {
-      explicitLinks.push({ url: dto.linkUrl, title: dto.linkTitle });
-    }
-    if (Array.isArray(dto.links)) {
-      for (const item of dto.links) {
-        if (item?.url) {
-          explicitLinks.push({ url: item.url, title: item.title });
-        }
-      }
-    }
-
-    // Format content with any inline links from DTO or HTML tags
-    const processedContent = this.formatContentWithLinks(
-      dto.content.trim(),
-      explicitLinks,
-    );
-
-    // Auto-detect link from content if not explicitly provided (Facebook-style)
-    if (!linkUrl && processedContent) {
-      const detected = this.extractLinkFromContent(processedContent);
-      if (detected) {
-        linkUrl = detected.url;
-        linkTitle = detected.title;
-      }
-    }
-
     const imageFiles = (files || []).filter(
       (f) =>
         f.mimetype.startsWith('image/') ||
@@ -186,6 +141,72 @@ export class PostsService {
       throw new BadRequestException(
         this.i18n.t('upload.video_limit_exceeded'),
       );
+    }
+
+    const trimmedContent = (dto.content || '').trim();
+    const hasText = trimmedContent.length > 0;
+    const hasImageFiles = imageFiles.length > 0;
+    const hasVideoFiles = videoFiles.length > 0;
+    const hasImageUrls = Array.isArray(dto.images) && dto.images.length > 0;
+    const hasVideoUrl = !!dto.videoUrl;
+    const hasBook = !!(dto.bookId || dto.audiobookId);
+    const hasLink = !!(
+      dto.link?.url ||
+      dto.linkUrl ||
+      (Array.isArray(dto.links) && dto.links.length > 0)
+    );
+
+    const hasAnyContent =
+      hasText ||
+      hasImageFiles ||
+      hasVideoFiles ||
+      hasImageUrls ||
+      hasVideoUrl ||
+      hasBook ||
+      hasLink;
+
+    if (!hasAnyContent) {
+      throw new BadRequestException(
+        this.i18n.t('posts.content_required'),
+      );
+    }
+
+    let linkUrl = dto.link?.url || dto.linkUrl || null;
+    let linkTitle = dto.link?.title || dto.linkTitle || null;
+
+    if (!linkUrl && Array.isArray(dto.links) && dto.links.length > 0) {
+      linkUrl = dto.links[0].url || null;
+      linkTitle = dto.links[0].title || null;
+    }
+
+    // Collect all explicit links provided in DTO
+    const explicitLinks: { url: string; title?: string | null }[] = [];
+    if (dto.link?.url) {
+      explicitLinks.push({ url: dto.link.url, title: dto.link.title });
+    }
+    if (dto.linkUrl) {
+      explicitLinks.push({ url: dto.linkUrl, title: dto.linkTitle });
+    }
+    if (Array.isArray(dto.links)) {
+      for (const item of dto.links) {
+        if (item?.url) {
+          explicitLinks.push({ url: item.url, title: item.title });
+        }
+      }
+    }
+
+    // Format content with any inline links from DTO or HTML tags
+    const processedContent = hasText
+      ? this.formatContentWithLinks(trimmedContent, explicitLinks)
+      : '';
+
+    // Auto-detect link from content if not explicitly provided (Facebook-style)
+    if (!linkUrl && processedContent) {
+      const detected = this.extractLinkFromContent(processedContent);
+      if (detected) {
+        linkUrl = detected.url;
+        linkTitle = detected.title;
+      }
     }
 
     const { book, audiobook } = await this.resolveBookOrAudiobook(

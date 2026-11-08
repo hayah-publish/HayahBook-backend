@@ -135,9 +135,9 @@ export const ar = {
   'upload.payload_too_large': 'حجم البيانات يتجاوز الحد الأقصى المسموح به',
   'upload.post_images_success': 'تم رفع الصور بنجاح',
   'upload.post_video_success': 'تم رفع الفيديو بنجاح',
-  'upload.images_limit_exceeded': 'الحد الأقصى المسموح به هو 10 صور',
+  'upload.images_limit_exceeded': 'الحد الأقصى المسموح به هو 10 صور فقط لكل منشور',
   'upload.image_size_exceeded': 'حجم الصورة الواحدة يتجاوز الحد الأقصى (20 ميجابايت)',
-  'upload.video_limit_exceeded': 'يمكنك إرفاق فيديو واحد فقط كحد أقصى',
+  'upload.video_limit_exceeded': 'يسمح برفع فيديو واحد فقط لكل منشور',
   'upload.video_size_exceeded': 'حجم الفيديو يتجاوز الحد الأقصى (500 ميجابايت)',
   'upload.invalid_video_type': 'نوع الفيديو غير مدعوم. الأنواع المسموحة: MP4, MOV, WEBM, MKV',
 
