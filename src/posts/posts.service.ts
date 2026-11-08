@@ -293,24 +293,36 @@ export class PostsService {
    * 2. Cover image is MANDATORY (إجباري) via uploaded file or valid URL
    * 3. Category is MANDATORY (إجباري) and must belong to the approved 9 article categories
    * 4. Content is MANDATORY (إجباري)
+   * 5. Agree to Terms is MANDATORY (إجباري: agreeToTerms === true)
    */
   async createArticle(
     userId: string,
     dto: CreateArticleDto,
     files?: UploadFile[],
   ): Promise<{ message: string; data: FormattedPost }> {
-    // 1. Title validation (إجباري)
+    // 1. Terms acceptance validation (إجباري - يجب أن يكون true)
+    const termsAccepted =
+      dto.agreeToTerms === true ||
+      (dto as any).termsAccepted === true ||
+      (dto as any).agreeToTerms === 'true' ||
+      (dto as any).termsAccepted === 'true';
+
+    if (!termsAccepted) {
+      throw new BadRequestException(this.i18n.t('articles.terms_required'));
+    }
+
+    // 2. Title validation (إجباري)
     const title = dto.title?.trim();
     if (!title) {
       throw new BadRequestException(this.i18n.t('articles.title_required'));
     }
 
-    // 2. Content validation (إجباري)
+    // 3. Content validation (إجباري)
     if (!dto.content || !dto.content.trim()) {
       throw new BadRequestException(this.i18n.t('articles.content_required'));
     }
 
-    // 3. Category validation (إجباري)
+    // 4. Category validation (إجباري)
     const categoryInput = (dto.categoryId || dto.category || '').trim();
     if (!categoryInput) {
       throw new BadRequestException(this.i18n.t('articles.category_required'));

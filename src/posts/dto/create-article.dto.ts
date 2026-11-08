@@ -1,4 +1,5 @@
 import {
+  Equals,
   IsArray,
   IsBoolean,
   IsNotEmpty,
@@ -144,12 +145,12 @@ export class CreateArticleDto {
   @IsUUID(undefined, { each: true })
   mentions?: string[];
 
-  @IsOptional()
-  @Transform(({ value }) => {
-    if (value === 'true' || value === true || value === 1 || value === '1') return true;
+  @Transform(({ value, obj }) => {
+    const raw = value !== undefined ? value : obj?.termsAccepted;
+    if (raw === 'true' || raw === true || raw === 1 || raw === '1') return true;
     return false;
   })
-  @IsBoolean()
-  agreeToTerms?: boolean;
+  @Equals(true, { message: 'articles.terms_required' })
+  agreeToTerms: boolean;
 }
 

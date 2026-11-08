@@ -65,6 +65,7 @@ describe('ArticlesController', () => {
   beforeEach(async () => {
     postsService = {
       createArticle: jest.fn().mockImplementation((userId, dto, files) => {
+        if (!dto.agreeToTerms) throw new BadRequestException('يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook');
         if (!dto.title) throw new BadRequestException('عنوان المقال مطلوب');
         if (!dto.content) throw new BadRequestException('نص المقال مطلوب');
         if (!dto.category && !dto.categoryId) throw new BadRequestException('تصنيف المقال مطلوب');
@@ -112,7 +113,7 @@ describe('ArticlesController', () => {
     expect(interestsService.getArticleCategories).toHaveBeenCalled();
   });
 
-  it('POST /v1/articles creates article successfully when all 4 mandatory fields are provided', async () => {
+  it('POST /v1/articles creates article successfully when all mandatory fields are provided', async () => {
     const req: any = { user: { userId: 'user-1', role: 'user' } };
     const dto: any = {
       title: 'قوة العادات وكيف تغير حياتك',
@@ -120,6 +121,7 @@ describe('ArticlesController', () => {
       category: 'تطوير الذات',
       categoryId: '1a31fd07-744e-4896-b787-b1d4c96ea222',
       coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/user1_cover.jpg',
+      agreeToTerms: true,
     };
 
     const result = await controller.createArticle(req, dto);
@@ -130,9 +132,23 @@ describe('ArticlesController', () => {
     expect(result.data.content).toBe('نص المقال الكامل...');
   });
 
+  it('POST /v1/articles fails if agreeToTerms is missing or false', async () => {
+    const req: any = { user: { userId: 'user-1', role: 'user' } };
+    const dto: any = {
+      title: 'قوة العادات',
+      content: 'نص المقال...',
+      category: 'تطوير الذات',
+      coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/user1_cover.jpg',
+      agreeToTerms: false,
+    };
+
+    await expect(controller.createArticle(req, dto)).rejects.toThrow(BadRequestException);
+  });
+
   it('POST /v1/articles fails if title is missing', async () => {
     const req: any = { user: { userId: 'user-1', role: 'user' } };
     const dto: any = {
+      agreeToTerms: true,
       title: '',
       content: 'نص المقال...',
       category: 'تطوير الذات',
@@ -145,6 +161,7 @@ describe('ArticlesController', () => {
   it('POST /v1/articles fails if cover image is missing', async () => {
     const req: any = { user: { userId: 'user-1', role: 'user' } };
     const dto: any = {
+      agreeToTerms: true,
       title: 'عنوان المقال',
       content: 'نص المقال...',
       category: 'تطوير الذات',
@@ -156,6 +173,7 @@ describe('ArticlesController', () => {
   it('POST /v1/articles fails if category is missing', async () => {
     const req: any = { user: { userId: 'user-1', role: 'user' } };
     const dto: any = {
+      agreeToTerms: true,
       title: 'عنوان المقال',
       content: 'نص المقال...',
       coverImageUrl: 'https://example.com/cover.jpg',
@@ -167,6 +185,7 @@ describe('ArticlesController', () => {
   it('POST /v1/articles fails if content is missing', async () => {
     const req: any = { user: { userId: 'user-1', role: 'user' } };
     const dto: any = {
+      agreeToTerms: true,
       title: 'عنوان المقال',
       content: '',
       category: 'تطوير الذات',

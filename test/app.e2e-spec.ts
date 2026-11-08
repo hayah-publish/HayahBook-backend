@@ -1995,12 +1995,13 @@ describe('AppController (e2e)', () => {
   describe('Articles Management (POST /v1/articles)', () => {
     let createdArticleId: string;
 
-    it('POST /v1/articles creates article when all 4 mandatory fields are provided', async () => {
+    it('POST /v1/articles creates article when all mandatory fields are provided', async () => {
       const res = await request(app.getHttpServer())
         .post('/v1/articles')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
         .send({
+          agreeToTerms: true,
           title: 'قوة العادات وكيف تغير حياتك',
           content: 'هذا مقال شامل يشرح بناء العادات اليومية وأثرها على الإنتاجية الشخصية.',
           category: 'تطوير الذات',
@@ -2018,12 +2019,30 @@ describe('AppController (e2e)', () => {
       createdArticleId = res.body.data.id;
     });
 
+    it('POST /v1/articles fails with 400 when agreeToTerms is missing or false', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'ar')
+        .send({
+          agreeToTerms: false,
+          title: 'عنوان المقال',
+          content: 'نص المقال الكامل...',
+          category: 'تطوير الذات',
+          coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
+        })
+        .expect(400);
+
+      expect(res.body.message).toContain('يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook');
+    });
+
     it('POST /v1/articles fails with 400 when title is missing', async () => {
       const res = await request(app.getHttpServer())
         .post('/v1/articles')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
         .send({
+          agreeToTerms: true,
           content: 'نص المقال فقط بدون عنوان',
           category: 'تطوير الذات',
           coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
@@ -2039,6 +2058,7 @@ describe('AppController (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
         .send({
+          agreeToTerms: true,
           title: 'عنوان المقال',
           content: 'نص المقال بدون صورة رئيسية',
           category: 'تطوير الذات',
@@ -2054,6 +2074,7 @@ describe('AppController (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
         .send({
+          agreeToTerms: true,
           title: 'عنوان المقال',
           content: 'نص المقال بدون تصنيف',
           coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
@@ -2069,6 +2090,7 @@ describe('AppController (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
         .send({
+          agreeToTerms: true,
           title: 'عنوان المقال',
           category: 'تطوير الذات',
           coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',

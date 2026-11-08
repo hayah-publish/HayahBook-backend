@@ -158,5 +158,6 @@ export const ar = {
   'articles.category_required': 'تصنيف المقال مطلوب، يرجى اختيار تصنيف من قائمة الفئات',
   'articles.category_invalid': 'التصنيف المحدد غير صالح. يرجى اختيار تصنيف من فئات المقالات المعتمدة',
   'articles.content_required': 'نص المقال مطلوب',
+  'articles.terms_required': 'يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook لنشر المقال',
 };
 
