@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 
@@ -804,6 +804,120 @@ describe('PostsService public post formatting', () => {
       expect(counts.articles).toBe(1);
       expect(counts.visuals).toBe(1);
       expect(counts.snippets).toBe(1);
+    });
+
+    describe('Home Following Feed and 4 Types Filtering', () => {
+      it('throws UnauthorizedException when following=true is requested without currentUserId', async () => {
+        const postService = new PostsService(
+          {} as any,
+          {} as any,
+          {} as any,
+          {} as any,
+          {} as any,
+          { t: jest.fn().mockReturnValue('Unauthorized') } as any,
+        );
+
+        await expect(
+          postService.getHomeFeed({ following: true }),
+        ).rejects.toThrow(UnauthorizedException);
+      });
+
+      it('returns empty list and zero counts if user follows no one', async () => {
+        const mockFollowRepo: any = {
+          find: jest.fn().mockResolvedValue([]),
+        };
+        const mockDataSource: any = {
+          query: jest.fn().mockResolvedValue([]),
+        };
+
+        const postService = new PostsService(
+          {} as any,
+          {} as any,
+          {} as any,
+          {} as any,
+          {} as any,
+          {} as any,
+          undefined,
+          mockFollowRepo,
+          mockDataSource,
+        );
+
+        const res = await postService.getHomeFeed({ following: true }, 'user-empty');
+        expect(res.data).toEqual([]);
+        expect(res.total).toBe(0);
+        expect(res.counts.all).toBe(0);
+        expect(res.counts.posts).toBe(0);
+        expect(res.counts.articles).toBe(0);
+        expect(res.counts.visuals).toBe(0);
+        expect(res.counts.snippets).toBe(0);
+      });
+
+      it('filters following feed and tab counts by followed user IDs across the 4 types', async () => {
+        const mockFollowRepo: any = {
+          find: jest.fn().mockResolvedValue([
+            { followingId: 'followed-user-1' },
+            { followingId: 'followed-user-2' },
+          ]),
+        };
+        const mockDataSource: any = {
+          query: jest.fn().mockResolvedValue([]),
+        };
+
+        const qb: any = {
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+          select: jest.fn().mockReturnThis(),
+          getRawMany: jest.fn().mockResolvedValue([
+            { post_type: 'post', post_video_url: null, post_category: null },
+            { post_type: 'article', post_video_url: null, post_category: 'تطوير الذات' },
+            { post_type: 'visual', post_video_url: 'https://cdn.example.com/v.mp4', post_category: null },
+            { post_type: 'snippet', post_video_url: null, post_category: 'مقتطفات' },
+          ]),
+        };
+
+        const mockPostsRepo: any = {
+          createQueryBuilder: jest.fn().mockReturnValue(qb),
+        };
+        const mockUsersRepo: any = {
+          find: jest.fn().mockResolvedValue([]),
+        };
+
+        const postService = new PostsService(
+          mockPostsRepo,
+          mockUsersRepo,
+          {} as any,
+          {} as any,
+          {} as any,
+          { t: jest.fn().mockImplementation((k) => k) } as any,
+          undefined,
+          mockFollowRepo,
+          mockDataSource,
+        );
+
+        // Test with tab 'articles' in following feed
+        const res = await postService.getHomeFeed(
+          { following: true, type: 'articles' },
+          'user-viewer-1',
+        );
+
+        expect(qb.andWhere).toHaveBeenCalledWith(
+          'post.user_id IN (:...followingUserIds)',
+          expect.objectContaining({
+            followingUserIds: expect.arrayContaining(['followed-user-1', 'followed-user-2']),
+          }),
+        );
+        expect(qb.andWhere).toHaveBeenCalledWith("post.type = 'article'");
+        expect(res.counts.all).toBe(4);
+        expect(res.counts.posts).toBe(1);
+        expect(res.counts.articles).toBe(1);
+        expect(res.counts.visuals).toBe(1);
+        expect(res.counts.snippets).toBe(1);
+      });
     });
   });
 });

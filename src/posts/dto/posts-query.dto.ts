@@ -1,5 +1,5 @@
 import {
-  IsIn,
+  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -7,7 +7,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class PostsQueryDto {
   @IsOptional()
@@ -38,5 +38,21 @@ export class PostsQueryDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true || value === '1' || value === 1) return true;
+    if (value === 'false' || value === false || value === '0' || value === 0) return false;
+    return undefined;
+  })
+  @IsBoolean()
+  following?: boolean;
+
+  @IsOptional()
+  @IsString()
+  scope?: string;
+
+  // Internal filter passed to query builder
+  followingUserIds?: string[];
 }
 

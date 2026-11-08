@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './post.entity';
 import { User } from '../users/user.entity';
+import { UserUserFollow } from '../users/user-user-follow.entity';
 import { Book } from '../books/book.entity';
 import { Audiobook } from '../books/audiobook.entity';
 import { PostsService } from './posts.service';
@@ -13,7 +14,7 @@ import { InterestsModule } from '../interests/interests.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, User, Book, Audiobook]),
+    TypeOrmModule.forFeature([Post, User, UserUserFollow, Book, Audiobook]),
     UploadModule,
     I18nModule,
     InterestsModule,
