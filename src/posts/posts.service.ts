@@ -250,11 +250,7 @@ export class PostsService {
       const post = this.postsRepository.create({
         userId,
         type: dto.type || 'post',
-        title: dto.title?.trim() || null,
-        coverImageUrl: dto.coverImageUrl || null,
         content: processedContent,
-        category: dto.category?.trim() || null,
-        categoryId: dto.categoryId || null,
         images: finalImages,
         videoUrl: finalVideoUrl,
         linkUrl,

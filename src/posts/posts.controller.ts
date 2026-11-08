@@ -21,7 +21,6 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostsQueryDto } from './dto/posts-query.dto';
 import { UploadFile } from '../upload/upload-file.interface';
-import { InterestsService } from '../interests/interests.service';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -35,21 +34,11 @@ interface AuthenticatedRequest extends Request {
 export class PostsController {
   constructor(
     private readonly postsService: PostsService,
-    private readonly interestsService: InterestsService,
   ) {}
 
   /**
-   * GET /v1/posts/categories
-   * Returns article categories for publishing or filtering articles
-   */
-  @Get('categories')
-  async getCategories() {
-    return this.interestsService.getArticleCategories();
-  }
-
-  /**
    * POST /v1/posts
-   * Create and publish a post or article with direct atomic media upload (images and/or video)
+   * Create and publish a post with direct atomic media upload (images and/or video)
    * Ensures media is ONLY uploaded to Cloudflare R2 when the user actually publishes the post.
    */
   @UseGuards(JwtAuthGuard)

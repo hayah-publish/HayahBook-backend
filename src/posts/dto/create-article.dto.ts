@@ -152,3 +152,4 @@ export class CreateArticleDto {
   @IsBoolean()
   agreeToTerms?: boolean;
 }
+

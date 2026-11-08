@@ -787,15 +787,6 @@ describe('AppController (e2e)', () => {
       expect(res.body[0].category_en).toBe('Articles');
     });
 
-    it('GET /v1/posts/categories returns the 9 article categories', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/v1/posts/categories')
-        .expect(200);
-
-      expect(res.body.length).toBe(9);
-      expect(res.body[0].category_en).toBe('Articles');
-    });
-
     it('GET /v1/articles/categories returns specifically the 9 article categories in sorted order', async () => {
       const res = await request(app.getHttpServer())
         .get('/v1/articles/categories')

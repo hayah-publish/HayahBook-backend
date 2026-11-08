@@ -26,17 +26,6 @@ export class CreatePostDto {
   @IsIn(['post', 'article'])
   type?: 'post' | 'article' = 'post';
 
-  @IsOptional()
-  @Transform(({ value }) => (value === '' ? undefined : value))
-  @IsString()
-  @MaxLength(255)
-  title?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => (value === '' ? undefined : value))
-  @IsUrl({ require_protocol: true })
-  coverImageUrl?: string;
-
   @IsNotEmpty()
   @IsString()
   content: string;
@@ -124,17 +113,6 @@ export class CreatePostDto {
   @Transform(({ value }) => (value === '' ? undefined : value))
   @IsUUID()
   audiobookId?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => (value === '' ? undefined : value))
-  @IsString()
-  @MaxLength(100)
-  category?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => (value === '' ? undefined : value))
-  @IsUUID()
-  categoryId?: string;
 
   @IsOptional()
   @Transform(({ value }) => {
