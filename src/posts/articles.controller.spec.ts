@@ -68,7 +68,9 @@ describe('ArticlesController', () => {
         if (!dto.title) throw new BadRequestException('عنوان المقال مطلوب');
         if (!dto.content) throw new BadRequestException('نص المقال مطلوب');
         if (!dto.category && !dto.categoryId) throw new BadRequestException('تصنيف المقال مطلوب');
-        if (!dto.coverImageUrl && (!files || files.length === 0)) {
+        const coverF = files?.find((f: any) => f.fieldname === 'cover' || f.fieldname === 'coverImage');
+        const hasCover = dto.coverImageUrl || dto.coverUrl || (typeof dto.cover === 'string' && dto.cover.startsWith('http')) || coverF;
+        if (!hasCover) {
           throw new BadRequestException('الصورة الرئيسية للمقال مطلوبة');
         }
         return Promise.resolve(mockArticleResponse);

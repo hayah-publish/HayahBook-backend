@@ -53,6 +53,14 @@ export class CreatePostDto {
   videoUrl?: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  image?: any;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  video?: any;
+
+  @IsOptional()
   @Transform(({ value }) => {
     if (!value || value === '') return undefined;
     if (typeof value === 'string') {

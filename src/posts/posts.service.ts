@@ -314,9 +314,15 @@ export class PostsService {
         f.fieldname === 'cover_image' ||
         f.fieldname === 'mainImage' ||
         f.fieldname === 'main_image',
-    ) || (files?.length === 1 && files[0].mimetype.startsWith('image/') ? files[0] : undefined);
+    ) || (files?.length === 1 && files[0].mimetype.startsWith('image/') && files[0].fieldname !== 'images' && files[0].fieldname !== 'image' ? files[0] : undefined);
 
-    let finalCoverUrl = dto.coverImageUrl || dto.coverUrl || null;
+    let finalCoverUrl =
+      (typeof dto.cover === 'string' && dto.cover.trim().startsWith('http') ? dto.cover.trim() : null) ||
+      (typeof dto.coverImage === 'string' && dto.coverImage.trim().startsWith('http') ? dto.coverImage.trim() : null) ||
+      dto.coverImageUrl ||
+      dto.coverUrl ||
+      null;
+
     if (!coverFile && !finalCoverUrl) {
       throw new BadRequestException(this.i18n.t('articles.cover_required'));
     }

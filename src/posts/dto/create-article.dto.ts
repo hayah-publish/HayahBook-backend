@@ -26,13 +26,36 @@ export class CreateArticleDto {
   @IsOptional()
   @Transform(({ value }) => (value === '' ? undefined : value))
   @IsString()
-  @MaxLength(100)
+  type?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   category?: string;
 
   @IsOptional()
   @Transform(({ value }) => (value === '' ? undefined : value))
   @IsUUID(undefined, { message: 'articles.category_invalid' })
   categoryId?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  cover?: any;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  coverImage?: any;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  cover_image?: any;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  mainImage?: any;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  main_image?: any;
 
   @IsOptional()
   @Transform(({ value }) => (value === '' ? undefined : value))
@@ -43,6 +66,14 @@ export class CreateArticleDto {
   @Transform(({ value }) => (value === '' ? undefined : value))
   @IsUrl({ require_protocol: true })
   coverUrl?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  image?: any;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  video?: any;
 
   @IsOptional()
   @Transform(({ value }) => {
