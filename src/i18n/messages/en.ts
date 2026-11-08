@@ -148,5 +148,15 @@ export const en = {
   'posts.unauthorized': 'You are not authorized to delete this post',
   'posts.content_required': 'Post content is required',
   'posts.content_or_media_required': 'Post content is required',
+
+  // Articles
+  'articles.created': 'Article published successfully',
+  'articles.deleted': 'Article deleted successfully',
+  'articles.not_found': 'Article not found',
+  'articles.title_required': 'Article title is required',
+  'articles.cover_required': 'Article cover image is required',
+  'articles.category_required': 'Article category is required, please select a valid category',
+  'articles.category_invalid': 'Invalid category. Please select from the approved article categories',
+  'articles.content_required': 'Article content is required',
 };
 

@@ -22,40 +22,15 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-/**
- * Dedicated Controller specifically for:
- * GET /v1/articles/categories
- * Returns the exact 9 article categories in sorted order.
- */
-@Controller('articles/categories')
-export class ArticlesCategoriesController {
-  constructor(private readonly interestsService: InterestsService) {}
-
-  @Get()
-  async getCategories() {
-    return this.interestsService.getArticleCategories();
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post(['save', 'select'])
-  @HttpCode(HttpStatus.OK)
-  async saveCategory(
-    @Req() req: AuthenticatedRequest,
-    @Body() body: { categoryId?: string; category?: string },
-  ) {
-    return this.interestsService.saveSingleCategory(
-      req.user.userId,
-      body.categoryId || body.category,
-    );
-  }
-}
-
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly interestsService: InterestsService) {}
 
   /**
    * GET /v1/categories/articles
+   * Returns the 9 article categories matching the mobile/web design:
+   * Current events, History and heritage, Culture and arts, Knowledge and education,
+   * Business and skills, Self development, Society and life, Free articles, Travel and places.
    */
   @Get('articles')
   async getArticleCategories() {

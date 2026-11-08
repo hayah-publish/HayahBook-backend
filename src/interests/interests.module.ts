@@ -4,11 +4,11 @@ import { Interest } from './interest.entity';
 import { User } from '../users/user.entity';
 import { InterestsService } from './interests.service';
 import { InterestsController } from './interests.controller';
-import { CategoriesController, ArticlesCategoriesController } from './categories.controller';
+import { CategoriesController } from './categories.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Interest, User])],
-  controllers: [InterestsController, CategoriesController, ArticlesCategoriesController],
+  controllers: [InterestsController, CategoriesController],
   providers: [InterestsService],
   exports: [InterestsService],
 })

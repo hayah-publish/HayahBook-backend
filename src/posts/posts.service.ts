@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, FindOptionsWhere } from 'typeorm';
@@ -11,10 +12,12 @@ import { User } from '../users/user.entity';
 import { Book } from '../books/book.entity';
 import { Audiobook } from '../books/audiobook.entity';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CreateArticleDto } from './dto/create-article.dto';
 import { PostsQueryDto } from './dto/posts-query.dto';
 import { I18nService } from '../i18n/i18n.service';
 import { UploadService } from '../upload/upload.service';
 import { UploadFile } from '../upload/upload-file.interface';
+import { InterestsService } from '../interests/interests.service';
 
 export interface FormattedPostPublisher {
   id: string;
@@ -58,8 +61,11 @@ export interface FormattedPostLink {
 export interface FormattedPost {
   id: string;
   type: 'post' | 'article';
+  title?: string | null;
+  coverImageUrl?: string | null;
   category?: string | null;
   categoryId?: string | null;
+  categoryDetails?: any;
   content: string;
   cleanContent: string;
   htmlContent: string;
@@ -93,6 +99,8 @@ export class PostsService {
     private readonly audiobooksRepository: Repository<Audiobook>,
     private readonly uploadService: UploadService,
     private readonly i18n: I18nService,
+    @Optional()
+    private readonly interestsService?: InterestsService,
   ) { }
 
   async createPost(
@@ -242,6 +250,8 @@ export class PostsService {
       const post = this.postsRepository.create({
         userId,
         type: dto.type || 'post',
+        title: dto.title?.trim() || null,
+        coverImageUrl: dto.coverImageUrl || null,
         content: processedContent,
         category: dto.category?.trim() || null,
         categoryId: dto.categoryId || null,
@@ -277,6 +287,172 @@ export class PostsService {
 
     return {
       message: this.i18n.t('posts.created'),
+      data: formatted,
+    };
+  }
+
+  /**
+   * Create and publish an article with strict validations:
+   * 1. Title is MANDATORY (إجباري)
+   * 2. Cover image is MANDATORY (إجباري) via uploaded file or valid URL
+   * 3. Category is MANDATORY (إجباري) and must belong to the approved 9 article categories
+   * 4. Content is MANDATORY (إجباري)
+   */
+  async createArticle(
+    userId: string,
+    dto: CreateArticleDto,
+    files?: UploadFile[],
+  ): Promise<{ message: string; data: FormattedPost }> {
+    // 1. Title validation (إجباري)
+    const title = dto.title?.trim();
+    if (!title) {
+      throw new BadRequestException(this.i18n.t('articles.title_required'));
+    }
+
+    // 2. Content validation (إجباري)
+    if (!dto.content || !dto.content.trim()) {
+      throw new BadRequestException(this.i18n.t('articles.content_required'));
+    }
+
+    // 3. Category validation (إجباري)
+    const categoryInput = (dto.categoryId || dto.category || '').trim();
+    if (!categoryInput) {
+      throw new BadRequestException(this.i18n.t('articles.category_required'));
+    }
+
+    let finalCategory = dto.category?.trim() || null;
+    let finalCategoryId = dto.categoryId || null;
+
+    if (this.interestsService) {
+      const validCategories = await this.interestsService.getArticleCategories();
+      const matched = validCategories.find(
+        (c) =>
+          c.id.toLowerCase() === categoryInput.toLowerCase() ||
+          c.name_ar === categoryInput ||
+          c.name_en?.toLowerCase() === categoryInput.toLowerCase() ||
+          c.displayName?.toLowerCase() === categoryInput.toLowerCase(),
+      );
+
+      if (!matched) {
+        throw new BadRequestException(this.i18n.t('articles.category_invalid'));
+      }
+      finalCategoryId = matched.id;
+      finalCategory = matched.name_ar;
+    }
+
+    // 4. Cover Image validation (إجباري)
+    const coverFile = files?.find(
+      (f) =>
+        f.fieldname === 'cover' ||
+        f.fieldname === 'coverImage' ||
+        f.fieldname === 'cover_image' ||
+        f.fieldname === 'mainImage' ||
+        f.fieldname === 'main_image',
+    ) || (files?.length === 1 && files[0].mimetype.startsWith('image/') ? files[0] : undefined);
+
+    let finalCoverUrl = dto.coverImageUrl || dto.coverUrl || null;
+    if (!coverFile && !finalCoverUrl) {
+      throw new BadRequestException(this.i18n.t('articles.cover_required'));
+    }
+
+    const remainingFiles = files ? files.filter((f) => f !== coverFile) : [];
+    const imageFiles = remainingFiles.filter((f) => f.mimetype.startsWith('image/'));
+    const videoFiles = remainingFiles.filter((f) => f.mimetype.startsWith('video/'));
+
+    if (imageFiles.length > 10) {
+      throw new BadRequestException(this.i18n.t('upload.images_limit_exceeded'));
+    }
+
+    if (videoFiles.length > 1) {
+      throw new BadRequestException(this.i18n.t('upload.video_limit_exceeded'));
+    }
+
+    let book: Book | null = null;
+    if (dto.bookId) {
+      book = await this.booksRepository.findOne({ where: { id: dto.bookId } });
+    }
+
+    let audiobook: Audiobook | null = null;
+    if (dto.audiobookId) {
+      audiobook = await this.audiobooksRepository.findOne({ where: { id: dto.audiobookId } });
+    }
+
+    const explicitLinks: { url: string; title?: string | null }[] = [];
+    if (dto.link?.url) {
+      explicitLinks.push({ url: dto.link.url, title: dto.link.title });
+    }
+    if (Array.isArray(dto.links)) {
+      for (const l of dto.links) {
+        if (l?.url) explicitLinks.push({ url: l.url, title: l.title });
+      }
+    }
+    const processedContent = this.formatContentWithLinks(dto.content, explicitLinks);
+
+    let linkUrl = dto.link?.url || dto.linkUrl || null;
+    let linkTitle = dto.link?.title || dto.linkTitle || null;
+    if (!linkUrl && Array.isArray(dto.links) && dto.links.length > 0) {
+      linkUrl = dto.links[0].url || null;
+      linkTitle = dto.links[0].title || null;
+    }
+
+    const uploadedUrlsToCleanup: string[] = [];
+    let saved: Post;
+
+    try {
+      if (coverFile) {
+        const coverUpload = await this.uploadService.uploadArticleCover(userId, coverFile);
+        finalCoverUrl = coverUpload.url;
+        uploadedUrlsToCleanup.push(finalCoverUrl);
+      }
+
+      const uploadedImageUrls: string[] = [];
+      if (imageFiles.length > 0) {
+        const uploadRes = await this.uploadService.uploadPostImages(userId, imageFiles);
+        uploadedImageUrls.push(...uploadRes.urls);
+        uploadedUrlsToCleanup.push(...uploadRes.urls);
+      }
+      const finalImages = [...(dto.images || []), ...uploadedImageUrls];
+
+      let finalVideoUrl = dto.videoUrl || null;
+      if (videoFiles.length > 0) {
+        const uploadRes = await this.uploadService.uploadPostVideo(userId, videoFiles[0]);
+        finalVideoUrl = uploadRes.videoUrl;
+        uploadedUrlsToCleanup.push(finalVideoUrl);
+      }
+
+      const post = this.postsRepository.create({
+        userId,
+        type: 'article',
+        title,
+        coverImageUrl: finalCoverUrl,
+        category: finalCategory,
+        categoryId: finalCategoryId,
+        content: processedContent,
+        images: finalImages,
+        videoUrl: finalVideoUrl,
+        linkUrl,
+        linkTitle,
+        bookId: book?.id || null,
+        audiobookId: audiobook?.id || null,
+        book: book || undefined,
+        audiobook: audiobook || undefined,
+        mentions: dto.mentions || [],
+      });
+
+      saved = await this.postsRepository.save(post);
+    } catch (error) {
+      await Promise.all(uploadedUrlsToCleanup.map((url) => this.uploadService.deleteFileByUrl(url)));
+      throw error;
+    }
+
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    saved.user = user!;
+    saved.book = book;
+    saved.audiobook = audiobook;
+
+    const formatted = await this.formatPost(saved);
+    return {
+      message: this.i18n.t('articles.created'),
       data: formatted,
     };
   }
@@ -498,11 +674,27 @@ export class PostsService {
       });
     }
 
+    const currentLang = this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar';
+    const categoryDetails = (post.categoryId || post.category)
+      ? {
+          id: post.categoryId || null,
+          displayName: post.category,
+          name_ar: post.category,
+          name_en: post.category,
+          category: currentLang === 'en' ? 'Articles' : 'المقالات',
+          category_ar: 'المقالات',
+          category_en: 'Articles',
+        }
+      : null;
+
     return {
       id: post.id,
       type: post.type,
+      title: post.title || null,
+      coverImageUrl: post.coverImageUrl || null,
       category: post.category || null,
       categoryId: post.categoryId || null,
+      categoryDetails,
       content: post.content,
       cleanContent: parsedLinksInfo.cleanContent,
       htmlContent: parsedLinksInfo.htmlContent,

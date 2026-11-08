@@ -2000,4 +2000,121 @@ describe('AppController (e2e)', () => {
       expect(res.body.message).toBe('تم حذف المنشور بنجاح');
     });
   });
+
+  describe('Articles Management (POST /v1/articles)', () => {
+    let createdArticleId: string;
+
+    it('POST /v1/articles creates article when all 4 mandatory fields are provided', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'ar')
+        .send({
+          title: 'قوة العادات وكيف تغير حياتك',
+          content: 'هذا مقال شامل يشرح بناء العادات اليومية وأثرها على الإنتاجية الشخصية.',
+          category: 'تطوير الذات',
+          coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
+        })
+        .expect(201);
+
+      expect(res.body.message).toBe('تم نشر المقال بنجاح');
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.type).toBe('article');
+      expect(res.body.data.title).toBe('قوة العادات وكيف تغير حياتك');
+      expect(res.body.data.coverImageUrl).toBe('https://cdn.hayahbook.com/articles/covers/sample.jpg');
+      expect(res.body.data.category).toBe('تطوير الذات');
+      expect(res.body.data.content).toContain('هذا مقال شامل');
+      createdArticleId = res.body.data.id;
+    });
+
+    it('POST /v1/articles fails with 400 when title is missing', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'ar')
+        .send({
+          content: 'نص المقال فقط بدون عنوان',
+          category: 'تطوير الذات',
+          coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
+        })
+        .expect(400);
+
+      expect(res.body.message).toContain('عنوان المقال مطلوب');
+    });
+
+    it('POST /v1/articles fails with 400 when cover image is missing', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'ar')
+        .send({
+          title: 'عنوان المقال',
+          content: 'نص المقال بدون صورة رئيسية',
+          category: 'تطوير الذات',
+        })
+        .expect(400);
+
+      expect(res.body.message).toContain('الصورة الرئيسية للمقال مطلوبة');
+    });
+
+    it('POST /v1/articles fails with 400 when category is missing', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'ar')
+        .send({
+          title: 'عنوان المقال',
+          content: 'نص المقال بدون تصنيف',
+          coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
+        })
+        .expect(400);
+
+      expect(res.body.message).toContain('تصنيف المقال مطلوب');
+    });
+
+    it('POST /v1/articles fails with 400 when content is missing', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'ar')
+        .send({
+          title: 'عنوان المقال',
+          category: 'تطوير الذات',
+          coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
+        })
+        .expect(400);
+
+      expect(res.body.message).toContain('نص المقال مطلوب');
+    });
+
+    it('GET /v1/articles returns feed of articles', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/v1/articles')
+        .expect(200);
+
+      expect(Array.isArray(res.body.data)).toBe(true);
+      const found = res.body.data.find((a: any) => a.id === createdArticleId);
+      expect(found).toBeDefined();
+      expect(found.title).toBe('قوة العادات وكيف تغير حياتك');
+    });
+
+    it('GET /v1/articles/:id returns single article details', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/v1/articles/${createdArticleId}`)
+        .expect(200);
+
+      expect(res.body.id).toBe(createdArticleId);
+      expect(res.body.title).toBe('قوة العادات وكيف تغير حياتك');
+    });
+
+    it('DELETE /v1/articles/:id deletes article successfully', async () => {
+      const res = await request(app.getHttpServer())
+        .delete(`/v1/articles/${createdArticleId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'ar')
+        .expect(200);
+
+      expect(res.body.message).toBe('تم حذف المقال بنجاح');
+    });
+  });
 });

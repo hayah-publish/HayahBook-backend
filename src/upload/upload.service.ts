@@ -220,6 +220,41 @@ export class UploadService {
   }
 
   /**
+   * Upload single article cover image to Cloudflare R2 (Max 20MB)
+   */
+  async uploadArticleCover(
+    userId: string,
+    file?: UploadFile,
+  ): Promise<{ url: string; message: string }> {
+    if (!file || !file.buffer) {
+      throw new BadRequestException(this.i18n.t('articles.cover_required'));
+    }
+
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype) || !hasSignature(file.buffer, file.mimetype)) {
+      throw new BadRequestException(this.i18n.t('upload.invalid_file_type'));
+    }
+
+    const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20 MB
+    if (file.size > MAX_IMAGE_SIZE) {
+      throw new BadRequestException(this.i18n.t('upload.image_size_exceeded'));
+    }
+
+    let ext = 'jpg';
+    if (file.mimetype === 'image/png') ext = 'png';
+    else if (file.mimetype === 'image/webp') ext = 'webp';
+    else if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') ext = 'heic';
+
+    const randomHex = randomBytes(4).toString('hex');
+    const newKey = `articles/covers/${userId}_${Date.now()}_${randomHex}.${ext}`;
+
+    const url = await this.uploadFile(file.buffer, newKey, file.mimetype);
+    return {
+      url,
+      message: this.i18n.t('common.success'),
+    };
+  }
+
+  /**
    * Upload multiple post images to Cloudflare R2 (Max 10 images, max 20MB per image)
    */
   async uploadPostImages(

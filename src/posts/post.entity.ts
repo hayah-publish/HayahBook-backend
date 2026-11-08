@@ -30,6 +30,12 @@ export class Post {
   @Column({ type: 'varchar', length: 20, default: 'post' })
   type: PostType;
 
+  @Column({ name: 'title', type: 'varchar', length: 255, nullable: true })
+  title: string | null;
+
+  @Column({ name: 'cover_image_url', type: 'text', nullable: true })
+  coverImageUrl: string | null;
+
   @Column({ type: 'text' })
   content: string;
 

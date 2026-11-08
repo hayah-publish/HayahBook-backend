@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoriesController, ArticlesCategoriesController } from './categories.controller';
+import { CategoriesController } from './categories.controller';
 import { InterestsService } from './interests.service';
 
-describe('CategoriesController & ArticlesCategoriesController', () => {
+describe('CategoriesController', () => {
   let controller: CategoriesController;
-  let articlesController: ArticlesCategoriesController;
   let service: Partial<Record<keyof InterestsService, jest.Mock>>;
 
   const mockArticleCategories = [
@@ -116,7 +115,7 @@ describe('CategoriesController & ArticlesCategoriesController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [CategoriesController, ArticlesCategoriesController],
+      controllers: [CategoriesController],
       providers: [
         {
           provide: InterestsService,
@@ -126,14 +125,6 @@ describe('CategoriesController & ArticlesCategoriesController', () => {
     }).compile();
 
     controller = module.get<CategoriesController>(CategoriesController);
-    articlesController = module.get<ArticlesCategoriesController>(ArticlesCategoriesController);
-  });
-
-  it('ArticlesCategoriesController.getCategories returns the 9 article categories', async () => {
-    const result = await articlesController.getCategories();
-    expect(result).toHaveLength(9);
-    expect(result[0].name_en).toBe('Current events');
-    expect(service.getArticleCategories).toHaveBeenCalled();
   });
 
   it('getArticleCategories returns the 9 article categories matching exact design', async () => {
