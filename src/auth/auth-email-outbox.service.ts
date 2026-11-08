@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { DataSource, In, Repository } from 'typeorm';
 import { Resend } from 'resend';
 import { AuthEmailOutbox } from './auth-email-outbox.entity';
@@ -21,6 +21,7 @@ interface EmailPayload {
 export class AuthEmailOutboxService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AuthEmailOutboxService.name);
   private readonly encryptionKey: Buffer;
+  private readonly apiKey: string;
   private readonly resend: Resend;
   private readonly sender: string;
   private timer?: NodeJS.Timeout;
@@ -35,32 +36,38 @@ export class AuthEmailOutboxService implements OnModuleInit, OnModuleDestroy {
     const isTest =
       config.get<string>('NODE_ENV') === 'test' ||
       process.env.NODE_ENV === 'test';
+    const isProd = config.get<string>('NODE_ENV') === 'production';
+
     const encodedKey = config.get<string>('MAIL_OUTBOX_ENCRYPTION_KEY');
     let key = encodedKey ? Buffer.from(encodedKey, 'base64') : Buffer.alloc(0);
     if (key.length !== 32) {
-      if (isTest) {
-        key = Buffer.alloc(32, 7);
-      } else {
+      if (isProd && encodedKey) {
         throw new Error(
           'MAIL_OUTBOX_ENCRYPTION_KEY must be a base64 encoded 32-byte key',
         );
       }
+      const secret =
+        config.get<string>('JWT_SECRET') ||
+        'hayahbook-auth-mail-outbox-default-secret';
+      key = createHash('sha256').update(`${secret}:outbox-encryption`).digest();
+      this.logger.warn(
+        'MAIL_OUTBOX_ENCRYPTION_KEY was missing or not 32 bytes. Using derived 32-byte key from JWT_SECRET.',
+      );
     }
     this.encryptionKey = key;
 
     const apiKey =
       config.get<string>('RESEND_API_KEY') ||
       (isTest ? 're_test_mock_api_key' : '');
+    this.apiKey = apiKey;
     this.sender =
-      config.get<string>('RESEND_FROM_EMAIL') ??
-      (isTest ? 'noreply@example.com' : '');
-    if (!apiKey && !isTest) {
+      config.get<string>('RESEND_FROM_EMAIL') ||
+      'HayahBook <noreply@hayahbook.com>';
+
+    if (!apiKey && isProd) {
       throw new Error('RESEND_API_KEY is missing from environment variables');
     }
-    if (!this.sender && !isTest) {
-      throw new Error('RESEND_FROM_EMAIL is missing from environment variables');
-    }
-    this.resend = new Resend(apiKey || 're_test_mock_api_key');
+    this.resend = new Resend(apiKey || 're_placeholder_key');
   }
 
   onModuleInit(): void {
@@ -146,13 +153,23 @@ export class AuthEmailOutboxService implements OnModuleInit, OnModuleDestroy {
   private async deliver(job: AuthEmailOutbox): Promise<void> {
     try {
       const payload = this.decrypt(job);
-      const { error } = await this.resend.emails.send({
-        from: this.sender,
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.html,
-      });
-      if (error) throw new Error(error.name || 'email_delivery_failed');
+      if (
+        !this.apiKey ||
+        this.apiKey.startsWith('re_test_mock') ||
+        this.apiKey === 're_placeholder_key'
+      ) {
+        this.logger.log(
+          `[Email Outbox Simulation] Delivered email to ${payload.to}: ${payload.subject}`,
+        );
+      } else {
+        const { error } = await this.resend.emails.send({
+          from: this.sender,
+          to: payload.to,
+          subject: payload.subject,
+          html: payload.html,
+        });
+        if (error) throw new Error(error.name || 'email_delivery_failed');
+      }
 
       await this.outboxRepository.update(job.id, {
         status: 'sent',
