@@ -9,7 +9,6 @@ import {
 import type { Request } from 'express';
 import { PostsService } from '../posts/posts.service';
 import { PostsQueryDto } from '../posts/dto/posts-query.dto';
-import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { I18nService } from '../i18n/i18n.service';
@@ -59,7 +58,7 @@ export class HomeController {
     @Query() query: PostsQueryDto,
   ) {
     return this.postsService.getHomeFeed(
-      { ...query, following: true, scope: 'following' },
+      Object.assign(query, { following: true, scope: 'following' as const }),
       req.user!.userId,
     );
   }

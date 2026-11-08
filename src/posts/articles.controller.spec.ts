@@ -132,8 +132,8 @@ describe('ArticlesController', () => {
     expect(result.data.category).toBe('تطوير الذات');
     expect(result.data.content).toBe('نص المقال الكامل...');
     expect(result.data.agreeToTerms).toBe(true);
-    expect(result.data.cleanContent).toBeUndefined();
-    expect(result.data.htmlContent).toBeUndefined();
+    expect((result.data as any).cleanContent).toBeUndefined();
+    expect((result.data as any).htmlContent).toBeUndefined();
   });
 
   it('POST /v1/articles succeeds when sending only categoryId and returns displayName in category', async () => {

@@ -1993,7 +1993,15 @@ describe('AppController (e2e)', () => {
   });
 
   describe('Articles Management (POST /v1/articles)', () => {
+    let authToken: string;
     let createdArticleId: string;
+
+    beforeAll(async () => {
+      const jwtService = app.get(JwtService);
+      const usersService = app.get(UsersService);
+      const user = await usersService.findByEmail('hussein.mohamed.software@gmail.com');
+      authToken = jwtService.sign({ sub: user!.id, role: user!.role, tokenVersion: user!.tokenVersion });
+    });
 
     it('POST /v1/articles creates article when all mandatory fields are provided', async () => {
       const res = await request(app.getHttpServer())

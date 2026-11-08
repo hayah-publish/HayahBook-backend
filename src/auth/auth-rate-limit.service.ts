@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
-import { createHmac, randomInt, randomUUID } from 'crypto';
+import { createHmac, randomInt } from 'crypto';
 
 @Injectable()
 export class AuthRateLimitService {

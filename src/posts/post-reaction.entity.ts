@@ -59,3 +59,4 @@ export class PostReaction {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }
+

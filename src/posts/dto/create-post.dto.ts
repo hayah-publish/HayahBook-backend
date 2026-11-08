@@ -1,7 +1,6 @@
 import {
   IsArray,
   IsIn,
-  IsNotEmpty,
   IsOptional,
   IsString,
   IsUrl,
@@ -23,8 +22,8 @@ export class PostLinkDto {
 
 export class CreatePostDto {
   @IsOptional()
-  @IsIn(['post'])
-  type?: 'post' = 'post';
+  @IsIn(['post'] as const)
+  type?: 'post' = 'post' as const;
 
   @IsOptional()
   @Transform(({ value }) => (value === '' ? undefined : value))

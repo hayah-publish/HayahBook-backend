@@ -72,7 +72,10 @@ export class PostsController {
     @Query() query: PostsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
-    return this.postsService.findAll({ ...query, type: 'post' }, req?.user?.userId);
+    return this.postsService.findAll(
+      Object.assign(query, { type: 'post' as const }),
+      req?.user?.userId,
+    );
   }
 
   /**

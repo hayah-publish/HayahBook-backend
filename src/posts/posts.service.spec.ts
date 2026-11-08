@@ -664,6 +664,7 @@ describe('PostsService public post formatting', () => {
 
       expect(result.data.videoUrl).toBe('https://cdn.example.com/video.mp4');
       expect(result.data.content).toBe('');
+      expect(savedPostData.content).toBe('');
     });
 
     it('rejects if total images exceed 10', async () => {

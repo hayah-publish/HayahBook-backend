@@ -155,7 +155,7 @@ describe('CategoriesController', () => {
   it('getCategories without query returns categories summary', async () => {
     const result = await controller.getCategories(undefined, undefined);
     expect(service.getCategoriesSummary).toHaveBeenCalled();
-    expect(result[0].key).toBe('articles');
+    expect((result[0] as any).key).toBe('articles');
   });
 
   it('getByCategory delegates to findAll with path parameter', async () => {

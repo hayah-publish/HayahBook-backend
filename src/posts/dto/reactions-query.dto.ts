@@ -19,3 +19,4 @@ export class ReactionsQueryDto {
   @IsString()
   type?: string = 'all';
 }
+

@@ -36,9 +36,9 @@ export class AuthRateLimitMiddleware implements NestMiddleware {
     const bearerIdentity = authorization.startsWith('Bearer ')
       ? authorization.slice(7)
       : '';
-    const target = String(
-      body?.email ?? body?.newEmail ?? body?.phone ?? bearerIdentity,
-    ).trim().toLowerCase();
+    const targetValue = [body?.email, body?.newEmail, body?.phone]
+      .find((value): value is string => typeof value === 'string');
+    const target = (targetValue ?? bearerIdentity).trim().toLowerCase();
 
     if (otpRequest) {
       const [ipAllowed, targetAllowed] = await Promise.all([

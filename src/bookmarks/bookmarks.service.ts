@@ -82,7 +82,7 @@ export class BookmarksService {
       qb.andWhere("post.type = 'article'");
     } else if (tab === 'visuals') {
       qb.andWhere(
-        "(post.type = 'visual' OR (post.videoUrl IS NOT NULL AND post.videoUrl != '') OR post.category ILIKE 'المرئيات' OR post.category ILIKE 'Visuals')",
+        "(post.type = 'visual' OR (post.video_url IS NOT NULL AND post.video_url != '') OR post.category ILIKE 'المرئيات' OR post.category ILIKE 'Visuals')",
       );
     } else if (tab === 'snippets') {
       qb.andWhere(
@@ -90,7 +90,7 @@ export class BookmarksService {
       );
     } else if (tab === 'posts') {
       qb.andWhere(
-        "post.type = 'post' AND (post.videoUrl IS NULL OR post.videoUrl = '') AND (post.category NOT IN ('المقتطفات', 'Snippets', 'المرئيات', 'Visuals') OR post.category IS NULL)",
+        "post.type = 'post' AND (post.video_url IS NULL OR post.video_url = '') AND (post.category NOT IN ('المقتطفات', 'Snippets', 'المرئيات', 'Visuals') OR post.category IS NULL)",
       );
     }
     // 'all' requires no extra conditions
@@ -169,9 +169,9 @@ export class BookmarksService {
       .innerJoin('bookmark.post', 'post')
       .where('bookmark.userId = :userId', { userId })
       .select('COUNT(*)', 'all')
-      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post' AND post.videoUrl IS NULL AND LOWER(COALESCE(post.category, '')) NOT IN ('المقتطفات', 'snippets', 'المرئيات', 'visuals'))`, 'posts')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post' AND post.video_url IS NULL AND LOWER(COALESCE(post.category, '')) NOT IN ('المقتطفات', 'snippets', 'المرئيات', 'visuals'))`, 'posts')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'article')`, 'articles')
-      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR post.videoUrl IS NOT NULL OR LOWER(COALESCE(post.category, '')) IN ('المرئيات', 'visuals'))`, 'visuals')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR post.video_url IS NOT NULL OR LOWER(COALESCE(post.category, '')) IN ('المرئيات', 'visuals'))`, 'visuals')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'snippet' OR LOWER(COALESCE(post.category, '')) IN ('المقتطفات', 'snippets'))`, 'snippets')
       .getRawOne();
 

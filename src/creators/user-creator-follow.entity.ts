@@ -11,7 +11,7 @@ import { User } from '../users/user.entity';
 import { Creator } from './creator.entity';
 
 @Entity('user_creator_follows')
-@Index(['userId', 'creatorId'], { unique: true })
+@Index('uq_user_creator_follows_pair', ['userId', 'creatorId'], { unique: true })
 export class UserCreatorFollow {
   @PrimaryGeneratedColumn('uuid')
   id: string;

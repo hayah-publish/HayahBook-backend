@@ -1,4 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
+import { BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 describe('AuthService session and privacy safeguards', () => {
@@ -52,7 +53,7 @@ describe('AuthService session and privacy safeguards', () => {
     };
     const usersService = {
       findById: jest.fn(async () => ({ ...user })),
-      findByEmail: jest.fn(async () => null),
+      findByEmail: jest.fn(async (_email: string) => null as any),
       createUserWithPassword: jest.fn(async () => ({ ...user, emailVerified: false })),
       markEmailVerified: jest.fn(async () => undefined),
     };
@@ -103,6 +104,17 @@ describe('AuthService session and privacy safeguards', () => {
     const unknown = await service.forgotPassword({ email: 'missing@example.com' } as any);
 
     expect(known).toEqual(unknown);
+    expect((service as any).createAndSendOtp).toHaveBeenCalledWith(expect.objectContaining({ delivery: 'outbox' }));
+  });
+
+  it('returns the same verification error for signup OTPs when the account is missing or the code is invalid', async () => {
+    const { service, usersService } = createHarness();
+    jest.spyOn(service as any, 'verifyOtpRecord').mockRejectedValue(new BadRequestException('otp.invalid_or_expired'));
+    usersService.findByEmail.mockImplementation(async (email: string) => email === user.email ? user : null);
+
+    const known = await service.verifySignupOtp(user.email, '000000').catch((error) => error.message);
+    const unknown = await service.verifySignupOtp('missing@example.com', '000000').catch((error) => error.message);
+    expect(known).toBe(unknown);
   });
 
   it('rotates a refresh token once and rejects both concurrent reuse and the old token afterward', async () => {

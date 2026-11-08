@@ -32,18 +32,35 @@ export class AuthEmailOutboxService implements OnModuleInit, OnModuleDestroy {
     private readonly dataSource: DataSource,
     config: ConfigService,
   ) {
+    const isTest =
+      config.get<string>('NODE_ENV') === 'test' ||
+      process.env.NODE_ENV === 'test';
     const encodedKey = config.get<string>('MAIL_OUTBOX_ENCRYPTION_KEY');
-    const key = encodedKey ? Buffer.from(encodedKey, 'base64') : Buffer.alloc(0);
+    let key = encodedKey ? Buffer.from(encodedKey, 'base64') : Buffer.alloc(0);
     if (key.length !== 32) {
-      throw new Error('MAIL_OUTBOX_ENCRYPTION_KEY must be a base64 encoded 32-byte key');
+      if (isTest) {
+        key = Buffer.alloc(32, 7);
+      } else {
+        throw new Error(
+          'MAIL_OUTBOX_ENCRYPTION_KEY must be a base64 encoded 32-byte key',
+        );
+      }
     }
     this.encryptionKey = key;
 
-    const apiKey = config.get<string>('RESEND_API_KEY');
-    this.sender = config.get<string>('RESEND_FROM_EMAIL') ?? '';
-    if (!apiKey) throw new Error('RESEND_API_KEY is missing from environment variables');
-    if (!this.sender) throw new Error('RESEND_FROM_EMAIL is missing from environment variables');
-    this.resend = new Resend(apiKey);
+    const apiKey =
+      config.get<string>('RESEND_API_KEY') ||
+      (isTest ? 're_test_mock_api_key' : '');
+    this.sender =
+      config.get<string>('RESEND_FROM_EMAIL') ??
+      (isTest ? 'noreply@example.com' : '');
+    if (!apiKey && !isTest) {
+      throw new Error('RESEND_API_KEY is missing from environment variables');
+    }
+    if (!this.sender && !isTest) {
+      throw new Error('RESEND_FROM_EMAIL is missing from environment variables');
+    }
+    this.resend = new Resend(apiKey || 're_test_mock_api_key');
   }
 
   onModuleInit(): void {
@@ -104,8 +121,8 @@ export class AuthEmailOutboxService implements OnModuleInit, OnModuleDestroy {
            WHERE (status = 'pending' AND available_at <= now())
               OR (status = 'processing' AND lock_until <= now())
            ORDER BY created_at
-           FOR UPDATE SKIP LOCKED
-           LIMIT 10`,
+           LIMIT 10
+           FOR UPDATE SKIP LOCKED`,
         );
         if (selected.length === 0) return [];
         const ids = selected.map((row: { id: string }) => row.id);
@@ -119,7 +136,7 @@ export class AuthEmailOutboxService implements OnModuleInit, OnModuleDestroy {
       });
 
       for (const job of jobs) await this.deliver(job);
-    } catch (error) {
+    } catch {
       this.logger.error('Outbox polling failed');
     } finally {
       this.processing = false;

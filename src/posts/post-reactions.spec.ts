@@ -1,7 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { Post } from './post.entity';
-import { PostReaction, ReactionType } from './post-reaction.entity';
+import type { ReactionType } from './post-reaction.entity';
 
 describe('Post Reactions Feature', () => {
   let service: PostsService;
@@ -375,3 +374,4 @@ describe('Post Reactions Feature', () => {
     });
   });
 });
+

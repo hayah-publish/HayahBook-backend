@@ -13,7 +13,9 @@ describe('AuthRateLimitService', () => {
 
   it('records a shared atomic fixed-window counter without storing the identity', async () => {
     await expect(service.consume('login-ip', '203.0.113.8', 10, 900_000)).resolves.toBe(true);
-    const [sql, params] = dataSource.query.mock.calls[0];
+    const insertCall = dataSource.query.mock.calls.find(([sql]) => String(sql).includes('ON CONFLICT (key) DO UPDATE'));
+    expect(insertCall).toBeDefined();
+    const [sql, params] = insertCall!;
     expect(sql).toContain('ON CONFLICT (key) DO UPDATE');
     expect(params[0]).not.toContain('203.0.113.8');
     expect(params[1]).toBe(900_000);

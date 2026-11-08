@@ -15,8 +15,8 @@ import { Audiobook } from './audiobook.entity';
 export type ReadingStatus = 'finished' | 'reading' | 'want_to_read';
 
 @Entity('user_books')
-@Index(['userId', 'bookId'])
-@Index(['userId', 'audiobookId'])
+@Index('uq_user_books_user_book', ['userId', 'bookId'], { unique: true, where: 'book_id IS NOT NULL' })
+@Index('uq_user_books_user_audiobook', ['userId', 'audiobookId'], { unique: true, where: 'audiobook_id IS NOT NULL' })
 @Index(['userId', 'status'])
 export class UserBook {
   @PrimaryGeneratedColumn('uuid')

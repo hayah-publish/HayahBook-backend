@@ -5,3 +5,4 @@ export class ReactPostDto {
   @IsString()
   reaction: string;
 }
+

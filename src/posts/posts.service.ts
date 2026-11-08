@@ -988,7 +988,7 @@ export class PostsService {
       qb.andWhere("post.type = 'article'");
     } else if (tab === 'visuals') {
       qb.andWhere(
-        "(post.type = 'visual' OR (post.videoUrl IS NOT NULL AND post.videoUrl != '') OR post.category ILIKE '%مرئيات%' OR post.category ILIKE '%visual%')",
+        "(post.type = 'visual' OR (post.video_url IS NOT NULL AND post.video_url != '') OR post.category ILIKE '%مرئيات%' OR post.category ILIKE '%visual%')",
       );
     } else if (tab === 'snippets') {
       qb.andWhere(
@@ -1017,7 +1017,7 @@ export class PostsService {
       .select('COUNT(*)', 'all')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post')`, 'posts')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'article')`, 'articles')
-      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR post.videoUrl IS NOT NULL OR LOWER(COALESCE(post.category, '')) LIKE '%مرئيات%' OR LOWER(COALESCE(post.category, '')) LIKE '%visual%')`, 'visuals')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR post.video_url IS NOT NULL OR LOWER(COALESCE(post.category, '')) LIKE '%مرئيات%' OR LOWER(COALESCE(post.category, '')) LIKE '%visual%')`, 'visuals')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'snippet' OR LOWER(COALESCE(post.category, '')) LIKE '%مقتطف%' OR LOWER(COALESCE(post.category, '')) LIKE '%snippet%' OR LOWER(COALESCE(post.category, '')) LIKE '%اقتباس%')`, 'snippets');
 
     if (Array.isArray(filterUserIds) && filterUserIds.length > 0) {
@@ -1083,10 +1083,9 @@ export class PostsService {
     }
 
     const feed = await this.findAll(
-      {
-        ...query,
+      Object.assign(query, {
         followingUserIds: filterUserIds,
-      },
+      }),
       currentUserId,
     );
     const counts = await this.getFeedCounts(filterUserIds);
