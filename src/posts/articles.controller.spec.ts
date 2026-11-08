@@ -213,7 +213,7 @@ describe('ArticlesController', () => {
   it('DELETE /v1/articles/:id deletes article', async () => {
     const req: any = { user: { userId: 'user-1', role: 'user' } };
     const res = await controller.deleteArticle(req, 'article-uuid-1');
-    expect(postsService.remove).toHaveBeenCalledWith('article-uuid-1', 'user-1', false);
+    expect(postsService.remove).toHaveBeenCalledWith('article-uuid-1', 'user-1', false, 'article');
     expect(res.message).toBe('تم حذف المقال بنجاح');
   });
 });

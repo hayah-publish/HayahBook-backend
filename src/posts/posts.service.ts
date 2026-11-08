@@ -563,20 +563,35 @@ export class PostsService {
     id: string,
     userId: string,
     isAdmin = false,
+    expectedType?: 'post' | 'article',
   ): Promise<{ message: string }> {
     const post = await this.postsRepository.findOne({
       where: { id },
     });
 
+    const isArticle = expectedType === 'article' || (!expectedType && post?.type === 'article');
+    const notFoundMsg = isArticle ? this.i18n.t('articles.not_found') : this.i18n.t('posts.not_found');
+    const unauthorizedMsg = isArticle ? this.i18n.t('articles.unauthorized') : this.i18n.t('posts.unauthorized');
+    const deletedMsg = isArticle ? this.i18n.t('articles.deleted') : this.i18n.t('posts.deleted');
+
     if (!post) {
-      throw new NotFoundException(this.i18n.t('posts.not_found'));
+      throw new NotFoundException(notFoundMsg);
+    }
+
+    if (expectedType && post.type !== expectedType) {
+      throw new NotFoundException(notFoundMsg);
     }
 
     if (post.userId !== userId && !isAdmin) {
-      throw new ForbiddenException(this.i18n.t('posts.unauthorized'));
+      throw new ForbiddenException(unauthorizedMsg);
     }
 
-    // Purge images and video from Cloudflare R2 upon post deletion
+    // Purge cover image from Cloudflare R2 if present (articles)
+    if (post.coverImageUrl) {
+      await this.uploadService.deleteFileByUrl(post.coverImageUrl);
+    }
+
+    // Purge images and video from Cloudflare R2 upon post/article deletion
     if (Array.isArray(post.images) && post.images.length > 0) {
       for (const imgUrl of post.images) {
         await this.uploadService.deleteFileByUrl(imgUrl);
@@ -590,7 +605,7 @@ export class PostsService {
     await this.postsRepository.delete(id);
 
     return {
-      message: this.i18n.t('posts.deleted'),
+      message: deletedMsg,
     };
   }
 

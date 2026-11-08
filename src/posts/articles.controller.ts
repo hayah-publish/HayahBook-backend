@@ -103,6 +103,7 @@ export class ArticlesController {
       id,
       req.user.userId,
       req.user.role === 'admin',
+      'article',
     );
   }
 }

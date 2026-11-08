@@ -153,6 +153,7 @@ export const en = {
   'articles.created': 'Article published successfully',
   'articles.deleted': 'Article deleted successfully',
   'articles.not_found': 'Article not found',
+  'articles.unauthorized': 'You are not authorized to delete this article',
   'articles.title_required': 'Article title is required',
   'articles.cover_required': 'Article cover image is required',
   'articles.category_required': 'Article category is required, please select a valid category',

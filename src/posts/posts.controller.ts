@@ -92,6 +92,7 @@ export class PostsController {
       id,
       req.user.userId,
       req.user.role === 'admin',
+      'post',
     );
   }
 }

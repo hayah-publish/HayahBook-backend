@@ -153,6 +153,7 @@ export const ar = {
   'articles.created': 'تم نشر المقال بنجاح',
   'articles.deleted': 'تم حذف المقال بنجاح',
   'articles.not_found': 'المقال غير موجود',
+  'articles.unauthorized': 'غير مصرح لك بحذف هذا المقال',
   'articles.title_required': 'عنوان المقال مطلوب',
   'articles.cover_required': 'الصورة الرئيسية للمقال مطلوبة',
   'articles.category_required': 'تصنيف المقال مطلوب، يرجى اختيار تصنيف من قائمة الفئات',
