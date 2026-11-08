@@ -184,51 +184,10 @@ export class PostsService {
       );
     }
 
-    let book: Book | null = null;
-    if (dto.bookId) {
-      book = await this.booksRepository.findOne({
-        where: { id: dto.bookId },
-        relations: { audiobooks: true },
-      });
-    }
-
-    let audiobook: Audiobook | null = null;
-    if (dto.audiobookId) {
-      audiobook = await this.audiobooksRepository.findOne({
-        where: { id: dto.audiobookId },
-        relations: { book: true },
-      });
-    }
-
-    // Auto-link complementary format if available
-    if (book && !audiobook) {
-      const conditions: FindOptionsWhere<Audiobook>[] = [{ bookId: book.id }];
-      if (book.author) {
-        conditions.push({ title: book.title, author: book.author });
-      } else {
-        conditions.push({ title: book.title });
-      }
-      audiobook = await this.audiobooksRepository.findOne({
-        where: conditions,
-      });
-    } else if (audiobook && !book) {
-      if (audiobook.bookId) {
-        book = await this.booksRepository.findOne({
-          where: { id: audiobook.bookId },
-        });
-      }
-      if (!book) {
-        const conditions: FindOptionsWhere<Book>[] = [];
-        if (audiobook.author) {
-          conditions.push({ title: audiobook.title, author: audiobook.author });
-        } else {
-          conditions.push({ title: audiobook.title });
-        }
-        book = await this.booksRepository.findOne({
-          where: conditions,
-        });
-      }
-    }
+    const { book, audiobook } = await this.resolveBookOrAudiobook(
+      dto.bookId,
+      dto.audiobookId,
+    );
 
     const uploadedImageUrls: string[] = [];
     let uploadedVideoUrl: string | null = null;
@@ -374,15 +333,10 @@ export class PostsService {
       throw new BadRequestException(this.i18n.t('upload.video_limit_exceeded'));
     }
 
-    let book: Book | null = null;
-    if (dto.bookId) {
-      book = await this.booksRepository.findOne({ where: { id: dto.bookId } });
-    }
-
-    let audiobook: Audiobook | null = null;
-    if (dto.audiobookId) {
-      audiobook = await this.audiobooksRepository.findOne({ where: { id: dto.audiobookId } });
-    }
+    const { book, audiobook } = await this.resolveBookOrAudiobook(
+      dto.bookId,
+      dto.audiobookId,
+    );
 
     const explicitLinks: { url: string; title?: string | null }[] = [];
     if (dto.link?.url) {
@@ -607,6 +561,75 @@ export class PostsService {
     return {
       message: deletedMsg,
     };
+  }
+
+  /**
+   * Smartly resolve a book or audiobook from a unified bookId key (or fallback audiobookId).
+   * Automatically inspects Books (ebooks) first; if not found, checks Audiobooks.
+   * Also auto-links complementary format if available.
+   */
+  private async resolveBookOrAudiobook(
+    bookId?: string | null,
+    audiobookId?: string | null,
+  ): Promise<{ book: Book | null; audiobook: Audiobook | null }> {
+    const rawId = bookId || audiobookId;
+    if (!rawId) {
+      return { book: null, audiobook: null };
+    }
+
+    let book: Book | null = null;
+    let audiobook: Audiobook | null = null;
+
+    // 1. Try finding in Books table (E-Book)
+    book = await this.booksRepository.findOne({
+      where: { id: rawId },
+      relations: { audiobooks: true },
+    });
+
+    if (book) {
+      // It's an E-Book! Auto-link complementary audiobook if available
+      const conditions: FindOptionsWhere<Audiobook>[] = [{ bookId: book.id }];
+      if (book.author) {
+        conditions.push({ title: book.title, author: book.author });
+      } else {
+        conditions.push({ title: book.title });
+      }
+      audiobook = await this.audiobooksRepository.findOne({ where: conditions });
+      return { book, audiobook };
+    }
+
+    // 2. If not found in Books, try finding in Audiobooks table
+    audiobook = await this.audiobooksRepository.findOne({
+      where: { id: rawId },
+      relations: { book: true },
+    });
+
+    if (audiobook) {
+      // It's an Audiobook! Auto-link complementary e-book if available
+      if (audiobook.bookId) {
+        book = await this.booksRepository.findOne({
+          where: { id: audiobook.bookId },
+        });
+      }
+      if (!book) {
+        const conditions: FindOptionsWhere<Book>[] = [];
+        if (audiobook.author) {
+          conditions.push({ title: audiobook.title, author: audiobook.author });
+        } else {
+          conditions.push({ title: audiobook.title });
+        }
+        book = await this.booksRepository.findOne({ where: conditions });
+      }
+      return { book, audiobook };
+    }
+
+    // 3. Fallback: If both bookId and audiobookId were passed distinctly
+    if (bookId && audiobookId && bookId !== audiobookId) {
+      book = await this.booksRepository.findOne({ where: { id: bookId } });
+      audiobook = await this.audiobooksRepository.findOne({ where: { id: audiobookId } });
+    }
+
+    return { book, audiobook };
   }
 
   private async formatPost(

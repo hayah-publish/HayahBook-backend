@@ -370,5 +370,152 @@ describe('PostsService public post formatting', () => {
         title: 'منصة حياة بوك',
       });
     });
+
+    it('auto-detects ebook when bookId is an ebook UUID', async () => {
+      let savedPostData: any = null;
+      const mockPostsRepo: any = {
+        create: jest.fn().mockImplementation((data) => ({
+          ...data,
+          id: 'post-uuid-ebook',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          likesCount: 0,
+          commentsCount: 0,
+          sharesCount: 0,
+        })),
+        save: jest.fn().mockImplementation((post) => {
+          savedPostData = post;
+          return Promise.resolve(post);
+        }),
+      };
+
+      const mockUsersRepo: any = {
+        findOne: jest.fn().mockResolvedValue({ id: 'user-1', name: 'User 1' }),
+        find: jest.fn().mockResolvedValue([]),
+      };
+
+      const mockBooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue({
+          id: 'ebook-uuid-1',
+          title: 'عقدك النفسية',
+          author: 'يوسف الحسني',
+          coverUrl: 'https://cdn.example.com/cover.jpg',
+          rating: 4.8,
+          views: 100,
+          readsCount: 50,
+        }),
+      };
+
+      const mockAudiobooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue(null),
+      };
+
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn(),
+        uploadPostVideo: jest.fn(),
+        deleteFileByUrl: jest.fn(),
+      };
+
+      const mockI18n: any = {
+        t: jest.fn().mockImplementation((key) => key),
+      };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      const result = await postService.createPost('user-1', {
+        content: 'منشور رائع عن كتاب',
+        bookId: 'ebook-uuid-1',
+      });
+
+      expect(savedPostData.bookId).toBe('ebook-uuid-1');
+      expect(result.data.book).toBeDefined();
+      expect(result.data.book?.id).toBe('ebook-uuid-1');
+      expect(result.data.book?.type).toBe('ebook');
+      expect(result.data.book?.hasEbook).toBe(true);
+      expect(result.data.book?.hasAudio).toBe(false);
+    });
+
+    it('auto-detects audiobook when bookId contains an audiobook UUID', async () => {
+      let savedPostData: any = null;
+      const mockPostsRepo: any = {
+        create: jest.fn().mockImplementation((data) => ({
+          ...data,
+          id: 'post-uuid-audio',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          likesCount: 0,
+          commentsCount: 0,
+          sharesCount: 0,
+        })),
+        save: jest.fn().mockImplementation((post) => {
+          savedPostData = post;
+          return Promise.resolve(post);
+        }),
+      };
+
+      const mockUsersRepo: any = {
+        findOne: jest.fn().mockResolvedValue({ id: 'user-1', name: 'User 1' }),
+        find: jest.fn().mockResolvedValue([]),
+      };
+
+      // Not found in Books table
+      const mockBooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue(null),
+      };
+
+      // Found in Audiobooks table
+      const mockAudiobooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue({
+          id: 'audiobook-uuid-1',
+          title: 'كتاب صوتي مميز',
+          author: 'أحمد كمال',
+          narrator: 'صوت القارئ',
+          coverUrl: 'https://cdn.example.com/audio-cover.jpg',
+          rating: 4.9,
+          views: 200,
+          listensCount: 150,
+          bookId: null,
+        }),
+      };
+
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn(),
+        uploadPostVideo: jest.fn(),
+        deleteFileByUrl: jest.fn(),
+      };
+
+      const mockI18n: any = {
+        t: jest.fn().mockImplementation((key) => key),
+      };
+
+      const postService = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        mockBooksRepo,
+        mockAudiobooksRepo,
+        mockUploadService,
+        mockI18n,
+      );
+
+      // Sent in single bookId key:
+      const result = await postService.createPost('user-1', {
+        content: 'استمعوا لهذا الكتاب الصوتي',
+        bookId: 'audiobook-uuid-1',
+      });
+
+      expect(savedPostData.audiobookId).toBe('audiobook-uuid-1');
+      expect(result.data.book).toBeDefined();
+      expect(result.data.book?.id).toBe('audiobook-uuid-1');
+      expect(result.data.book?.type).toBe('audiobook');
+      expect(result.data.book?.hasAudio).toBe(true);
+      expect(result.data.book?.hasEbook).toBe(false);
+    });
   });
 });
