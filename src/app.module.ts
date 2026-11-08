@@ -13,12 +13,14 @@ import { AuthorsModule } from './authors/authors.module';
 import { CreatorsModule } from './creators/creators.module';
 import { UploadModule } from './upload/upload.module';
 import { PostsModule } from './posts/posts.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { I18nModule } from './i18n/i18n.module';
 import { I18nMiddleware } from './i18n/i18n.middleware';
 import { I18nValidationExceptionFilter } from './i18n/i18n-validation.filter';
 import { createStepValidationPipe } from './i18n/i18n-validation.pipe';
 import { AuthRateLimitMiddleware } from './auth/auth-rate-limit.middleware';
 import { AuthSecurityTables1762300000000 } from './database/migrations/1762300000000-auth-security-tables';
+import { CreateBookmarksTable1762400000000 } from './database/migrations/1762400000000-create-bookmarks-table';
 
 @Module({
   imports: [
@@ -46,7 +48,10 @@ import { AuthSecurityTables1762300000000 } from './database/migrations/176230000
             ssl: sslOption,
             autoLoadEntities: true,
             synchronize,
-            migrations: [AuthSecurityTables1762300000000],
+            migrations: [
+              AuthSecurityTables1762300000000,
+              CreateBookmarksTable1762400000000,
+            ],
             migrationsRun: true,
           };
         }
@@ -61,7 +66,10 @@ import { AuthSecurityTables1762300000000 } from './database/migrations/176230000
           ssl: sslOption,
           autoLoadEntities: true,
           synchronize,
-          migrations: [AuthSecurityTables1762300000000],
+          migrations: [
+            AuthSecurityTables1762300000000,
+            CreateBookmarksTable1762400000000,
+          ],
           migrationsRun: true,
         };
       },
@@ -77,6 +85,7 @@ import { AuthSecurityTables1762300000000 } from './database/migrations/176230000
     CreatorsModule,
     UploadModule,
     PostsModule,
+    BookmarksModule,
   ],
   controllers: [AppController],
   providers: [

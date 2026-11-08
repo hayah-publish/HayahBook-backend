@@ -82,6 +82,9 @@ export interface FormattedPost {
   likesCount: number;
   commentsCount: number;
   sharesCount: number;
+  bookmarksCount?: number;
+  isSaved?: boolean;
+  savedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -712,7 +715,7 @@ export class PostsService {
     return null;
   }
 
-  private async formatPost(
+  async formatPost(
     post: Post,
     preloadedMentions?: Map<string, FormattedMentionUser>,
   ): Promise<FormattedPost> {
@@ -839,6 +842,7 @@ export class PostsService {
       likesCount: post.likesCount || 0,
       commentsCount: post.commentsCount || 0,
       sharesCount: post.sharesCount || 0,
+      bookmarksCount: post.bookmarksCount || 0,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
     };

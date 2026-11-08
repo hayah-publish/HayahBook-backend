@@ -83,6 +83,9 @@ export class Post {
   @Column({ name: 'shares_count', type: 'integer', default: 0 })
   sharesCount: number;
 
+  @Column({ name: 'bookmarks_count', type: 'integer', default: 0 })
+  bookmarksCount: number;
+
   @Index()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

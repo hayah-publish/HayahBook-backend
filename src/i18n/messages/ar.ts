@@ -160,5 +160,11 @@ export const ar = {
   'articles.category_invalid': 'التصنيف المحدد غير صالح. يرجى اختيار تصنيف من فئات المقالات المعتمدة',
   'articles.content_required': 'نص المقال مطلوب',
   'articles.terms_required': 'يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook لنشر المقال',
+
+  // Bookmarks / Saved (المحفوظات)
+  'bookmarks.saved': 'تمت إضافة العنصر إلى المحفوظات بنجاح',
+  'bookmarks.removed': 'تمت إزالة العنصر من المحفوظات بنجاح',
+  'bookmarks.already_removed': 'العنصر غير موجود في المحفوظات',
+  'bookmarks.not_found': 'العنصر المطلوب غير موجود',
 };
 

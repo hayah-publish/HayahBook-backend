@@ -160,5 +160,11 @@ export const en = {
   'articles.category_invalid': 'Invalid category. Please select from the approved article categories',
   'articles.content_required': 'Article content is required',
   'articles.terms_required': 'You must agree to the terms and privacy of Hayahbook community to publish the article',
+
+  // Bookmarks / Saved
+  'bookmarks.saved': 'Item saved successfully',
+  'bookmarks.removed': 'Item removed from saved successfully',
+  'bookmarks.already_removed': 'Item is not in your saved items',
+  'bookmarks.not_found': 'Item not found',
 };
 
