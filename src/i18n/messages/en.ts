@@ -75,6 +75,9 @@ export const en = {
   'interests.already_exists': 'Interest already exists',
   'interests.not_found': 'Interest not found',
   'interests.deleted': 'Interest deleted successfully',
+  'categories.saved': 'Category saved successfully',
+  'categories.not_found': 'Category not found',
+  'categories.required': 'Category is required',
 
   // Books
   'books.not_found': 'Book not found',

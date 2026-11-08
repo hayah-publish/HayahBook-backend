@@ -727,6 +727,75 @@ describe('AppController (e2e)', () => {
       expect(first.category).toBe(first.category_en);
     });
 
+    it('GET /v1/categories/articles returns the 9 article categories matching attached designs', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/v1/categories/articles')
+        .set('Accept-Language', 'ar')
+        .expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(9);
+      const namesAr = res.body.map((c: any) => c.name_ar);
+      expect(namesAr).toContain('احداث حالية');
+      expect(namesAr).toContain('تاريخ وتراث');
+      expect(namesAr).toContain('ثقافة وفنون');
+      expect(namesAr).toContain('معرفة وتعليم');
+      expect(namesAr).toContain('أعمال ومهارات');
+      expect(namesAr).toContain('تطوير الذات');
+      expect(namesAr).toContain('مجتمع وحياة');
+      expect(namesAr).toContain('مقالات حرة');
+      expect(namesAr).toContain('سفر وأماكن');
+
+      const first = res.body[0];
+      expect(first).toHaveProperty('id');
+      expect(first).toHaveProperty('displayName');
+      expect(first).toHaveProperty('name_ar');
+      expect(first).toHaveProperty('name_en');
+      expect(first).toHaveProperty('category');
+      expect(first).toHaveProperty('category_ar');
+      expect(first).toHaveProperty('category_en');
+      expect(first.category_ar).toBe('المقالات');
+      expect(first.category_en).toBe('Articles');
+    });
+
+    it('GET /v1/categories/articles returns English names when Accept-Language is en', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/v1/categories/articles')
+        .set('Accept-Language', 'en')
+        .expect(200);
+
+      expect(res.body.length).toBe(9);
+      const namesEn = res.body.map((c: any) => c.name_en);
+      expect(namesEn).toContain('Current events');
+      expect(namesEn).toContain('History and heritage');
+      expect(namesEn).toContain('Culture and arts');
+      expect(namesEn).toContain('Knowledge and education');
+      expect(namesEn).toContain('Business and skills');
+      expect(namesEn).toContain('Self development');
+      expect(namesEn).toContain('Society and life');
+      expect(namesEn).toContain('Free articles');
+      expect(namesEn).toContain('Travel and places');
+      expect(res.body[0].category).toBe('Articles');
+    });
+
+    it('GET /v1/interests?category=articles returns the 9 article categories', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/v1/interests?category=articles')
+        .expect(200);
+
+      expect(res.body.length).toBe(9);
+      expect(res.body[0].category_en).toBe('Articles');
+    });
+
+    it('GET /v1/posts/categories returns the 9 article categories', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/v1/posts/categories')
+        .expect(200);
+
+      expect(res.body.length).toBe(9);
+      expect(res.body[0].category_en).toBe('Articles');
+    });
+
     it('POST /v1/interests/me fails if < 3 selected from Books section', async () => {
       const books = allInterests.filter((i) => i.category_ar === 'الكتب').slice(0, 2);
       const visuals = allInterests.filter((i) => i.category_ar === 'المرئيات').slice(0, 3);

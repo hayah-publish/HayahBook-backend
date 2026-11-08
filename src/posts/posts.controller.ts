@@ -21,6 +21,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostsQueryDto } from './dto/posts-query.dto';
 import { UploadFile } from '../upload/upload-file.interface';
+import { InterestsService } from '../interests/interests.service';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -34,7 +35,17 @@ interface AuthenticatedRequest extends Request {
 export class PostsController {
   constructor(
     private readonly postsService: PostsService,
+    private readonly interestsService: InterestsService,
   ) {}
+
+  /**
+   * GET /v1/posts/categories
+   * Returns article categories for publishing or filtering articles
+   */
+  @Get('categories')
+  async getCategories() {
+    return this.interestsService.getArticleCategories();
+  }
 
   /**
    * POST /v1/posts

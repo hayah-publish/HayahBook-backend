@@ -8,12 +8,14 @@ import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { UploadModule } from '../upload/upload.module';
 import { I18nModule } from '../i18n/i18n.module';
+import { InterestsModule } from '../interests/interests.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post, User, Book, Audiobook]),
     UploadModule,
     I18nModule,
+    InterestsModule,
   ],
   controllers: [PostsController],
   providers: [PostsService],

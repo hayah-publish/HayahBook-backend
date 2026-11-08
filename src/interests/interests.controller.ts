@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -31,8 +32,23 @@ export class InterestsController {
   constructor(private readonly interestsService: InterestsService) {}
 
   @Get()
-  async getAllInterests() {
-    return this.interestsService.findAll();
+  async getAllInterests(@Query('category') category?: string) {
+    return this.interestsService.findAll({ category });
+  }
+
+  @Get('categories')
+  async getCategoriesSummary() {
+    return this.interestsService.getCategoriesSummary();
+  }
+
+  @Get('articles')
+  async getArticleCategories() {
+    return this.interestsService.getArticleCategories();
+  }
+
+  @Get('category/:category')
+  async getByCategory(@Param('category') category: string) {
+    return this.interestsService.findAll({ category });
   }
 
   @UseGuards(JwtAuthGuard)

@@ -58,6 +58,8 @@ export interface FormattedPostLink {
 export interface FormattedPost {
   id: string;
   type: 'post' | 'article';
+  category?: string | null;
+  categoryId?: string | null;
   content: string;
   cleanContent: string;
   htmlContent: string;
@@ -241,6 +243,8 @@ export class PostsService {
         userId,
         type: dto.type || 'post',
         content: processedContent,
+        category: dto.category?.trim() || null,
+        categoryId: dto.categoryId || null,
         images: finalImages,
         videoUrl: finalVideoUrl,
         linkUrl,
@@ -305,6 +309,16 @@ export class PostsService {
       qb.andWhere('post.content ILIKE :search', {
         search: `%${query.search.trim()}%`,
       });
+    }
+
+    if (query.category?.trim()) {
+      qb.andWhere(
+        '(post.category ILIKE :cat OR post.category_id = :catId)',
+        {
+          cat: `%${query.category.trim()}%`,
+          catId: query.category.trim(),
+        },
+      );
     }
 
     qb.orderBy('post.createdAt', 'DESC')
@@ -487,6 +501,8 @@ export class PostsService {
     return {
       id: post.id,
       type: post.type,
+      category: post.category || null,
+      categoryId: post.categoryId || null,
       content: post.content,
       cleanContent: parsedLinksInfo.cleanContent,
       htmlContent: parsedLinksInfo.htmlContent,
@@ -606,7 +622,7 @@ export class PostsService {
 
     // Combined regex: match markdown links first, then standalone URLs
     const combinedRegex =
-      /\[([^\]]+)\]\(((?:https?:\/\/|www\.)[^\s)]+)\)|((?:https?:\/\/|www\.)[^\s<>'"`()[\]]+)/gi;
+      /\[([^\]]*)\]\(((?:https?:\/\/|www\.)[^\s)]+)\)|((?:https?:\/\/|www\.)[^\s<>'"`()[\]]+)/gi;
 
     const links: FormattedPostLink[] = [];
     let cleanContent = '';
@@ -626,15 +642,20 @@ export class PostsService {
       let url = '';
       let title: string | null = null;
       let displayText = '';
+      let trailingPunctuation = '';
 
       if (match[1] !== undefined && match[2] !== undefined) {
         // Markdown link [title](url)
         title = match[1].trim();
-        url = match[2].trim().replace(/[.,!?;:)،؛؟\s]+$/, '');
+        const rawUrl = match[2].trim();
+        url = rawUrl.replace(/[.,!?;:)،؛؟\s]+$/, '');
+        trailingPunctuation = rawUrl.slice(url.length);
         displayText = title || url;
       } else if (match[3] !== undefined) {
-        // Standalone URL
-        url = match[3].trim().replace(/[.,!?;:)،؛؟\s]+$/, '');
+        // Standalone URL (Facebook style)
+        const rawUrl = match[3].trim();
+        url = rawUrl.replace(/[.,!?;:)،؛؟\s]+$/, '');
+        trailingPunctuation = rawUrl.slice(url.length);
         try {
           const parsed = new URL(url.startsWith('http') ? url : `https://${url}`);
           title = parsed.hostname.replace(/^www\./, '');
@@ -652,7 +673,9 @@ export class PostsService {
       cleanContent += displayText;
       const endIndex = cleanContent.length;
 
-      htmlContent += `<a href="${this.escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(displayText)}</a>`;
+      cleanContent += trailingPunctuation;
+
+      htmlContent += `<a href="${this.escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(displayText)}</a>${this.escapeHtml(trailingPunctuation)}`;
 
       links.push({
         url,

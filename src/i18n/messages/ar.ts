@@ -75,6 +75,9 @@ export const ar = {
   'interests.already_exists': 'الاهتمام موجود مسبقاً',
   'interests.not_found': 'الاهتمام غير موجود',
   'interests.deleted': 'تم حذف الاهتمام بنجاح',
+  'categories.saved': 'تم حفظ الفئة بنجاح',
+  'categories.not_found': 'الفئة المحددة غير موجودة',
+  'categories.required': 'يرجى تحديد الفئة المطلوبة',
 
   // Books
   'books.not_found': 'الكتاب غير موجود',

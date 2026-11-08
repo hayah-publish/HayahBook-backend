@@ -34,5 +34,9 @@ export class PostsQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
 }
 

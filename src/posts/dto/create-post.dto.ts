@@ -115,6 +115,17 @@ export class CreatePostDto {
   audiobookId?: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @IsString()
+  @MaxLength(100)
+  category?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @IsUUID()
+  categoryId?: string;
+
+  @IsOptional()
   @Transform(({ value }) => {
     if (!value || value === '') return undefined;
     if (typeof value === 'string') {

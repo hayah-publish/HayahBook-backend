@@ -59,6 +59,12 @@ export class Post {
   @JoinColumn({ name: 'audiobook_id' })
   audiobook: Audiobook | null;
 
+  @Column({ name: 'category', type: 'varchar', length: 100, nullable: true })
+  category: string | null;
+
+  @Column({ name: 'category_id', type: 'uuid', nullable: true })
+  categoryId: string | null;
+
   @Column({ type: 'jsonb', default: () => "'[]'" })
   mentions: string[]; // User IDs mentioned
 

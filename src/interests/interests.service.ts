@@ -63,15 +63,15 @@ export const SEED_INTERESTS = [
   { name_ar: 'الفكر والعلوم الإنسانية', name_en: 'Thought & Humanities', category_ar: 'المرئيات', category_en: 'Visuals' },
 
   // 3. المقالات (Articles) - 9 اهتمامات
-  { name_ar: 'أحداث حالية', name_en: 'Current Events', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'تاريخ وتراث', name_en: 'History & Heritage', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'ثقافة وفنون', name_en: 'Culture & Arts', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'معرفة وتعليم', name_en: 'Knowledge & Education', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'أعمال ومهارات', name_en: 'Business & Skills', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'تطوير الذات', name_en: 'Self-Development', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'مجتمع وحياة', name_en: 'Society & Life', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'مقالات حرة', name_en: 'Opinion Articles', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'سفر وأماكن', name_en: 'Travel & Places', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'احداث حالية', name_en: 'Current events', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'تاريخ وتراث', name_en: 'History and heritage', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'ثقافة وفنون', name_en: 'Culture and arts', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'معرفة وتعليم', name_en: 'Knowledge and education', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'أعمال ومهارات', name_en: 'Business and skills', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'تطوير الذات', name_en: 'Self development', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'مجتمع وحياة', name_en: 'Society and life', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'مقالات حرة', name_en: 'Free articles', category_ar: 'المقالات', category_en: 'Articles' },
+  { name_ar: 'سفر وأماكن', name_en: 'Travel and places', category_ar: 'المقالات', category_en: 'Articles' },
 
   // 4. المقتطفات (Snippets) - 11 اهتمام
   { name_ar: 'رومانسي', name_en: 'Romance', category_ar: 'المقتطفات', category_en: 'Snippets' },
@@ -108,22 +108,50 @@ export class InterestsService implements OnModuleInit {
   ) { }
 
   async onModuleInit() {
-    const count = await this.interestRepository.count();
-    if (count < SEED_INTERESTS.length) {
-      for (const item of SEED_INTERESTS) {
-        const existing = await this.interestRepository.findOne({
-          where: { name_ar: item.name_ar, category_ar: item.category_ar },
+    for (const item of SEED_INTERESTS) {
+      let existing = await this.interestRepository.findOne({
+        where: [
+          { name_ar: item.name_ar, category_ar: item.category_ar },
+          { name: item.name_ar, category_ar: item.category_ar },
+        ],
+      });
+
+      if (!existing && item.name_ar === 'احداث حالية') {
+        existing = await this.interestRepository.findOne({
+          where: [
+            { name_ar: 'أحداث حالية', category_ar: item.category_ar },
+            { name: 'أحداث حالية', category_ar: item.category_ar },
+          ],
         });
-        if (!existing) {
-          const interest = this.interestRepository.create({
-            name: item.name_ar,
-            name_ar: item.name_ar,
-            name_en: item.name_en,
-            category: item.category_ar,
-            category_ar: item.category_ar,
-            category_en: item.category_en,
-          });
-          await this.interestRepository.save(interest);
+      }
+
+      if (!existing) {
+        const interest = this.interestRepository.create({
+          name: item.name_ar,
+          name_ar: item.name_ar,
+          name_en: item.name_en,
+          category: item.category_ar,
+          category_ar: item.category_ar,
+          category_en: item.category_en,
+        });
+        await this.interestRepository.save(interest);
+      } else {
+        let changed = false;
+        if (existing.name_en !== item.name_en) {
+          existing.name_en = item.name_en;
+          changed = true;
+        }
+        if (existing.name_ar !== item.name_ar) {
+          existing.name_ar = item.name_ar;
+          existing.name = item.name_ar;
+          changed = true;
+        }
+        if (existing.category_en !== item.category_en) {
+          existing.category_en = item.category_en;
+          changed = true;
+        }
+        if (changed) {
+          await this.interestRepository.save(existing);
         }
       }
     }
@@ -151,21 +179,176 @@ export class InterestsService implements OnModuleInit {
   resolveInterest(input: string, allInterests: Interest[]): Interest | undefined {
     if (!input || !input.trim()) return undefined;
     const q = input.trim().toLowerCase();
-    return allInterests.find((i) =>
-      i.id.toLowerCase() === q ||
-      (i.name_ar && i.name_ar.trim().toLowerCase() === q) ||
-      (i.name_en && i.name_en.trim().toLowerCase() === q) ||
-      (i.name && i.name.trim().toLowerCase() === q),
-    );
+    const normalizeAr = (s: string) =>
+      s
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .trim()
+        .toLowerCase();
+    const qNorm = normalizeAr(q);
+
+    return allInterests.find((i) => {
+      if (i.id.toLowerCase() === q) return true;
+
+      const nameAr = (i.name_ar || i.name || '').trim().toLowerCase();
+      const nameEn = (i.name_en || '').trim().toLowerCase();
+      const nameArNorm = normalizeAr(nameAr);
+
+      if (nameAr === q || nameArNorm === qNorm) return true;
+      if (nameEn === q) return true;
+
+      // Compatibility aliases
+      if (
+        (q === 'opinion articles' || q === 'free articles') &&
+        (nameEn === 'free articles' || nameAr === 'مقالات حرة')
+      ) {
+        return true;
+      }
+      if (
+        (q === 'self-development' || q === 'self development') &&
+        (nameEn === 'self development' || nameAr === 'تطوير الذات')
+      ) {
+        return true;
+      }
+      return false;
+    });
   }
 
-  async findAll(lang?: SupportedLanguage): Promise<FormattedInterest[]> {
+  normalizeCategory(category: string): string {
+    const c = category.trim().toLowerCase();
+    if (
+      c === 'articles' ||
+      c === 'article' ||
+      c === 'المقالات' ||
+      c === 'مقالات' ||
+      c === 'المقالة'
+    ) {
+      return 'المقالات';
+    }
+    if (
+      c === 'books' ||
+      c === 'book' ||
+      c === 'الكتب' ||
+      c === 'كتب' ||
+      c === 'الكتاب'
+    ) {
+      return 'الكتب';
+    }
+    if (
+      c === 'visuals' ||
+      c === 'visual' ||
+      c === 'المرئيات' ||
+      c === 'مرئيات'
+    ) {
+      return 'المرئيات';
+    }
+    if (
+      c === 'snippets' ||
+      c === 'snippet' ||
+      c === 'المقتطفات' ||
+      c === 'مقتطفات' ||
+      c === 'quotes'
+    ) {
+      return 'المقتطفات';
+    }
+    return category.trim();
+  }
+
+  async findAll(
+    optionsOrLang?: string | { category?: string; lang?: SupportedLanguage },
+  ): Promise<FormattedInterest[]> {
+    let category: string | undefined;
+    let lang: SupportedLanguage | undefined;
+
+    if (typeof optionsOrLang === 'string') {
+      if (optionsOrLang === 'ar' || optionsOrLang === 'en') {
+        lang = optionsOrLang;
+      } else {
+        category = optionsOrLang;
+      }
+    } else if (optionsOrLang && typeof optionsOrLang === 'object') {
+      category = optionsOrLang.category;
+      lang = optionsOrLang.lang;
+    }
+
     const currentLang = lang || this.i18n.getCurrentLanguage();
-    const data = await this.interestRepository.find({
+    const qb = this.interestRepository.createQueryBuilder('interest');
+
+    if (category && category.trim()) {
+      const normalized = this.normalizeCategory(category);
+      qb.where(
+        '(interest.category_ar = :catAr OR interest.category_en ILIKE :catEn OR interest.category = :catAr)',
+        {
+          catAr: normalized,
+          catEn: category.trim(),
+        },
+      );
+    }
+
+    qb.orderBy('interest.createdAt', 'ASC');
+    const data = await qb.getMany();
+
+    return data.map((interest) => this.formatInterest(interest, currentLang));
+  }
+
+  async getArticleCategories(lang?: SupportedLanguage): Promise<FormattedInterest[]> {
+    return this.findAll({ category: 'articles', lang });
+  }
+
+  async getCategoriesSummary(lang?: SupportedLanguage) {
+    const currentLang = lang || this.i18n.getCurrentLanguage();
+    const all = await this.interestRepository.find({
       order: { createdAt: 'ASC' },
     });
 
-    return data.map((interest) => this.formatInterest(interest, currentLang));
+    const categoriesDef = [
+      { key: 'books', name_ar: 'الكتب', name_en: 'Books' },
+      { key: 'visuals', name_ar: 'المرئيات', name_en: 'Visuals' },
+      { key: 'articles', name_ar: 'المقالات', name_en: 'Articles' },
+      { key: 'snippets', name_ar: 'المقتطفات', name_en: 'Snippets' },
+    ];
+
+    return categoriesDef.map((cat) => {
+      const items = all.filter(
+        (i) =>
+          (i.category_ar || i.category) === cat.name_ar ||
+          (i.category_en || '').toLowerCase() === cat.name_en.toLowerCase(),
+      );
+      return {
+        key: cat.key,
+        displayName: currentLang === 'en' ? cat.name_en : cat.name_ar,
+        name_ar: cat.name_ar,
+        name_en: cat.name_en,
+        category: currentLang === 'en' ? cat.name_en : cat.name_ar,
+        category_ar: cat.name_ar,
+        category_en: cat.name_en,
+        count: items.length,
+        items: items.map((i) => this.formatInterest(i, currentLang)),
+      };
+    });
+  }
+
+  async saveSingleCategory(userId: string, input?: string) {
+    if (!input || !input.trim()) {
+      throw new BadRequestException(
+        this.i18n.t('categories.required') || 'يرجى تحديد الفئة المطلوبة',
+      );
+    }
+    const all = await this.interestRepository.find();
+    const matched = this.resolveInterest(input.trim(), all);
+    if (!matched) {
+      throw new NotFoundException(
+        this.i18n.t('categories.not_found') || 'الفئة المحددة غير موجودة',
+      );
+    }
+    const formatted = this.formatInterest(matched);
+    return {
+      success: true,
+      message:
+        this.i18n.t('categories.saved') || 'تم حفظ الفئة بنجاح',
+      data: formatted,
+    };
   }
 
   async getUserInterests(userId: string, lang?: SupportedLanguage): Promise<FormattedInterest[]> {

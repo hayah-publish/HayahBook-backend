@@ -150,6 +150,93 @@ describe('PostsService public post formatting', () => {
       ).toBe('قناة يوتيوب');
     });
 
+    it('supports the Facebook way: pasting raw URLs in content without custom names', async () => {
+      const post = {
+        id: 'post-fb-1',
+        type: 'post',
+        content:
+          'منشور عادي برابط فيسبوك ستايل تفضلوا بزيارة https://hayahbook.com/books، نتمنى أن ينال إعجابكم!',
+        images: [],
+        videoUrl: null,
+        linkUrl: null,
+        linkTitle: null,
+        mentions: [],
+        likesCount: 0,
+        commentsCount: 0,
+        sharesCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'user-1',
+        user: { id: 'user-1', name: 'Person', profileUrl: null, role: 'user' },
+        book: null,
+        audiobook: null,
+      } as any;
+
+      const response = await (service as any).formatPost(post);
+
+      // In Facebook style, raw URL remains in the text with its punctuation
+      expect(response.cleanContent).toBe(
+        'منشور عادي برابط فيسبوك ستايل تفضلوا بزيارة https://hayahbook.com/books، نتمنى أن ينال إعجابكم!',
+      );
+
+      // In HTML, the URL itself is clickable
+      expect(response.htmlContent).toContain(
+        '<a href="https://hayahbook.com/books" target="_blank" rel="noopener noreferrer">https://hayahbook.com/books</a>،',
+      );
+
+      // Auto-detected Facebook-style preview card link
+      expect(response.link).toEqual({
+        url: 'https://hayahbook.com/books',
+        title: 'hayahbook.com',
+      });
+
+      expect(response.links).toHaveLength(1);
+      expect(response.links[0].displayText).toBe('https://hayahbook.com/books');
+    });
+
+    it('supports both styles simultaneously in the same post content', async () => {
+      const post = {
+        id: 'post-both-1',
+        type: 'post',
+        content:
+          'زوروا [موقعنا الرسمي](https://hayahbook.com) أو تابعوا حسابنا المباشر https://x.com/hayahbook وشكراً.',
+        images: [],
+        videoUrl: null,
+        linkUrl: null,
+        linkTitle: null,
+        mentions: [],
+        likesCount: 0,
+        commentsCount: 0,
+        sharesCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'user-1',
+        user: { id: 'user-1', name: 'Person', profileUrl: null, role: 'user' },
+        book: null,
+        audiobook: null,
+      } as any;
+
+      const response = await (service as any).formatPost(post);
+
+      // Custom link shows custom name, raw link shows raw URL
+      expect(response.cleanContent).toBe(
+        'زوروا موقعنا الرسمي أو تابعوا حسابنا المباشر https://x.com/hayahbook وشكراً.',
+      );
+
+      expect(response.htmlContent).toContain(
+        '<a href="https://hayahbook.com" target="_blank" rel="noopener noreferrer">موقعنا الرسمي</a>',
+      );
+      expect(response.htmlContent).toContain(
+        '<a href="https://x.com/hayahbook" target="_blank" rel="noopener noreferrer">https://x.com/hayahbook</a>',
+      );
+
+      expect(response.links).toHaveLength(2);
+      expect(response.links[0].title).toBe('موقعنا الرسمي');
+      expect(response.links[0].displayText).toBe('موقعنا الرسمي');
+      expect(response.links[1].title).toBe('x.com');
+      expect(response.links[1].displayText).toBe('https://x.com/hayahbook');
+    });
+
     it('escapes HTML special characters in htmlContent to prevent XSS', async () => {
       const post = {
         id: 'post-4',
