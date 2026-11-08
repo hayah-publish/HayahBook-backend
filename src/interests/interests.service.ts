@@ -293,7 +293,24 @@ export class InterestsService implements OnModuleInit {
   }
 
   async getArticleCategories(lang?: SupportedLanguage): Promise<FormattedInterest[]> {
-    return this.findAll({ category: 'articles', lang });
+    const list = await this.findAll({ category: 'articles', lang });
+    const order = [
+      'احداث حالية',
+      'تاريخ وتراث',
+      'ثقافة وفنون',
+      'معرفة وتعليم',
+      'أعمال ومهارات',
+      'تطوير الذات',
+      'مجتمع وحياة',
+      'مقالات حرة',
+      'سفر وأماكن',
+    ];
+    return list.sort((a, b) => {
+      const idxA = order.indexOf(a.name_ar);
+      const idxB = order.indexOf(b.name_ar);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return 0;
+    });
   }
 
   async getCategoriesSummary(lang?: SupportedLanguage) {

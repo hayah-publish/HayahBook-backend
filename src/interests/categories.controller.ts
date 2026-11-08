@@ -22,16 +22,40 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-@Controller(['categories', 'articles/categories'])
+/**
+ * Dedicated Controller specifically for:
+ * GET /v1/articles/categories
+ * Returns the exact 9 article categories in sorted order.
+ */
+@Controller('articles/categories')
+export class ArticlesCategoriesController {
+  constructor(private readonly interestsService: InterestsService) {}
+
+  @Get()
+  async getCategories() {
+    return this.interestsService.getArticleCategories();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(['save', 'select'])
+  @HttpCode(HttpStatus.OK)
+  async saveCategory(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: { categoryId?: string; category?: string },
+  ) {
+    return this.interestsService.saveSingleCategory(
+      req.user.userId,
+      body.categoryId || body.category,
+    );
+  }
+}
+
+@Controller('categories')
 export class CategoriesController {
   constructor(private readonly interestsService: InterestsService) {}
 
   /**
    * GET /v1/categories/articles
-   * GET /v1/articles/categories
-   * Returns the 9 article categories matching the mobile/web design:
-   * Current events, History and heritage, Culture and arts, Knowledge and education,
-   * Business and skills, Self development, Society and life, Free articles, Travel and places.
    */
   @Get('articles')
   async getArticleCategories() {
@@ -57,7 +81,6 @@ export class CategoriesController {
 
   /**
    * GET /v1/categories/:category
-   * Returns the items for a specific category (articles, books, visuals, snippets).
    */
   @Get(':category')
   async getByCategory(@Param('category') category: string) {
@@ -66,8 +89,6 @@ export class CategoriesController {
 
   /**
    * POST /v1/categories/save
-   * POST /v1/categories/select
-   * Helper endpoint for saving category selection on clicking "Save"
    */
   @UseGuards(JwtAuthGuard)
   @Post(['save', 'select'])
@@ -82,3 +103,4 @@ export class CategoriesController {
     );
   }
 }
+

@@ -796,6 +796,20 @@ describe('AppController (e2e)', () => {
       expect(res.body[0].category_en).toBe('Articles');
     });
 
+    it('GET /v1/articles/categories returns specifically the 9 article categories in sorted order', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/v1/articles/categories')
+        .set('Accept-Language', 'en')
+        .expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(9);
+      expect(res.body[0].displayName).toBe('Current events');
+      expect(res.body[0].name_ar).toBe('احداث حالية');
+      expect(res.body[0].name_en).toBe('Current events');
+      expect(res.body[8].displayName).toBe('Travel and places');
+    });
+
     it('POST /v1/interests/me fails if < 3 selected from Books section', async () => {
       const books = allInterests.filter((i) => i.category_ar === 'الكتب').slice(0, 2);
       const visuals = allInterests.filter((i) => i.category_ar === 'المرئيات').slice(0, 3);
