@@ -11,6 +11,7 @@ import {
 import { User } from '../users/user.entity';
 import { Book } from '../books/book.entity';
 import { Audiobook } from '../books/audiobook.entity';
+import type { PostReactionsCount } from './post-reaction.entity';
 
 export type PostType = 'post' | 'article';
 
@@ -76,6 +77,14 @@ export class Post {
 
   @Column({ name: 'likes_count', type: 'integer', default: 0 })
   likesCount: number;
+
+  @Column({
+    name: 'reactions_count',
+    type: 'jsonb',
+    default: () =>
+      `'{"total":0,"agree":0,"love":0,"applaud":0,"insightful":0,"disagree":0}'`,
+  })
+  reactionsCount: PostReactionsCount;
 
   @Column({ name: 'comments_count', type: 'integer', default: 0 })
   commentsCount: number;

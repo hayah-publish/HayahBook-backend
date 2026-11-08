@@ -1,9 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { AppService } from './app.service';
 import { I18nService } from './i18n/i18n.service';
 import { SetLanguageDto } from './i18n/dto/set-language.dto';
 import { AuthService } from './auth/auth.service';
+import { OptionalJwtAuthGuard } from './auth/optional-jwt-auth.guard';
+
+interface OptionalAuthenticatedRequest extends Request {
+  user?: any;
+}
 
 @Controller()
 export class AppController {
@@ -38,12 +43,8 @@ export class AppController {
 
   @Post(['language', 'app/language'])
   @HttpCode(HttpStatus.OK)
-  async setLanguage(@Req() req: Request, @Body() body: SetLanguageDto) {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.substring(7).trim()
-      : undefined;
-    const userId = await this.authService.resolveUserIdFromToken(token);
-    return this.authService.setLanguage(userId, body.language);
+  @UseGuards(OptionalJwtAuthGuard)
+  async setLanguage(@Req() req: OptionalAuthenticatedRequest, @Body() body: SetLanguageDto) {
+    return this.authService.setLanguage(req.user?.userId, body.language);
   }
 }

@@ -1,6 +1,7 @@
 import {
   IsDateString,
   IsOptional,
+  IsBoolean,
   IsString,
   Matches,
   MaxLength,
@@ -16,11 +17,6 @@ export class UpdateProfileDto {
   })
   @MaxLength(100)
   name?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(20)
-  phone?: string;
 
   @IsOptional()
   @IsDateString({}, { message: 'Birthday must be a valid date format (YYYY-MM-DD)' })
@@ -53,4 +49,16 @@ export class UpdateProfileDto {
   @IsString()
   @MaxLength(50)
   reading_language?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  showEmail?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  showPhone?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  showBirthday?: boolean;
 }

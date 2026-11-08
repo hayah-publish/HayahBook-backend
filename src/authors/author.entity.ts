@@ -31,6 +31,15 @@ export class Author {
   @Column({ name: 'birthday', type: 'date', nullable: true })
   birthday: string | null;
 
+  @Column({ name: 'show_email', type: 'boolean', default: false })
+  showEmail: boolean;
+
+  @Column({ name: 'show_phone', type: 'boolean', default: false })
+  showPhone: boolean;
+
+  @Column({ name: 'show_birthday', type: 'boolean', default: false })
+  showBirthday: boolean;
+
   @Column({ name: 'aboutMe', type: 'text', nullable: true })
   aboutMe: string | null;
 

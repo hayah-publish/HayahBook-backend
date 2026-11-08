@@ -76,6 +76,7 @@ describe('AuthService session and privacy safeguards', () => {
       jwtService,
       config as any,
       i18n as any,
+      { enqueue: jest.fn() } as any,
     );
     return { service, sessionsRepository, sessions, usersService };
   }

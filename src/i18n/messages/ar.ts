@@ -166,5 +166,16 @@ export const ar = {
   'bookmarks.removed': 'تمت إزالة العنصر من المحفوظات بنجاح',
   'bookmarks.already_removed': 'العنصر غير موجود في المحفوظات',
   'bookmarks.not_found': 'العنصر المطلوب غير موجود',
+
+  // Reactions (التفاعلات)
+  'reactions.added': 'تم التفاعل بنجاح',
+  'reactions.updated': 'تم تعديل التفاعل بنجاح',
+  'reactions.removed': 'تمت إزالة التفاعل بنجاح',
+  'reactions.invalid_type': 'نوع التفاعل غير صالح. الأنواع المتاحة: اتفق، احببته، احسنت، يستحق التفكير، اعترض',
+  'reactions.agree': 'اتفق',
+  'reactions.love': 'احببته',
+  'reactions.applaud': 'احسنت',
+  'reactions.insightful': 'يستحق التفكير',
+  'reactions.disagree': 'اعترض',
 };
 

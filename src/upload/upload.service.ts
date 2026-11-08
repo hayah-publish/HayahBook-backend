@@ -137,17 +137,23 @@ export class UploadService {
   private extractKeyFromUrl(url?: string | null): string | null {
     if (!url) return null;
     try {
-      if (url.startsWith(this.publicUrl)) {
-        return url.replace(`${this.publicUrl}/`, '');
-      }
       const parsed = new URL(url);
-      if (
-        parsed.hostname.includes('r2.cloudflarestorage.com') ||
-        parsed.hostname.includes('r2.dev') ||
-        parsed.hostname === new URL(this.publicUrl).hostname
-      ) {
-        return parsed.pathname.replace(/^\/+/, '');
+      const publicBase = new URL(this.publicUrl);
+      if (parsed.origin !== publicBase.origin) return null;
+
+      const basePath = publicBase.pathname.replace(/\/+$/, '');
+      const objectPath = basePath
+        ? parsed.pathname.startsWith(`${basePath}/`)
+          ? parsed.pathname.slice(basePath.length + 1)
+          : null
+        : parsed.pathname.replace(/^\/+/, '');
+      if (!objectPath) return null;
+      const key = decodeURIComponent(objectPath);
+      if (!/^(avatars|posts\/images|posts\/videos|articles\/covers)\//.test(key) ||
+          key.split('/').some((segment) => segment === '.' || segment === '..' || segment === '')) {
+        return null;
       }
+      return key;
     } catch {
       // not a valid URL, ignore
     }

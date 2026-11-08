@@ -164,53 +164,23 @@ export class BookmarksService {
    * Calculate saved count for each of the 5 tabs
    */
   async getCounts(userId: string): Promise<BookmarkCounts> {
-    const rawList = await this.bookmarksRepository
+    const raw = await this.bookmarksRepository
       .createQueryBuilder('bookmark')
       .innerJoin('bookmark.post', 'post')
       .where('bookmark.userId = :userId', { userId })
-      .select([
-        'bookmark.id AS id',
-        'post.type AS post_type',
-        'post.videoUrl AS post_video_url',
-        'post.category AS post_category',
-      ])
-      .getRawMany();
-
-    let posts = 0;
-    let articles = 0;
-    let visuals = 0;
-    let snippets = 0;
-
-    for (const row of rawList) {
-      const pType = row.post_type;
-      const hasVideo = !!row.post_video_url;
-      const cat = (row.post_category || '').toLowerCase();
-
-      const isVisual =
-        pType === 'visual' ||
-        hasVideo ||
-        cat === 'المرئيات' ||
-        cat === 'visuals';
-      const isSnippet =
-        pType === 'snippet' ||
-        cat === 'المقتطفات' ||
-        cat === 'snippets';
-      const isArticle = pType === 'article';
-
-      if (isVisual) visuals++;
-      if (isSnippet) snippets++;
-      if (isArticle) articles++;
-      if (pType === 'post' && !hasVideo && !isSnippet && !isVisual) {
-        posts++;
-      }
-    }
+      .select('COUNT(*)', 'all')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post' AND post.videoUrl IS NULL AND LOWER(COALESCE(post.category, '')) NOT IN ('المقتطفات', 'snippets', 'المرئيات', 'visuals'))`, 'posts')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'article')`, 'articles')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR post.videoUrl IS NOT NULL OR LOWER(COALESCE(post.category, '')) IN ('المرئيات', 'visuals'))`, 'visuals')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'snippet' OR LOWER(COALESCE(post.category, '')) IN ('المقتطفات', 'snippets'))`, 'snippets')
+      .getRawOne();
 
     return {
-      all: rawList.length,
-      posts,
-      articles,
-      visuals,
-      snippets,
+      all: Number(raw?.all ?? 0),
+      posts: Number(raw?.posts ?? 0),
+      articles: Number(raw?.articles ?? 0),
+      visuals: Number(raw?.visuals ?? 0),
+      snippets: Number(raw?.snippets ?? 0),
     };
   }
 
@@ -225,39 +195,21 @@ export class BookmarksService {
     isSaved: boolean;
     bookmarksCount: number;
   }> {
-    const post = await this.postsRepository.findOne({
-      where: { id: postId },
+    return this.bookmarksRepository.manager.transaction(async (manager) => {
+      const postsRepo = manager.getRepository(Post);
+      const bookmarksRepo = manager.getRepository(UserBookmark);
+      const post = await postsRepo.findOne({ where: { id: postId }, lock: { mode: 'pessimistic_write' } });
+      if (!post) throw new NotFoundException(this.i18n.t('bookmarks.not_found'));
+      const existing = await bookmarksRepo.findOne({ where: { userId, postId } });
+      if (existing) {
+        await bookmarksRepo.delete({ id: existing.id });
+        await postsRepo.decrement({ id: postId }, 'bookmarksCount', 1);
+        return { message: this.i18n.t('bookmarks.removed'), isSaved: false, bookmarksCount: Math.max(0, (post.bookmarksCount || 0) - 1) };
+      }
+      await bookmarksRepo.save(bookmarksRepo.create({ userId, postId }));
+      await postsRepo.increment({ id: postId }, 'bookmarksCount', 1);
+      return { message: this.i18n.t('bookmarks.saved'), isSaved: true, bookmarksCount: (post.bookmarksCount || 0) + 1 };
     });
-
-    if (!post) {
-      throw new NotFoundException(this.i18n.t('bookmarks.not_found'));
-    }
-
-    const existing = await this.bookmarksRepository.findOne({
-      where: { userId, postId },
-    });
-
-    if (existing) {
-      await this.bookmarksRepository.delete({ id: existing.id });
-      await this.postsRepository.decrement({ id: postId }, 'bookmarksCount', 1);
-      const newCount = Math.max(0, (post.bookmarksCount || 1) - 1);
-      return {
-        message: this.i18n.t('bookmarks.removed'),
-        isSaved: false,
-        bookmarksCount: newCount,
-      };
-    }
-
-    const bookmark = this.bookmarksRepository.create({ userId, postId });
-    await this.bookmarksRepository.save(bookmark);
-    await this.postsRepository.increment({ id: postId }, 'bookmarksCount', 1);
-    const newCount = (post.bookmarksCount || 0) + 1;
-
-    return {
-      message: this.i18n.t('bookmarks.saved'),
-      isSaved: true,
-      bookmarksCount: newCount,
-    };
   }
 
   /**
@@ -271,33 +223,19 @@ export class BookmarksService {
     isSaved: boolean;
     bookmarksCount: number;
   }> {
-    const post = await this.postsRepository.findOne({
-      where: { id: postId },
+    return this.bookmarksRepository.manager.transaction(async (manager) => {
+      const postsRepo = manager.getRepository(Post);
+      const bookmarksRepo = manager.getRepository(UserBookmark);
+      const post = await postsRepo.findOne({ where: { id: postId }, lock: { mode: 'pessimistic_write' } });
+      if (!post) throw new NotFoundException(this.i18n.t('bookmarks.not_found'));
+      const existing = await bookmarksRepo.findOne({ where: { userId, postId } });
+      if (existing) {
+        await bookmarksRepo.delete({ id: existing.id });
+        await postsRepo.decrement({ id: postId }, 'bookmarksCount', 1);
+        return { message: this.i18n.t('bookmarks.removed'), isSaved: false, bookmarksCount: Math.max(0, (post.bookmarksCount || 0) - 1) };
+      }
+      return { message: this.i18n.t('bookmarks.already_removed'), isSaved: false, bookmarksCount: post.bookmarksCount || 0 };
     });
-
-    if (!post) {
-      throw new NotFoundException(this.i18n.t('bookmarks.not_found'));
-    }
-
-    const existing = await this.bookmarksRepository.findOne({
-      where: { userId, postId },
-    });
-
-    if (existing) {
-      await this.bookmarksRepository.delete({ id: existing.id });
-      await this.postsRepository.decrement({ id: postId }, 'bookmarksCount', 1);
-      return {
-        message: this.i18n.t('bookmarks.removed'),
-        isSaved: false,
-        bookmarksCount: Math.max(0, (post.bookmarksCount || 1) - 1),
-      };
-    }
-
-    return {
-      message: this.i18n.t('bookmarks.already_removed'),
-      isSaved: false,
-      bookmarksCount: post.bookmarksCount || 0,
-    };
   }
 
   /**

@@ -13,13 +13,15 @@ import { UploadModule } from '../upload/upload.module';
 import { AuthSession } from './auth-session.entity';
 import { AuthRateLimit } from './auth-rate-limit.entity';
 import { AuthRateLimitService } from './auth-rate-limit.service';
+import { AuthEmailOutbox } from './auth-email-outbox.entity';
+import { AuthEmailOutboxService } from './auth-email-outbox.service';
 
 @Module({
   imports: [
     UsersModule,
     CountriesModule,
     UploadModule,
-    TypeOrmModule.forFeature([EmailOtp, AuthSession, AuthRateLimit]),
+    TypeOrmModule.forFeature([EmailOtp, AuthSession, AuthRateLimit, AuthEmailOutbox]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -40,7 +42,7 @@ import { AuthRateLimitService } from './auth-rate-limit.service';
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, AuthRateLimitService],
+  providers: [AuthService, JwtStrategy, AuthRateLimitService, AuthEmailOutboxService],
   exports: [AuthService, AuthRateLimitService],
 })
 export class AuthModule {}

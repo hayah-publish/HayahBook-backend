@@ -11,6 +11,7 @@ import { PostsService } from '../posts/posts.service';
 import { PostsQueryDto } from '../posts/dto/posts-query.dto';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { I18nService } from '../i18n/i18n.service';
 
 interface AuthenticatedRequest extends Request {
@@ -25,18 +26,8 @@ interface AuthenticatedRequest extends Request {
 export class HomeController {
   constructor(
     private readonly postsService: PostsService,
-    private readonly authService: AuthService,
     private readonly i18n: I18nService,
   ) {}
-
-  private async extractUserId(req: Request): Promise<string | undefined> {
-    const authHeader = req.headers?.authorization;
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.substring(7).trim()
-      : undefined;
-    if (!token) return undefined;
-    return this.authService.resolveUserIdFromToken(token);
-  }
 
   /**
    * GET /v1/home
@@ -48,12 +39,12 @@ export class HomeController {
    *  - scope: all | following
    */
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   async getHomeFeed(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Query() query: PostsQueryDto,
   ) {
-    const userId = await this.extractUserId(req);
-    return this.postsService.getHomeFeed(query, userId);
+    return this.postsService.getHomeFeed(query, req.user?.userId);
   }
 
   /**
@@ -77,12 +68,12 @@ export class HomeController {
    * GET /v1/home/feed
    */
   @Get('feed')
+  @UseGuards(OptionalJwtAuthGuard)
   async getFeed(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Query() query: PostsQueryDto,
   ) {
-    const userId = await this.extractUserId(req);
-    return this.postsService.getHomeFeed(query, userId);
+    return this.postsService.getHomeFeed(query, req.user?.userId);
   }
 
   /**
@@ -92,11 +83,12 @@ export class HomeController {
    * Supports ?following=true to get counts for followed accounts
    */
   @Get('counts')
+  @UseGuards(OptionalJwtAuthGuard)
   async getFeedCounts(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Query() query: PostsQueryDto,
   ) {
-    const userId = await this.extractUserId(req);
+    const userId = req.user?.userId;
     const isFollowing = query.following === true || query.scope === 'following';
     if (isFollowing && !userId) {
       throw new UnauthorizedException(

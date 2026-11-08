@@ -8,7 +8,7 @@ export class AuthRateLimitMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
     const path = req.path.replace(/^\/v\d+(?=\/)/, '');
-    if (req.method !== 'POST' || !path.startsWith('/auth/')) return next();
+    if (!path.startsWith('/auth/')) return next();
 
     const otpRequest =
       path === '/auth/signup' ||
@@ -23,9 +23,11 @@ export class AuthRateLimitMiddleware implements NestMiddleware {
       path === '/auth/reset-password' ||
       path === '/auth/change-password' ||
       path === '/auth/change-email' ||
-      path === '/auth/phone' ||
-      path === '/auth/account';
-    const loginAttempt = path === '/auth/login' || path === '/auth/verify-otp';
+      (path === '/auth/account' && req.method === 'DELETE') ||
+      (path === '/auth/phone' && req.method === 'PATCH');
+    const loginAttempt = req.method === 'POST' && (path === '/auth/login' || path === '/auth/verify-otp' || path === '/auth/google');
+    if (otpRequest && req.method !== 'POST') return next();
+    if (otpVerification && !['POST', 'DELETE', 'PATCH'].includes(req.method)) return next();
     if (!otpRequest && !otpVerification && !loginAttempt) return next();
 
     const ip = req.ip || req.socket.remoteAddress || 'unknown';

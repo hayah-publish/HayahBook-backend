@@ -775,12 +775,8 @@ describe('PostsService public post formatting', () => {
     it('getFeedCounts calculates correct counts across all 5 tabs', async () => {
       const qb: any = {
         select: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([
-          { post_type: 'post', post_video_url: null, post_category: null },
-          { post_type: 'article', post_video_url: null, post_category: 'تطوير الذات' },
-          { post_type: 'visual', post_video_url: 'https://cdn.example.com/v.mp4', post_category: null },
-          { post_type: 'snippet', post_video_url: null, post_category: 'مقتطفات' },
-        ]),
+        addSelect: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ all: '4', posts: '1', articles: '1', visuals: '1', snippets: '1' }),
       };
       const mockPostsRepo: any = { createQueryBuilder: jest.fn().mockReturnValue(qb) };
       const mockUsersRepo: any = {};
@@ -872,12 +868,8 @@ describe('PostsService public post formatting', () => {
           take: jest.fn().mockReturnThis(),
           getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
           select: jest.fn().mockReturnThis(),
-          getRawMany: jest.fn().mockResolvedValue([
-            { post_type: 'post', post_video_url: null, post_category: null },
-            { post_type: 'article', post_video_url: null, post_category: 'تطوير الذات' },
-            { post_type: 'visual', post_video_url: 'https://cdn.example.com/v.mp4', post_category: null },
-            { post_type: 'snippet', post_video_url: null, post_category: 'مقتطفات' },
-          ]),
+          addSelect: jest.fn().mockReturnThis(),
+          getRawOne: jest.fn().mockResolvedValue({ all: '4', posts: '1', articles: '1', visuals: '1', snippets: '1' }),
         };
 
         const mockPostsRepo: any = {

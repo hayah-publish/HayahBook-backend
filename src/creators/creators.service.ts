@@ -65,11 +65,11 @@ export class CreatorsService implements OnModuleInit {
     return {
       id: creator.id,
       name: creator.name,
-      email: creator.email,
-      phone: creator.phone,
-      countryCode: creator.countryCode,
+      email: creator.showEmail ? creator.email : null,
+      phone: creator.showPhone ? creator.phone : null,
+      countryCode: creator.showPhone ? creator.countryCode : null,
       country: this.i18n.formatCountry(creator.country) ?? creator.country ?? null,
-      birthday: creator.birthday,
+      birthday: creator.showBirthday ? creator.birthday : null,
       profileUrl: creator.profileUrl,
       aboutMe: creator.aboutMe,
       userType: creator.userType || 'ContentCreator',
@@ -90,82 +90,44 @@ export class CreatorsService implements OnModuleInit {
   ): Promise<CreatorResponse[]> {
     const currentLang = lang || this.i18n.getCurrentLanguage();
 
-    let userInterestIds = new Set<string>();
-    let followedCreatorIds = new Set<string>();
-
-    if (userId) {
-      const userInterestsRows: Array<{ interest_id: string }> = await this.creatorRepo.query(
-        `SELECT interest_id FROM user_interests WHERE user_id = $1`,
-        [userId],
-      );
-      userInterestIds = new Set(userInterestsRows.map((r) => r.interest_id));
-
-      const follows = await this.followRepo.find({
-        where: { userId },
-      });
-      followedCreatorIds = new Set(follows.map((f) => f.creatorId));
+    const safeLimit = Math.max(1, Math.min(100, Math.trunc(Number(limit) || 50)));
+    const interestRows: Array<{ interest_id: string }> = userId
+      ? await this.creatorRepo.query('SELECT interest_id FROM user_interests WHERE user_id = $1', [userId])
+      : [];
+    const interestIds = interestRows.map((row) => row.interest_id);
+    const follows = userId ? await this.followRepo.find({ where: { userId } }) : [];
+    const followedIds = new Set(follows.map((row) => row.creatorId));
+    const ranked: Array<{ id: string }> = await this.creatorRepo.query(`
+      SELECT c.id
+      FROM creators c
+      LEFT JOIN user_interests ui ON ui.user_id = c.id
+      GROUP BY c.id
+      ORDER BY COUNT(ui.interest_id) FILTER (WHERE ui.interest_id = ANY($1::uuid[])) DESC,
+               c."followersCount" DESC NULLS LAST, c.id
+      LIMIT $2
+    `, [interestIds, safeLimit]);
+    if (!ranked.length) return [];
+    const ids = ranked.map((row) => row.id);
+    const creators = await this.creatorRepo.findBy({ id: In(ids) });
+    const byId = new Map(creators.map((creator) => [creator.id, creator]));
+    const rows: Array<{ creatorId: string; interestId: string; name: string; name_ar: string; name_en: string }> =
+      await this.creatorRepo.query(`
+        SELECT ui.user_id AS "creatorId", i.id AS "interestId", i.name, i.name_ar, i.name_en
+        FROM user_interests ui JOIN interests i ON i.id = ui.interest_id
+        WHERE ui.user_id = ANY($1::uuid[])
+      `, [ids]);
+    const matching = new Map<string, string[]>();
+    const selectedInterestIds = new Set(interestIds);
+    for (const row of rows) {
+      if (!selectedInterestIds.has(row.interestId)) continue;
+      const list = matching.get(row.creatorId) ?? [];
+      list.push(currentLang === 'en' ? (row.name_en || row.name) : (row.name_ar || row.name));
+      matching.set(row.creatorId, list);
     }
-
-    const allCreators = await this.creatorRepo.find();
-
-    const creatorInterestsRows: Array<{
-      creatorId: string;
-      interestId: string;
-      name: string;
-      name_ar: string;
-      name_en: string;
-    }> = await this.creatorRepo.query(`
-      SELECT ui.user_id as "creatorId", i.id as "interestId", i.name, i.name_ar, i.name_en
-      FROM user_interests ui
-      JOIN interests i ON i.id = ui.interest_id
-    `);
-
-    const creatorInterestsMap = new Map<
-      string,
-      Array<{ id: string; name: string; name_ar: string; name_en: string }>
-    >();
-    for (const row of creatorInterestsRows) {
-      const list = creatorInterestsMap.get(row.creatorId) || [];
-      list.push({
-        id: row.interestId,
-        name: row.name,
-        name_ar: row.name_ar,
-        name_en: row.name_en,
-      });
-      creatorInterestsMap.set(row.creatorId, list);
-    }
-
-    const mapped = allCreators.map((creator) => {
-      const cInterests = creatorInterestsMap.get(creator.id) || [];
-      const matched = cInterests.filter((i) => userInterestIds.has(i.id));
-
-      return {
-        creator,
-        matchCount: matched.length,
-        matchingInterests: matched.map((i) =>
-          currentLang === 'en' ? (i.name_en || i.name) : (i.name_ar || i.name),
-        ),
-        isFollowing: followedCreatorIds.has(creator.id),
-      };
+    return ids.flatMap((id) => {
+      const creator = byId.get(id);
+      return creator ? [this.mapCreatorToResponse(creator, matching.get(id) ?? [], followedIds.has(id), currentLang)] : [];
     });
-
-    mapped.sort((a, b) => {
-      if (b.matchCount !== a.matchCount) {
-        return b.matchCount - a.matchCount;
-      }
-      return (b.creator.followersCount || 0) - (a.creator.followersCount || 0);
-    });
-
-    const topCreators = mapped.slice(0, limit);
-
-    return topCreators.map((item) =>
-      this.mapCreatorToResponse(
-        item.creator,
-        item.matchingInterests,
-        item.isFollowing,
-        currentLang,
-      ),
-    );
   }
 
   async followMultiple(
@@ -176,14 +138,6 @@ export class CreatorsService implements OnModuleInit {
     followingCount: number;
     creatorsSelected: boolean;
   }> {
-    const user = await this.userRepo.findOne({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException(this.i18n.t('auth.user_not_found'));
-    }
-
     const incomingCreatorIds = (dto.data && dto.data.length > 0) ? dto.data : dto.creatorIds;
     if (!incomingCreatorIds || incomingCreatorIds.length === 0) {
       throw new BadRequestException(
@@ -193,48 +147,38 @@ export class CreatorsService implements OnModuleInit {
       );
     }
 
-    const isFirstTime = !user.creatorsSelected;
-    const existingCount = await this.followRepo.count({ where: { userId } });
     const distinctIds = Array.from(new Set(incomingCreatorIds));
-
-    // Require at least 5 creators on initial onboarding selection
-    if (isFirstTime && (existingCount + distinctIds.length) < 5) {
-      throw new BadRequestException(this.i18n.t('creators.select_at_least_5'));
-    }
-
-    const creators = await this.creatorRepo.findBy({ id: In(distinctIds) });
-    if (creators.length !== distinctIds.length) {
-      throw new BadRequestException(this.i18n.t('creators.some_not_found'));
-    }
-
-    for (const creator of creators) {
-      const existingFollow = await this.followRepo.findOne({
-        where: { userId, creatorId: creator.id },
-      });
-
-      if (!existingFollow) {
-        const follow = this.followRepo.create({
-          userId,
-          creatorId: creator.id,
-        });
-        await this.followRepo.save(follow);
-        await this.creatorRepo.increment({ id: creator.id }, 'followersCount', 1);
-        await this.userRepo.increment({ id: creator.id }, 'followersCount', 1);
+    return this.userRepo.manager.transaction(async (manager) => {
+      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId]);
+      const userRepo = manager.getRepository(User);
+      const creatorRepo = manager.getRepository(Creator);
+      const followRepo = manager.getRepository(UserCreatorFollow);
+      const user = await userRepo.findOne({ where: { id: userId } });
+      if (!user) throw new NotFoundException(this.i18n.t('auth.user_not_found'));
+      const creators = await creatorRepo.findBy({ id: In(distinctIds) });
+      if (creators.length !== distinctIds.length) {
+        throw new BadRequestException(this.i18n.t('creators.some_not_found'));
       }
-    }
-
-    user.creatorsSelected = true;
-    await this.userRepo.save(user);
-
-    const totalFollowing = await this.followRepo.count({
-      where: { userId },
+      const existing = await followRepo.find({ where: { userId } });
+      const existingIds = new Set(existing.map((follow) => follow.creatorId));
+      const newCreators = creators.filter((creator) => !existingIds.has(creator.id));
+      if (!user.creatorsSelected && existingIds.size + newCreators.length < 5) {
+        throw new BadRequestException(this.i18n.t('creators.select_at_least_5'));
+      }
+      for (const creator of newCreators) {
+        await followRepo.save(followRepo.create({ userId, creatorId: creator.id }));
+        await creatorRepo.increment({ id: creator.id }, 'followersCount', 1);
+        await userRepo.increment({ id: creator.id }, 'followersCount', 1);
+      }
+      user.creatorsSelected = true;
+      await userRepo.save(user);
+      const totalFollowing = await followRepo.count({ where: { userId } });
+      return {
+        message: this.i18n.t('creators.followed_success'),
+        followingCount: totalFollowing,
+        creatorsSelected: true,
+      };
     });
-
-    return {
-      message: this.i18n.t('creators.followed_success'),
-      followingCount: totalFollowing,
-      creatorsSelected: true,
-    };
   }
 
   async toggleFollow(
@@ -245,51 +189,36 @@ export class CreatorsService implements OnModuleInit {
     message: string;
     followersCount: number;
   }> {
-    const creator = await this.creatorRepo.findOne({
-      where: { id: creatorId },
-    });
-
-    if (!creator) {
-      throw new NotFoundException(this.i18n.t('creators.not_found'));
-    }
-
-    const existing = await this.followRepo.findOne({
-      where: { userId, creatorId },
-    });
-
-    if (existing) {
-      await this.followRepo.delete({ id: existing.id });
-      await this.creatorRepo.decrement({ id: creatorId }, 'followersCount', 1);
-      await this.userRepo.decrement({ id: creatorId }, 'followersCount', 1);
-      const updated = (await this.creatorRepo.findOne({ where: { id: creatorId } }))!;
-      return {
-        isFollowing: false,
-        message: this.i18n.t('creators.unfollowed_success'),
-        followersCount: Math.max(0, updated.followersCount),
-      };
-    } else {
-      const follow = this.followRepo.create({ userId, creatorId });
-      await this.followRepo.save(follow);
-      await this.creatorRepo.increment({ id: creatorId }, 'followersCount', 1);
-      await this.userRepo.increment({ id: creatorId }, 'followersCount', 1);
-      const updated = (await this.creatorRepo.findOne({ where: { id: creatorId } }))!;
-
-      // If user reaches 5 followed creators, mark creatorsSelected as true
-      const user = await this.userRepo.findOne({ where: { id: userId } });
-      if (user && !user.creatorsSelected) {
-        const totalCount = await this.followRepo.count({ where: { userId } });
-        if (totalCount >= 5) {
+    return this.userRepo.manager.transaction(async (manager) => {
+      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId]);
+      const creatorRepo = manager.getRepository(Creator);
+      const userRepo = manager.getRepository(User);
+      const followRepo = manager.getRepository(UserCreatorFollow);
+      const creator = await creatorRepo.findOne({ where: { id: creatorId } });
+      if (!creator) throw new NotFoundException(this.i18n.t('creators.not_found'));
+      const existing = await followRepo.findOne({ where: { userId, creatorId } });
+      const nowFollowing = !existing;
+      if (existing) {
+        await followRepo.delete({ id: existing.id });
+        await manager.query('UPDATE creators SET "followersCount" = GREATEST(COALESCE("followersCount", 0) - 1, 0) WHERE id = $1', [creatorId]);
+        await manager.query('UPDATE users SET "followersCount" = GREATEST(COALESCE("followersCount", 0) - 1, 0) WHERE id = $1', [creatorId]);
+      } else {
+        await followRepo.save(followRepo.create({ userId, creatorId }));
+        await creatorRepo.increment({ id: creatorId }, 'followersCount', 1);
+        await userRepo.increment({ id: creatorId }, 'followersCount', 1);
+        const user = await userRepo.findOne({ where: { id: userId } });
+        if (user && !user.creatorsSelected && await followRepo.count({ where: { userId } }) >= 5) {
           user.creatorsSelected = true;
-          await this.userRepo.save(user);
+          await userRepo.save(user);
         }
       }
-
+      const updated = await creatorRepo.findOne({ where: { id: creatorId } });
       return {
-        isFollowing: true,
-        message: this.i18n.t('creators.followed_single_success'),
-        followersCount: updated.followersCount,
+        isFollowing: nowFollowing,
+        message: this.i18n.t(nowFollowing ? 'creators.followed_single_success' : 'creators.unfollowed_success'),
+        followersCount: Math.max(0, updated?.followersCount ?? 0),
       };
-    }
+    });
   }
 
   async getFollowed(userId: string, lang?: SupportedLanguage): Promise<CreatorResponse[]> {

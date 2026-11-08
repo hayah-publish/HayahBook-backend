@@ -9,6 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, FindOptionsWhere, SelectQueryBuilder, DataSource } from 'typeorm';
 import { Post } from './post.entity';
+import { PostReaction, ReactionType, PostReactionsCount } from './post-reaction.entity';
 import { User } from '../users/user.entity';
 import { UserUserFollow } from '../users/user-user-follow.entity';
 import { Book } from '../books/book.entity';
@@ -16,6 +17,7 @@ import { Audiobook } from '../books/audiobook.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { PostsQueryDto } from './dto/posts-query.dto';
+import { ReactionsQueryDto } from './dto/reactions-query.dto';
 import { I18nService } from '../i18n/i18n.service';
 import { SupportedLanguage } from '../i18n/i18n.types';
 import { UploadService } from '../upload/upload.service';
@@ -85,6 +87,9 @@ export interface FormattedPost {
   commentsCount: number;
   sharesCount: number;
   bookmarksCount?: number;
+  reactionsCount?: PostReactionsCount;
+  topReactions?: ReactionType[];
+  userReaction?: ReactionType | null;
   isSaved?: boolean;
   savedAt?: Date;
   createdAt: Date;
@@ -111,6 +116,9 @@ export class PostsService {
     private readonly userFollowRepo?: Repository<UserUserFollow>,
     @Optional()
     private readonly dataSource?: DataSource,
+    @Optional()
+    @InjectRepository(PostReaction)
+    private readonly postReactionRepo?: Repository<PostReaction>,
   ) { }
 
   /**
@@ -164,11 +172,417 @@ export class PostsService {
     return Array.from(followedIds);
   }
 
+  /**
+   * Normalize input reaction string from English or Arabic into standard canonical ReactionType
+   */
+  normalizeReactionType(input?: string): ReactionType | null {
+    if (!input) return null;
+    const val = input.trim().toLowerCase();
+
+    if (val === 'agree' || val === 'اتفق' || val === 'اتفاق' || val === 'like') {
+      return 'agree';
+    }
+    if (
+      val === 'love' ||
+      val === 'احببته' ||
+      val === 'أحببته' ||
+      val === 'حب' ||
+      val === 'heart'
+    ) {
+      return 'love';
+    }
+    if (
+      val === 'applaud' ||
+      val === 'احسنت' ||
+      val === 'أحسنت' ||
+      val === 'bravo' ||
+      val === 'clap' ||
+      val === 'claps' ||
+      val === 'celebrate'
+    ) {
+      return 'applaud';
+    }
+    if (
+      val === 'insightful' ||
+      val === 'يستحق التفكير' ||
+      val === 'تفكير' ||
+      val === 'thoughtful' ||
+      val === 'think'
+    ) {
+      return 'insightful';
+    }
+    if (
+      val === 'disagree' ||
+      val === 'اعترض' ||
+      val === 'أعترض' ||
+      val === 'اعتراض'
+    ) {
+      return 'disagree';
+    }
+
+    return null;
+  }
+
+  /**
+   * Return metadata and localized labels for a reaction type
+   */
+  getReactionLabels(type: ReactionType): { ar: string; en: string; icon: string } {
+    switch (type) {
+      case 'agree':
+        return { ar: 'اتفق', en: 'Agree', icon: '🤝' };
+      case 'love':
+        return { ar: 'احببته', en: 'Love', icon: '❤️' };
+      case 'applaud':
+        return { ar: 'احسنت', en: 'Bravo', icon: '👏' };
+      case 'insightful':
+        return { ar: 'يستحق التفكير', en: 'Insightful', icon: '💭' };
+      case 'disagree':
+        return { ar: 'اعترض', en: 'Disagree', icon: '🙅' };
+    }
+  }
+
+  /**
+   * Add, toggle off, or switch reaction on a post or article
+   */
+  async reactToPost(
+    userId: string,
+    postId: string,
+    reactionInput: string,
+  ): Promise<{
+    message: string;
+    action: 'added' | 'updated' | 'removed';
+    userReaction: ReactionType | null;
+    reactionsCount: PostReactionsCount;
+    topReactions: ReactionType[];
+  }> {
+    const post = await this.postsRepository.findOne({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new NotFoundException(
+        this.i18n?.t ? this.i18n.t('posts.not_found') : 'Post not found',
+      );
+    }
+
+    const targetType = this.normalizeReactionType(reactionInput);
+    if (!targetType) {
+      throw new BadRequestException(
+        this.i18n?.t ? this.i18n.t('reactions.invalid_type') : 'Invalid reaction type',
+      );
+    }
+
+    const existing = await this.postReactionRepo?.findOne({
+      where: { postId, userId },
+    });
+
+    const rawCounts: any = post.reactionsCount || {};
+    const counts: PostReactionsCount = {
+      total: Number(rawCounts.total) || post.likesCount || 0,
+      agree: Number(rawCounts.agree) || 0,
+      love: Number(rawCounts.love) || 0,
+      applaud: Number(rawCounts.applaud) || 0,
+      insightful: Number(rawCounts.insightful) || 0,
+      disagree: Number(rawCounts.disagree) || 0,
+    };
+
+    let action: 'added' | 'updated' | 'removed';
+    let userReaction: ReactionType | null = null;
+    let messageKey = 'reactions.added';
+
+    if (!existing) {
+      // 1. New reaction
+      action = 'added';
+      userReaction = targetType;
+      messageKey = 'reactions.added';
+
+      if (this.postReactionRepo) {
+        const entity = this.postReactionRepo.create({
+          userId,
+          postId,
+          reactionType: targetType,
+        });
+        await this.postReactionRepo.save(entity);
+      }
+
+      counts[targetType] = (counts[targetType] || 0) + 1;
+      counts.total = (counts.total || 0) + 1;
+    } else if (existing.reactionType === targetType) {
+      // 2. Same reaction clicked again -> Toggle OFF (Remove)
+      action = 'removed';
+      userReaction = null;
+      messageKey = 'reactions.removed';
+
+      if (this.postReactionRepo) {
+        await this.postReactionRepo.delete({ id: existing.id });
+      }
+
+      counts[targetType] = Math.max(0, (counts[targetType] || 1) - 1);
+      counts.total = Math.max(0, (counts.total || 1) - 1);
+    } else {
+      // 3. Different reaction clicked -> Switch / Update
+      action = 'updated';
+      userReaction = targetType;
+      messageKey = 'reactions.updated';
+      const oldType = existing.reactionType;
+
+      if (this.postReactionRepo) {
+        existing.reactionType = targetType;
+        await this.postReactionRepo.save(existing);
+      }
+
+      counts[oldType] = Math.max(0, (counts[oldType] || 1) - 1);
+      counts[targetType] = (counts[targetType] || 0) + 1;
+      // Total count stays the same!
+    }
+
+    // Persist updated counters on post entity
+    post.reactionsCount = counts;
+    post.likesCount = counts.total;
+    await this.postsRepository.save(post);
+
+    const reactionKeys: ReactionType[] = [
+      'agree',
+      'love',
+      'applaud',
+      'insightful',
+      'disagree',
+    ];
+    const topReactions = reactionKeys
+      .filter((k) => (counts[k] || 0) > 0)
+      .sort((a, b) => (counts[b] || 0) - (counts[a] || 0))
+      .slice(0, 3);
+
+    return {
+      message: this.i18n?.t ? this.i18n.t(messageKey) : messageKey,
+      action,
+      userReaction,
+      reactionsCount: counts,
+      topReactions,
+    };
+  }
+
+  /**
+   * Explicitly remove reaction from a post
+   */
+  async removeReaction(
+    userId: string,
+    postId: string,
+  ): Promise<{
+    message: string;
+    action: 'removed';
+    userReaction: null;
+    reactionsCount: PostReactionsCount;
+    topReactions: ReactionType[];
+  }> {
+    const post = await this.postsRepository.findOne({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new NotFoundException(
+        this.i18n?.t ? this.i18n.t('posts.not_found') : 'Post not found',
+      );
+    }
+
+    const rawCounts: any = post.reactionsCount || {};
+    const counts: PostReactionsCount = {
+      total: Number(rawCounts.total) || post.likesCount || 0,
+      agree: Number(rawCounts.agree) || 0,
+      love: Number(rawCounts.love) || 0,
+      applaud: Number(rawCounts.applaud) || 0,
+      insightful: Number(rawCounts.insightful) || 0,
+      disagree: Number(rawCounts.disagree) || 0,
+    };
+
+    const existing = await this.postReactionRepo?.findOne({
+      where: { postId, userId },
+    });
+
+    if (existing) {
+      const oldType = existing.reactionType;
+      if (this.postReactionRepo) {
+        await this.postReactionRepo.delete({ id: existing.id });
+      }
+
+      counts[oldType] = Math.max(0, (counts[oldType] || 1) - 1);
+      counts.total = Math.max(0, (counts.total || 1) - 1);
+
+      post.reactionsCount = counts;
+      post.likesCount = counts.total;
+      await this.postsRepository.save(post);
+    }
+
+    const reactionKeys: ReactionType[] = [
+      'agree',
+      'love',
+      'applaud',
+      'insightful',
+      'disagree',
+    ];
+    const topReactions = reactionKeys
+      .filter((k) => (counts[k] || 0) > 0)
+      .sort((a, b) => (counts[b] || 0) - (counts[a] || 0))
+      .slice(0, 3);
+
+    return {
+      message: this.i18n?.t ? this.i18n.t('reactions.removed') : 'Reaction removed',
+      action: 'removed',
+      userReaction: null,
+      reactionsCount: counts,
+      topReactions,
+    };
+  }
+
+  /**
+   * Get reactions modal list for a post with tabs filtering (All, 🤝, ❤️, 👏, 💭, 🙅)
+   */
+  async getPostReactions(
+    postId: string,
+    query: ReactionsQueryDto,
+    currentUserId?: string,
+  ): Promise<{
+    counts: PostReactionsCount & { all: number };
+    data: Array<{
+      id: string;
+      reaction: ReactionType;
+      reactionIcon: string;
+      reactionLabelAr: string;
+      reactionLabelEn: string;
+      createdAt: Date;
+      user: {
+        id: string;
+        name: string;
+        profileUrl: string | null;
+        userType: string;
+        isVerified: boolean;
+        isFollowing: boolean;
+      };
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const post = await this.postsRepository.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundException(
+        this.i18n?.t ? this.i18n.t('posts.not_found') : 'Post not found',
+      );
+    }
+
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Math.min(50, Number(query.limit) || 20));
+
+    // 1. Grouped counts across all reaction types for this post
+    const counts = {
+      all: 0,
+      total: 0,
+      agree: 0,
+      love: 0,
+      applaud: 0,
+      insightful: 0,
+      disagree: 0,
+    };
+
+    if (this.postReactionRepo) {
+      const rawCounts = await this.postReactionRepo
+        .createQueryBuilder('r')
+        .where('r.postId = :postId', { postId })
+        .select(['r.reactionType AS type', 'COUNT(r.id) AS count'])
+        .groupBy('r.reactionType')
+        .getRawMany();
+
+      for (const row of rawCounts) {
+        const t = row.type as ReactionType;
+        const c = Number(row.count) || 0;
+        if (counts[t] !== undefined) counts[t] = c;
+        counts.all += c;
+        counts.total += c;
+      }
+    }
+
+    // 2. Query reactions for users list
+    let items: PostReaction[] = [];
+    let total = 0;
+
+    if (this.postReactionRepo) {
+      const qb = this.postReactionRepo
+        .createQueryBuilder('r')
+        .innerJoinAndSelect('r.user', 'user')
+        .where('r.postId = :postId', { postId });
+
+      if (query.type && query.type !== 'all' && query.type !== 'الكل') {
+        const targetType = this.normalizeReactionType(query.type);
+        if (targetType) {
+          qb.andWhere('r.reactionType = :targetType', { targetType });
+        }
+      }
+
+      qb.orderBy('r.createdAt', 'DESC')
+        .skip((page - 1) * limit)
+        .take(limit);
+
+      [items, total] = await qb.getManyAndCount();
+    }
+
+    // 3. Batch check isFollowing if currentUserId is provided
+    const followingSet = new Set<string>();
+    if (currentUserId && items.length > 0 && this.userFollowRepo) {
+      const targetUserIds = items.map((i) => i.user?.id).filter(Boolean);
+      if (targetUserIds.length > 0) {
+        try {
+          const userFollows = await this.userFollowRepo.find({
+            where: { followerId: currentUserId, followingId: In(targetUserIds) },
+            select: { followingId: true },
+          });
+          for (const f of userFollows) {
+            followingSet.add(f.followingId);
+          }
+        } catch {
+          // Ignore if follow table mock
+        }
+      }
+    }
+
+    const data = items.map((i) => {
+      const labels = this.getReactionLabels(i.reactionType);
+      return {
+        id: i.id,
+        reaction: i.reactionType,
+        reactionIcon: labels.icon,
+        reactionLabelAr: labels.ar,
+        reactionLabelEn: labels.en,
+        createdAt: i.createdAt,
+        user: {
+          id: i.user?.id || i.userId,
+          name: i.user?.name || '',
+          profileUrl: i.user?.profileUrl || null,
+          userType: i.user?.userType || 'reader',
+          isVerified: !!(i.user as any)?.isVerified,
+          isFollowing: followingSet.has(i.user?.id || i.userId),
+        },
+      };
+    });
+
+    return {
+      counts,
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    };
+  }
+
   async createPost(
     userId: string,
     dto: CreatePostDto,
     files?: UploadFile[],
   ): Promise<{ message: string; data: FormattedPost }> {
+    if ((dto as { type?: string }).type === 'article') {
+      throw new BadRequestException('Articles must be created through the articles endpoint');
+    }
     const imageFiles = (files || []).filter(
       (f) =>
         f.mimetype.startsWith('image/') ||
@@ -599,57 +1013,25 @@ export class PostsService {
       return { all: 0, posts: 0, articles: 0, visuals: 0, snippets: 0 };
     }
 
-    const qb = this.postsRepository
-      .createQueryBuilder('post')
-      .select([
-        'post.id AS id',
-        'post.type AS post_type',
-        'post.videoUrl AS post_video_url',
-        'post.category AS post_category',
-      ]);
+    const qb = this.postsRepository.createQueryBuilder('post')
+      .select('COUNT(*)', 'all')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post')`, 'posts')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'article')`, 'articles')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR post.videoUrl IS NOT NULL OR LOWER(COALESCE(post.category, '')) LIKE '%مرئيات%' OR LOWER(COALESCE(post.category, '')) LIKE '%visual%')`, 'visuals')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'snippet' OR LOWER(COALESCE(post.category, '')) LIKE '%مقتطف%' OR LOWER(COALESCE(post.category, '')) LIKE '%snippet%' OR LOWER(COALESCE(post.category, '')) LIKE '%اقتباس%')`, 'snippets');
 
     if (Array.isArray(filterUserIds) && filterUserIds.length > 0) {
       qb.where('post.user_id IN (:...filterUserIds)', { filterUserIds });
     }
 
-    const rawList = await qb.getRawMany();
-
-    let posts = 0;
-    let articles = 0;
-    let visuals = 0;
-    let snippets = 0;
-
-    for (const row of rawList) {
-      const pType = row.post_type;
-      const hasVideo = !!row.post_video_url;
-      const cat = (row.post_category || '').toLowerCase();
-
-      const isVisual =
-        pType === 'visual' ||
-        hasVideo ||
-        cat.includes('مرئيات') ||
-        cat.includes('visual');
-      const isSnippet =
-        pType === 'snippet' ||
-        cat.includes('مقتطف') ||
-        cat.includes('snippet') ||
-        cat.includes('اقتباس');
-      const isArticle = pType === 'article';
-
-      if (isVisual) visuals++;
-      if (isSnippet) snippets++;
-      if (isArticle) articles++;
-      if (pType === 'post') {
-        posts++;
-      }
-    }
+    const counts = await qb.getRawOne() ?? {};
 
     return {
-      all: rawList.length,
-      posts,
-      articles,
-      visuals,
-      snippets,
+      all: Number(counts.all ?? 0),
+      posts: Number(counts.posts ?? 0),
+      articles: Number(counts.articles ?? 0),
+      visuals: Number(counts.visuals ?? 0),
+      snippets: Number(counts.snippets ?? 0),
     };
   }
 
@@ -700,10 +1082,13 @@ export class PostsService {
       filterUserIds = followed;
     }
 
-    const feed = await this.findAll({
-      ...query,
-      followingUserIds: filterUserIds,
-    });
+    const feed = await this.findAll(
+      {
+        ...query,
+        followingUserIds: filterUserIds,
+      },
+      currentUserId,
+    );
     const counts = await this.getFeedCounts(filterUserIds);
 
     return {
@@ -712,7 +1097,10 @@ export class PostsService {
     };
   }
 
-  async findAll(query: PostsQueryDto): Promise<{
+  async findAll(
+    query: PostsQueryDto,
+    currentUserId?: string,
+  ): Promise<{
     data: FormattedPost[];
     total: number;
     page: number;
@@ -786,8 +1174,30 @@ export class PostsService {
       }
     }
 
+    // Pre-fetch user reactions if currentUserId is provided
+    const userReactionsMap = new Map<string, ReactionType>();
+    if (currentUserId && items.length > 0 && this.postReactionRepo) {
+      const itemIds = items.map((p) => p.id);
+      try {
+        const reactions = await this.postReactionRepo.find({
+          where: {
+            postId: In(itemIds),
+            userId: currentUserId,
+          },
+          select: { postId: true, reactionType: true },
+        });
+        for (const r of reactions) {
+          userReactionsMap.set(r.postId, r.reactionType);
+        }
+      } catch {
+        // Ignored if reaction table mock issue
+      }
+    }
+
     const data = await Promise.all(
-      items.map((p) => this.formatPost(p, mentionsMap)),
+      items.map((p) =>
+        this.formatPost(p, mentionsMap, userReactionsMap.get(p.id) || null),
+      ),
     );
 
     return {
@@ -799,7 +1209,7 @@ export class PostsService {
     };
   }
 
-  async findOne(id: string): Promise<FormattedPost> {
+  async findOne(id: string, currentUserId?: string): Promise<FormattedPost> {
     const post = await this.postsRepository.findOne({
       where: { id },
       relations: {
@@ -813,7 +1223,22 @@ export class PostsService {
       throw new NotFoundException(this.i18n.t('posts.not_found'));
     }
 
-    return this.formatPost(post);
+    let userReaction: ReactionType | null = null;
+    if (currentUserId && this.postReactionRepo) {
+      try {
+        const reaction = await this.postReactionRepo.findOne({
+          where: { postId: id, userId: currentUserId },
+          select: { reactionType: true },
+        });
+        if (reaction) {
+          userReaction = reaction.reactionType;
+        }
+      } catch {
+        // Ignored if reaction table mock issue
+      }
+    }
+
+    return this.formatPost(post, undefined, userReaction);
   }
 
   async remove(
@@ -1004,6 +1429,7 @@ export class PostsService {
   async formatPost(
     post: Post,
     preloadedMentions?: Map<string, FormattedMentionUser>,
+    userReaction?: ReactionType | null,
   ): Promise<FormattedPost> {
     const b = post.book;
     const ab = post.audiobook;
@@ -1099,6 +1525,33 @@ export class PostsService {
 
     const isArticle = post.type === 'article';
 
+    const rawCounts: any = post.reactionsCount || {};
+    const totalReactions =
+      rawCounts.total !== undefined && !isNaN(Number(rawCounts.total))
+        ? Number(rawCounts.total)
+        : post.likesCount || 0;
+
+    const reactionsCount: PostReactionsCount = {
+      total: totalReactions,
+      agree: Number(rawCounts.agree) || 0,
+      love: Number(rawCounts.love) || 0,
+      applaud: Number(rawCounts.applaud) || 0,
+      insightful: Number(rawCounts.insightful) || 0,
+      disagree: Number(rawCounts.disagree) || 0,
+    };
+
+    const reactionKeys: ReactionType[] = [
+      'agree',
+      'love',
+      'applaud',
+      'insightful',
+      'disagree',
+    ];
+    const topReactions = reactionKeys
+      .filter((k) => (reactionsCount[k] || 0) > 0)
+      .sort((a, b) => (reactionsCount[b] || 0) - (reactionsCount[a] || 0))
+      .slice(0, 3);
+
     const formatted: FormattedPost = {
       id: post.id,
       type: post.type,
@@ -1125,7 +1578,10 @@ export class PostsService {
         role: post.user?.role || 'user',
       },
       mentions: mentionsUsers,
-      likesCount: post.likesCount || 0,
+      likesCount: reactionsCount.total,
+      reactionsCount,
+      topReactions,
+      userReaction: userReaction ?? null,
       commentsCount: post.commentsCount || 0,
       sharesCount: post.sharesCount || 0,
       bookmarksCount: post.bookmarksCount || 0,

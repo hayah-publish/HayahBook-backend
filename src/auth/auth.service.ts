@@ -34,6 +34,7 @@ import { validatePhoneForCountry } from './phone-validation.util';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
 import { AuthSession } from './auth-session.entity';
+import { AuthEmailOutboxService } from './auth-email-outbox.service';
 
 type AuthResponse = {
   message?: string;
@@ -56,6 +57,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly i18n: I18nService,
+    private readonly emailOutbox: AuthEmailOutboxService,
   ) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
 
@@ -116,6 +118,9 @@ export class AuthService {
       countryCode: user.countryCode ?? null,
       profileUrl: user.profileUrl ?? null,
       birthday: user.birthday ?? null,
+      showEmail: Boolean(user.showEmail),
+      showPhone: Boolean(user.showPhone),
+      showBirthday: Boolean(user.showBirthday),
       country: this.i18n.formatCountry(user.country) ?? user.country ?? null,
       aboutMe: user.aboutMe ?? null,
       role: user.role,
@@ -203,6 +208,7 @@ export class AuthService {
     purpose: string;
     subject: string;
     expiresInMinutes?: number;
+    delivery?: 'direct' | 'outbox';
   }): Promise<void> {
     if (params.channel === 'phone') {
       throw new HttpException(
@@ -291,12 +297,9 @@ export class AuthService {
         `;
 
       try {
-        const { error } = await this.resend.emails.send({
-          from,
-          to: normalizedEmail,
-          subject: params.subject,
-          html: emailHtml,
-        });
+        const error = params.delivery === 'outbox'
+          ? (await this.emailOutbox.enqueue({ to: normalizedEmail, subject: params.subject, html: emailHtml }), null)
+          : (await this.resend.emails.send({ from, to: normalizedEmail, subject: params.subject, html: emailHtml })).error;
 
         if (error) {
           otp.used = true;
@@ -496,7 +499,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(normalizedEmail);
 
     if (!user) {
-      throw new BadRequestException(this.i18n.t('auth.account_not_found_email'));
+      throw new BadRequestException(this.i18n.t('otp.invalid_or_expired'));
     }
 
     await this.verifyOtpRecord({
@@ -629,6 +632,7 @@ export class AuthService {
           purpose: 'reset_password',
           subject: this.i18n.t('otp.subject_reset'),
           expiresInMinutes: 10,
+          delivery: 'outbox',
         });
       } catch {
         // Keep the response indistinguishable for existing and unknown accounts.
@@ -646,7 +650,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(normalizedEmail);
 
     if (!user) {
-      throw new NotFoundException(this.i18n.t('auth.account_not_found_email'));
+      throw new BadRequestException(this.i18n.t('otp.invalid_or_expired'));
     }
 
     await this.verifyOtpRecord({
@@ -700,7 +704,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(normalizedEmail);
 
     if (!user) {
-      throw new NotFoundException(this.i18n.t('auth.account_not_found_email'));
+      throw new BadRequestException(this.i18n.t('otp.invalid_or_expired'));
     }
 
     if (dto.resetToken) {
@@ -1061,12 +1065,14 @@ export class AuthService {
 
     const updatedUser = await this.usersService.updateProfile(userId, {
       name: dto.name,
-      phone: dto.phone,
       birthday: dto.birthday,
       country,
       aboutMe: dto.aboutMe,
       profileUrl,
       readingLanguage,
+      showEmail: dto.showEmail,
+      showPhone: dto.showPhone,
+      showBirthday: dto.showBirthday,
     });
 
     return {
@@ -1240,13 +1246,4 @@ export class AuthService {
     };
   }
 
-  async resolveUserIdFromToken(token?: string): Promise<string | undefined> {
-    if (!token) return undefined;
-    try {
-      const payload = this.jwtService.verify<{ sub?: string }>(token);
-      return payload?.sub;
-    } catch {
-      return undefined;
-    }
-  }
 }

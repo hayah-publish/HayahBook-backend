@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import { Book } from './book.entity';
@@ -50,7 +50,7 @@ export interface FormattedUserBook {
 }
 
 @Injectable()
-export class BooksService implements OnModuleInit {
+export class BooksService {
   constructor(
     @InjectRepository(Book)
     private readonly booksRepository: Repository<Book>,
@@ -63,8 +63,26 @@ export class BooksService implements OnModuleInit {
     private readonly i18n: I18nService,
   ) {}
 
-  async onModuleInit() {
-    await this.seedBooksAndAudiobooks();
+  async seedDevelopmentCatalog(): Promise<void> {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Development catalog seeding is disabled in production');
+    }
+    const booksByTitle = new Map<string, Book>();
+    for (const item of SEED_BOOKS) {
+      let book = await this.booksRepository.findOne({ where: { title: item.title } });
+      if (!book) book = await this.booksRepository.save(this.booksRepository.create(item));
+      booksByTitle.set(book.title, book);
+    }
+    for (const item of SEED_AUDIOBOOKS) {
+      const exists = await this.audiobooksRepository.findOne({ where: { title: item.title } });
+      if (exists) continue;
+      const { companionBookTitle, ...audioFields } = item;
+      const companion = companionBookTitle ? booksByTitle.get(companionBookTitle) : undefined;
+      await this.audiobooksRepository.save(this.audiobooksRepository.create({
+        ...audioFields,
+        bookId: companion?.id ?? null,
+      }));
+    }
   }
 
   private async seedBooksAndAudiobooks() {
@@ -832,6 +850,7 @@ export class BooksService implements OnModuleInit {
     }
 
     const now = new Date();
+    const wasFinished = userBook?.status === 'finished';
 
     if (!userBook) {
       userBook = this.userBooksRepository.create({
@@ -868,11 +887,11 @@ export class BooksService implements OnModuleInit {
       if (!userBook.finishedAt) {
         userBook.finishedAt = now;
       }
-      if (book) {
+      if (!wasFinished && book) {
         book.readsCount = (book.readsCount || 0) + 1;
         await this.booksRepository.save(book);
       }
-      if (audiobook) {
+      if (!wasFinished && audiobook) {
         audiobook.listensCount = (audiobook.listensCount || 0) + 1;
         await this.audiobooksRepository.save(audiobook);
       }

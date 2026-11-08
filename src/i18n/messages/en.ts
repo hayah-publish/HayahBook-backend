@@ -166,5 +166,16 @@ export const en = {
   'bookmarks.removed': 'Item removed from saved successfully',
   'bookmarks.already_removed': 'Item is not in your saved items',
   'bookmarks.not_found': 'Item not found',
+
+  // Reactions
+  'reactions.added': 'Reaction added successfully',
+  'reactions.updated': 'Reaction updated successfully',
+  'reactions.removed': 'Reaction removed successfully',
+  'reactions.invalid_type': 'Invalid reaction type. Available: agree, love, applaud, insightful, disagree',
+  'reactions.agree': 'Agree',
+  'reactions.love': 'Love',
+  'reactions.applaud': 'Bravo',
+  'reactions.insightful': 'Insightful',
+  'reactions.disagree': 'Disagree',
 };
 

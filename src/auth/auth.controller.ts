@@ -21,6 +21,7 @@ import { UploadFile } from '../upload/upload-file.interface';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -49,6 +50,10 @@ interface AuthenticatedRequest extends Request {
     email: string;
     role: string;
   };
+}
+
+interface OptionalAuthenticatedRequest extends Request {
+  user?: any;
 }
 
 @Controller('auth')
@@ -303,13 +308,9 @@ export class AuthController {
 
   @Post('language')
   @HttpCode(HttpStatus.OK)
-  async setLanguage(@Req() req: Request, @Body() body: SetLanguageDto) {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.substring(7).trim()
-      : undefined;
-    const userId = await this.authService.resolveUserIdFromToken(token);
-    return this.authService.setLanguage(userId, body.language);
+  @UseGuards(OptionalJwtAuthGuard)
+  async setLanguage(@Req() req: OptionalAuthenticatedRequest, @Body() body: SetLanguageDto) {
+    return this.authService.setLanguage(req.user?.userId, body.language);
   }
 
   @UseGuards(JwtAuthGuard)

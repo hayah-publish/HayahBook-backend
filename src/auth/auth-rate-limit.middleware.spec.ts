@@ -45,4 +45,47 @@ describe('AuthRateLimitMiddleware', () => {
     expect(res.status).toHaveBeenCalledWith(429);
     expect(next).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['DELETE', '/v1/auth/account'],
+    ['PATCH', '/v1/auth/phone'],
+  ])('limits OTP protected %s %s requests', async (method, path) => {
+    const consume = jest.fn().mockResolvedValue(true);
+    const middleware = new AuthRateLimitMiddleware({ consume } as any);
+    const req = {
+      method,
+      path,
+      ip: '192.0.2.11',
+      socket: { remoteAddress: '192.0.2.11' },
+      body: { email: 'person@example.com', phone: '201234567890' },
+      header: () => undefined,
+    } as any;
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as any;
+    const next = jest.fn();
+
+    await middleware.use(req, res, next);
+
+    expect(consume).toHaveBeenCalledWith('otp-verify-ip', '192.0.2.11', 30, 900_000);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
+  it('rate limits Google login attempts per IP', async () => {
+    const consume = jest.fn().mockResolvedValue(true);
+    const middleware = new AuthRateLimitMiddleware({ consume } as any);
+    const req = {
+      method: 'POST',
+      path: '/v1/auth/google',
+      ip: '192.0.2.12',
+      socket: { remoteAddress: '192.0.2.12' },
+      body: { idToken: 'opaque-token' },
+      header: () => undefined,
+    } as any;
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as any;
+    const next = jest.fn();
+
+    await middleware.use(req, res, next);
+
+    expect(consume).toHaveBeenCalledWith('login-ip', '192.0.2.12', 10, 900_000);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
 });

@@ -69,4 +69,12 @@ describe('UploadService failure handling', () => {
     ).rejects.toThrow('upload.invalid_file_type');
     expect(uploadSpy).not.toHaveBeenCalled();
   });
+
+  it('only extracts keys from the configured R2 public origin and app paths', () => {
+    const extract = (url: string) => (service as any).extractKeyFromUrl(url);
+    expect(extract('https://evil-r2.example/posts/images/victim.png')).toBeNull();
+    expect(extract('https://cdn.hayahbook.com.evil.test/posts/images/victim.png')).toBeNull();
+    expect(extract('https://cdn.hayahbook.com/unrelated/victim.png')).toBeNull();
+    expect(extract('https://cdn.hayahbook.com/posts/images/victim.png')).toBe('posts/images/victim.png');
+  });
 });

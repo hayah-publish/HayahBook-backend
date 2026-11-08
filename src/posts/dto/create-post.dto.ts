@@ -23,8 +23,8 @@ export class PostLinkDto {
 
 export class CreatePostDto {
   @IsOptional()
-  @IsIn(['post', 'article'])
-  type?: 'post' | 'article' = 'post';
+  @IsIn(['post'])
+  type?: 'post' = 'post';
 
   @IsOptional()
   @Transform(({ value }) => (value === '' ? undefined : value))

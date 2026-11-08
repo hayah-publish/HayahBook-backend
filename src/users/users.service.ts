@@ -185,6 +185,9 @@ export class UsersService implements OnModuleInit {
       followersCount?: number;
       readingLanguage?: string;
       userType?: string;
+      showEmail?: boolean;
+      showPhone?: boolean;
+      showBirthday?: boolean;
     },
   ): Promise<User> {
     const updateData: Partial<User> = {};
@@ -204,6 +207,9 @@ export class UsersService implements OnModuleInit {
     if (data.followersCount !== undefined) updateData.followersCount = data.followersCount;
     if (data.readingLanguage !== undefined) updateData.readingLanguage = data.readingLanguage?.trim() || null;
     if (data.userType !== undefined) updateData.userType = data.userType?.trim() || 'Reader';
+    if (data.showEmail !== undefined) updateData.showEmail = data.showEmail;
+    if (data.showPhone !== undefined) updateData.showPhone = data.showPhone;
+    if (data.showBirthday !== undefined) updateData.showBirthday = data.showBirthday;
 
     if (Object.keys(updateData).length > 0) {
       await this.usersRepository.update(id, updateData);
@@ -217,6 +223,9 @@ export class UsersService implements OnModuleInit {
         if (updateData.countryCode !== undefined) authorUpdate.countryCode = updateData.countryCode;
         if (updateData.country !== undefined) authorUpdate.country = updateData.country;
         if (updateData.birthday !== undefined) authorUpdate.birthday = updateData.birthday;
+        if (updateData.showEmail !== undefined) authorUpdate.showEmail = updateData.showEmail;
+        if (updateData.showPhone !== undefined) authorUpdate.showPhone = updateData.showPhone;
+        if (updateData.showBirthday !== undefined) authorUpdate.showBirthday = updateData.showBirthday;
         if (updateData.aboutMe !== undefined) authorUpdate.aboutMe = updateData.aboutMe;
         if (updateData.profileUrl !== undefined) authorUpdate.profileUrl = updateData.profileUrl;
         if (updateData.userType !== undefined) authorUpdate.userType = updateData.userType;
@@ -235,6 +244,9 @@ export class UsersService implements OnModuleInit {
         if (updateData.countryCode !== undefined) creatorUpdate.countryCode = updateData.countryCode;
         if (updateData.country !== undefined) creatorUpdate.country = updateData.country;
         if (updateData.birthday !== undefined) creatorUpdate.birthday = updateData.birthday;
+        if (updateData.showEmail !== undefined) creatorUpdate.showEmail = updateData.showEmail;
+        if (updateData.showPhone !== undefined) creatorUpdate.showPhone = updateData.showPhone;
+        if (updateData.showBirthday !== undefined) creatorUpdate.showBirthday = updateData.showBirthday;
         if (updateData.aboutMe !== undefined) creatorUpdate.aboutMe = updateData.aboutMe;
         if (updateData.profileUrl !== undefined) creatorUpdate.profileUrl = updateData.profileUrl;
         if (updateData.userType !== undefined) creatorUpdate.userType = updateData.userType;

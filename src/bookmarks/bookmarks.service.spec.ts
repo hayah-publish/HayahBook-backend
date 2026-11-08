@@ -52,6 +52,12 @@ describe('BookmarksService', () => {
       increment: jest.fn().mockResolvedValue({ affected: 1 }),
       decrement: jest.fn().mockResolvedValue({ affected: 1 }),
     };
+    const transactionManager = {
+      getRepository: (entity: unknown) => entity === Post ? postsRepo : bookmarksRepo,
+    };
+    bookmarksRepo.manager = {
+      transaction: (callback: (manager: any) => unknown) => callback(transactionManager),
+    };
 
     usersRepo = {
       find: jest.fn().mockResolvedValue([]),
@@ -219,13 +225,8 @@ describe('BookmarksService', () => {
         innerJoin: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([
-          { post_type: 'post', post_video_url: null, post_category: null },
-          { post_type: 'article', post_video_url: null, post_category: 'تطوير الذات' },
-          { post_type: 'visual', post_video_url: 'https://cdn.example.com/v.mp4', post_category: null },
-          { post_type: 'post', post_video_url: 'https://cdn.example.com/v2.mp4', post_category: null },
-          { post_type: 'snippet', post_video_url: null, post_category: 'مقتطفات' },
-        ]),
+        addSelect: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ all: '5', posts: '1', articles: '1', visuals: '2', snippets: '1' }),
       };
       bookmarksRepo.createQueryBuilder.mockReturnValue(qb);
 
@@ -256,9 +257,8 @@ describe('BookmarksService', () => {
         innerJoin: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([
-          { post_type: 'post', post_video_url: null, post_category: null },
-        ]),
+        addSelect: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ all: '1', posts: '1', articles: '0', visuals: '0', snippets: '0' }),
       };
 
       bookmarksRepo.createQueryBuilder

@@ -215,15 +215,17 @@ describe('ArticlesController', () => {
   });
 
   it('GET /v1/articles filters posts by type=article', async () => {
-    const res = await controller.getArticles({ page: 1, limit: 10 });
-    expect(postsService.findAll).toHaveBeenCalledWith({ page: 1, limit: 10, type: 'article' });
+    const req: any = { user: { userId: 'user-1' } };
+    const res = await controller.getArticles({ page: 1, limit: 10 } as any, req);
+    expect(postsService.findAll).toHaveBeenCalledWith({ page: 1, limit: 10, type: 'article' }, 'user-1');
     expect(res.data).toHaveLength(1);
     expect(res.data[0].type).toBe('article');
   });
 
   it('GET /v1/articles/:id returns single article', async () => {
-    const res = await controller.getArticleById('article-uuid-1');
-    expect(postsService.findOne).toHaveBeenCalledWith('article-uuid-1');
+    const req: any = { user: { userId: 'user-1' } };
+    const res = await controller.getArticleById('article-uuid-1', req);
+    expect(postsService.findOne).toHaveBeenCalledWith('article-uuid-1', 'user-1');
     expect(res.id).toBe('article-uuid-1');
   });
 

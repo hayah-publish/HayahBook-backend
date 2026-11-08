@@ -359,6 +359,12 @@ export class InterestsService implements OnModuleInit {
         this.i18n.t('categories.not_found') || 'الفئة المحددة غير موجودة',
       );
     }
+    const user = await this.userRepository.findOne({ where: { id: userId }, select: { id: true } });
+    if (!user) throw new NotFoundException(this.i18n.t('auth.user_not_found'));
+    await this.userRepository.manager.query(
+      'INSERT INTO user_interests (user_id, interest_id) VALUES ($1, $2) ON CONFLICT (user_id, interest_id) DO NOTHING',
+      [userId, matched.id],
+    );
     const formatted = this.formatInterest(matched);
     return {
       success: true,

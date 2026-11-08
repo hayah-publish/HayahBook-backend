@@ -22,6 +22,8 @@ import { createStepValidationPipe } from './i18n/i18n-validation.pipe';
 import { AuthRateLimitMiddleware } from './auth/auth-rate-limit.middleware';
 import { AuthSecurityTables1762300000000 } from './database/migrations/1762300000000-auth-security-tables';
 import { CreateBookmarksTable1762400000000 } from './database/migrations/1762400000000-create-bookmarks-table';
+import { ProfilePrivacyMailReadingIntegrity1762500000000 } from './database/migrations/1762500000000-profile-privacy-mail-reading-integrity';
+import { CreatePostReactionsTable1762600000000 } from './database/migrations/1762600000000-create-post-reactions-table';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { CreateBookmarksTable1762400000000 } from './database/migrations/1762400
             migrations: [
               AuthSecurityTables1762300000000,
               CreateBookmarksTable1762400000000,
+              ProfilePrivacyMailReadingIntegrity1762500000000,
+              CreatePostReactionsTable1762600000000,
             ],
             migrationsRun: true,
           };
@@ -70,6 +74,8 @@ import { CreateBookmarksTable1762400000000 } from './database/migrations/1762400
           migrations: [
             AuthSecurityTables1762300000000,
             CreateBookmarksTable1762400000000,
+            ProfilePrivacyMailReadingIntegrity1762500000000,
+            CreatePostReactionsTable1762600000000,
           ],
           migrationsRun: true,
         };

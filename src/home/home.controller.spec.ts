@@ -2,13 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { HomeController } from './home.controller';
 import { PostsService } from '../posts/posts.service';
-import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 
 describe('HomeController', () => {
   let controller: HomeController;
   let postsService: Partial<Record<keyof PostsService, jest.Mock>>;
-  let authService: Partial<Record<keyof AuthService, jest.Mock>>;
   let i18nService: Partial<Record<keyof I18nService, jest.Mock>>;
 
   beforeEach(async () => {
@@ -36,13 +34,6 @@ describe('HomeController', () => {
       getFollowedUserIds: jest.fn().mockResolvedValue(['user-followed-1']),
     };
 
-    authService = {
-      resolveUserIdFromToken: jest.fn().mockImplementation(async (token) => {
-        if (token === 'valid-token') return 'user-viewer-1';
-        return undefined;
-      }),
-    };
-
     i18nService = {
       t: jest.fn().mockImplementation((k) => k),
     };
@@ -53,10 +44,6 @@ describe('HomeController', () => {
         {
           provide: PostsService,
           useValue: postsService,
-        },
-        {
-          provide: AuthService,
-          useValue: authService,
         },
         {
           provide: I18nService,
@@ -84,11 +71,10 @@ describe('HomeController', () => {
     });
 
     it('passes resolved userId when token is present with following=true', async () => {
-      const mockReq: any = { headers: { authorization: 'Bearer valid-token' } };
+      const mockReq: any = { user: { userId: 'user-viewer-1' } };
       const query = { type: 'posts', following: true };
       const res = await controller.getHomeFeed(mockReq, query);
 
-      expect(authService.resolveUserIdFromToken).toHaveBeenCalledWith('valid-token');
       expect(postsService.getHomeFeed).toHaveBeenCalledWith(query, 'user-viewer-1');
       expect(res.counts.posts).toBe(5);
     });
@@ -127,7 +113,7 @@ describe('HomeController', () => {
     });
 
     it('retrieves followedIds and passes to getFeedCounts when following=true', async () => {
-      const mockReq: any = { headers: { authorization: 'Bearer valid-token' } };
+      const mockReq: any = { user: { userId: 'user-viewer-1' } };
       const res = await controller.getFeedCounts(mockReq, { following: true });
 
       expect(postsService.getFollowedUserIds).toHaveBeenCalledWith('user-viewer-1');
