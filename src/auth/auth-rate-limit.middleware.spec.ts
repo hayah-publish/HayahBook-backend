@@ -1,0 +1,48 @@
+import { AuthRateLimitMiddleware } from './auth-rate-limit.middleware';
+
+describe('AuthRateLimitMiddleware', () => {
+  it('uses the application IP and email rather than an untrusted forwarded IP header', async () => {
+    const consume = jest.fn().mockResolvedValue(true);
+    const middleware = new AuthRateLimitMiddleware({ consume } as any);
+    const req = {
+      method: 'POST',
+      path: '/v1/auth/login',
+      ip: '192.0.2.10',
+      socket: { remoteAddress: '192.0.2.10' },
+      body: { email: ' Person@Example.com ' },
+      headers: { 'x-forwarded-for': '198.51.100.9' },
+      header: (name: string) => name === 'x-forwarded-for' ? '198.51.100.9' : undefined,
+    } as any;
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as any;
+    const next = jest.fn();
+
+    await middleware.use(req, res, next);
+
+    expect(consume).toHaveBeenCalledWith('login-ip', '192.0.2.10', 10, 900_000);
+    expect(consume).toHaveBeenCalledWith('login-identity', 'person@example.com', 10, 900_000);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies the five-per-target OTP request limit', async () => {
+    const consume = jest.fn()
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false);
+    const middleware = new AuthRateLimitMiddleware({ consume } as any);
+    const req = {
+      method: 'POST',
+      path: '/v1/auth/otp/signup',
+      ip: '192.0.2.10',
+      socket: { remoteAddress: '192.0.2.10' },
+      body: { email: 'person@example.com' },
+      header: () => undefined,
+    } as any;
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as any;
+    const next = jest.fn();
+
+    await middleware.use(req, res, next);
+
+    expect(consume).toHaveBeenCalledWith('otp-target', 'person@example.com', 5, 900_000);
+    expect(res.status).toHaveBeenCalledWith(429);
+    expect(next).not.toHaveBeenCalled();
+  });
+});

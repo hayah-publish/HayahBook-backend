@@ -1,4 +1,3 @@
-
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -13,8 +12,17 @@ export class EmailOtp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  email: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  email: string | null;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  phone: string | null;
+
+  @Column({ type: 'varchar', length: 50, default: 'general' })
+  purpose: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'email' })
+  channel: 'email' | 'phone';
 
   @Column({ type: 'varchar', length: 64 })
   codeHash: string;

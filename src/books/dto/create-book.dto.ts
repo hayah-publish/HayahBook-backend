@@ -1,4 +1,3 @@
-
 import {
   IsIn,
   IsNotEmpty,
@@ -24,20 +23,21 @@ export class CreateBookDto {
   author?: string;
 
   @IsOptional()
-@IsString()
-@MaxLength(100)
-category?: string;
+  @IsString()
+  @MaxLength(100)
+  category?: string;
 
+  @IsOptional()
   @IsIn(['ebook', 'audiobook'])
-  contentType: 'ebook' | 'audiobook';
+  contentType?: 'ebook' | 'audiobook';
 
-@IsOptional()
-@IsString()
-@IsUrl({ require_protocol: true })
-coverUrl?: string;
+  @IsOptional()
+  @IsString()
+  @IsUrl({ require_protocol: true })
+  coverUrl?: string;
 
-@IsOptional()
-@IsString()
-@IsUrl({ require_protocol: true })
-contentUrl?: string;
+  @IsOptional()
+  @IsString()
+  @IsUrl({ require_protocol: true })
+  contentUrl?: string;
 }

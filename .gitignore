@@ -2,6 +2,9 @@
 /dist
 /node_modules
 /build
+ngrok.exe
+*.old
+*.zip
 
 # TypeScript build cache
 *.tsbuildinfo

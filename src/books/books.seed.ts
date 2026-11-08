@@ -1,0 +1,262 @@
+export interface SeedBookItem {
+  title: string;
+  author: string;
+  category: string;
+  contentType: string;
+  description: string;
+  coverUrl: string;
+  rating: number;
+  views: number;
+  readsCount: number;
+}
+
+export interface SeedAudiobookItem {
+  title: string;
+  author: string;
+  narrator: string;
+  category: string;
+  description: string;
+  coverUrl: string;
+  audioUrl?: string;
+  duration: number; // in seconds
+  rating: number;
+  views: number;
+  listensCount: number;
+  companionBookTitle?: string | null;
+}
+
+export const SEED_BOOKS: SeedBookItem[] = [
+  {
+    title: 'نقاط ضعفك',
+    author: 'جيمس كلير',
+    category: 'تطوير الذات',
+    contentType: 'ebook',
+    description: 'دليل عملي لفهم نقاط الضعف الشخصية وتحويلها إلى ركائز للنجاح وتطوير العادات اليومية.',
+    coverUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&q=80',
+    rating: 4.5,
+    views: 452,
+    readsCount: 5000,
+  },
+  {
+    title: 'الجلاد تحت جلدي',
+    author: 'صلاح علي',
+    category: 'روايات',
+    contentType: 'ebook',
+    description: 'رواية درامية مثيرة تغوص في أعماق النفس البشرية وصراعات الهوية والعدالة.',
+    coverUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&q=80',
+    rating: 4.5,
+    views: 452,
+    readsCount: 5600,
+  },
+  {
+    title: 'العادات الذرية',
+    author: 'جيمس كلير',
+    category: 'تطوير الذات',
+    contentType: 'ebook',
+    description: 'التغيرات الصغيرة تحدث فارقاً كبيراً، نظام مثبت لبناء عادات جيدة والتخلص من السيئة.',
+    coverUrl: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500&q=80',
+    rating: 4.8,
+    views: 1240,
+    readsCount: 8900,
+  },
+  {
+    title: 'قواعد العشق الأربعون',
+    author: 'إليف شافاق',
+    category: 'روايات',
+    contentType: 'ebook',
+    description: 'رواية ملهمة عن جلال الدين الرومي وشمس التبريزي ورحلة البحث عن المحبة والسلام الروحي.',
+    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&q=80',
+    rating: 4.6,
+    views: 980,
+    readsCount: 7200,
+  },
+  {
+    title: 'ثلاثية غرناطة',
+    author: 'رضوى عاشور',
+    category: 'كتب الأدب',
+    contentType: 'ebook',
+    description: 'ملحمة أندلسية ترصد حياة عائلة في غرناطة بعد سقوط الحكم الإسلامي للأندلس.',
+    coverUrl: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&q=80',
+    rating: 4.9,
+    views: 1120,
+    readsCount: 6500,
+  },
+  {
+    title: 'مقدمة ابن خلدون',
+    author: 'ابن خلدون',
+    category: 'التاريخ',
+    contentType: 'ebook',
+    description: 'الموسوعة التأسيسية لعلم الاجتماع وفلسفة التاريخ والعمران البشري وقوانين تطور الدول.',
+    coverUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=500&q=80',
+    rating: 4.7,
+    views: 840,
+    readsCount: 4300,
+  },
+  {
+    title: 'أولاد حارتنا',
+    author: 'نجيب محفوظ',
+    category: 'روايات',
+    contentType: 'ebook',
+    description: 'إحدى أعظم روايات أديب نوبل نجيب محفوظ التي تقدم قراءة رمزية عميقة للوجود والعدل.',
+    coverUrl: 'https://images.unsplash.com/photo-1532012164546-f432f2e3777a?w=500&q=80',
+    rating: 4.6,
+    views: 1500,
+    readsCount: 9100,
+  },
+  {
+    title: 'في قلبي أنثى عبرية',
+    author: 'خولة حمدي',
+    category: 'روايات',
+    contentType: 'ebook',
+    description: 'قصة حب وتضحية مستوحاة من أحداث حقيقية تدور حول فتاة مسلمة نشأت في حي يهودي.',
+    coverUrl: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=500&q=80',
+    rating: 4.4,
+    views: 890,
+    readsCount: 5800,
+  },
+  {
+    title: 'فن اللامبالاة',
+    author: 'مارك مانسون',
+    category: 'أسلوب الحياة',
+    contentType: 'ebook',
+    description: 'دليل عيش حياة تخالف المألوف، يعلمك كيف تتوقف عن الاهتمام بالأشياء غير المهمة.',
+    coverUrl: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&q=80',
+    rating: 4.3,
+    views: 1300,
+    readsCount: 8100,
+  },
+  {
+    title: 'الرحيق المختوم',
+    author: 'صفي الرحمن المباركفوري',
+    category: 'الكتب الدينية',
+    contentType: 'ebook',
+    description: 'بحث رائع وموثق في السيرة النبوية المطهرة نال الجائزة الأولى لرابطة العالم الإسلامي.',
+    coverUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&q=80',
+    rating: 4.9,
+    views: 2100,
+    readsCount: 12000,
+  },
+  {
+    title: 'عقدك النفسية سجنك الأبدي',
+    author: 'يوسف الحسني',
+    category: 'علم النفس',
+    contentType: 'ebook',
+    description: 'كتاب في التحليل النفسي العملي يساعدك على تفكيك عقد الطفولة والتحرر من سجونك الداخلية.',
+    coverUrl: 'https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=500&q=80',
+    rating: 4.5,
+    views: 950,
+    readsCount: 6100,
+  },
+  {
+    title: 'لأنك الله',
+    author: 'علي بن جابر الفيفي',
+    category: 'الكتب الدينية',
+    contentType: 'ebook',
+    description: 'رحلة إلى التعمق في معاني بعض أسماء الله الحسنى وكيف نعيش بها في تفاصيل أيامنا.',
+    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&q=80',
+    rating: 4.8,
+    views: 1400,
+    readsCount: 8700,
+  },
+];
+
+export const SEED_AUDIOBOOKS: SeedAudiobookItem[] = [
+  {
+    title: 'نقاط ضعفك',
+    author: 'جيمس كلير',
+    narrator: 'أحمد خيري',
+    category: 'تطوير الذات',
+    description: 'النسخة الصوتية الرسمية لكتاب نقاط ضعفك بأداء صوتي مؤثر وعالي الجودة.',
+    coverUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&q=80',
+    audioUrl: 'https://cdn.hayahbook.com/audio/weakness_points_intro.mp3',
+    duration: 18000,
+    rating: 4.5,
+    views: 452,
+    listensCount: 5200,
+    companionBookTitle: 'نقاط ضعفك',
+  },
+  {
+    title: 'الجلاد تحت جلدي',
+    author: 'صلاح علي',
+    narrator: 'طارق عبد المنعم',
+    category: 'روايات',
+    description: 'رواية مسموعة تمثيلية مثيرة تغوص في أعماق النفس وصراعات الهوية.',
+    coverUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&q=80',
+    audioUrl: 'https://cdn.hayahbook.com/audio/executioner_under_skin.mp3',
+    duration: 25200,
+    rating: 4.5,
+    views: 452,
+    listensCount: 5600,
+    companionBookTitle: 'الجلاد تحت جلدي',
+  },
+  {
+    title: 'العادات الذرية',
+    author: 'جيمس كلير',
+    narrator: 'محمد حسام',
+    category: 'تطوير الذات',
+    description: 'استمع إلى أسرار التغييرات الصغيرة وكيف تبني عادات يومية إيجابية.',
+    coverUrl: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500&q=80',
+    audioUrl: 'https://cdn.hayahbook.com/audio/atomic_habits.mp3',
+    duration: 21600,
+    rating: 4.8,
+    views: 1240,
+    listensCount: 9400,
+    companionBookTitle: 'العادات الذرية',
+  },
+  {
+    title: 'فن اللامبالاة',
+    author: 'مارك مانسون',
+    narrator: 'كريم الشاذلي',
+    category: 'أسلوب الحياة',
+    description: 'كتاب صوتي يرشدك لكيفية التوقف عن القلق والتركيز على ما يهم حقاً.',
+    coverUrl: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&q=80',
+    audioUrl: 'https://cdn.hayahbook.com/audio/subtle_art.mp3',
+    duration: 19800,
+    rating: 4.3,
+    views: 1300,
+    listensCount: 8100,
+    companionBookTitle: 'فن اللامبالاة',
+  },
+  {
+    title: 'الرحيق المختوم',
+    author: 'صفي الرحمن المباركفوري',
+    narrator: 'عبد الرحمن السعيد',
+    category: 'الكتب الدينية',
+    description: 'تسجيل صوتي كامل ومتقن للسيرة النبوية العطرة برواية صوتية متميزة.',
+    coverUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&q=80',
+    audioUrl: 'https://cdn.hayahbook.com/audio/sealed_nectar.mp3',
+    duration: 43200,
+    rating: 4.9,
+    views: 2100,
+    listensCount: 12500,
+    companionBookTitle: 'الرحيق المختوم',
+  },
+  {
+    title: 'أسرار القراءة والتفكير - بودكاست فنجان',
+    author: 'سامي بطاح',
+    narrator: 'سامي بطاح',
+    category: 'تطوير الذات',
+    description: 'حلقات صوتية تأملية حول كيفية بناء عقلية قارئ وتحليل الأفكار في عصر السرعة.',
+    coverUrl: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=500&q=80',
+    audioUrl: 'https://cdn.hayahbook.com/audio/fnjan_reading_secrets.mp3',
+    duration: 7200,
+    rating: 4.7,
+    views: 880,
+    listensCount: 6700,
+    companionBookTitle: null,
+  },
+  {
+    title: 'عبقريات العقاد الصوتية',
+    author: 'عباس محمود العقاد',
+    narrator: 'محمود ياسين',
+    category: 'التاريخ',
+    description: 'دراسات صوتية بديعة في عبقرية الشخصيات الإسلامية التاريخية بصوت أسطوري.',
+    coverUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
+    audioUrl: 'https://cdn.hayahbook.com/audio/elakkad_geniuses.mp3',
+    duration: 32400,
+    rating: 4.8,
+    views: 910,
+    listensCount: 4300,
+    companionBookTitle: null,
+  },
+];

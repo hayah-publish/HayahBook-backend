@@ -10,6 +10,8 @@ COPY . .
 
 RUN npm run build
 
+USER node
+
 # Port 7860 is default for Hugging Face Spaces, or any PORT from environment
 ENV PORT=7860
 EXPOSE 7860

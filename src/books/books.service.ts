@@ -1,29 +1,344 @@
-
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindOptionsWhere } from 'typeorm';
 import { Book } from './book.entity';
+import { Audiobook } from './audiobook.entity';
+import { UserBook } from './user-book.entity';
+import { User } from '../users/user.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { CreateAudiobookDto } from './dto/create-audiobook.dto';
+import { UpdateAudiobookDto } from './dto/update-audiobook.dto';
+import { UpdateReadingStatusDto } from './dto/update-reading-status.dto';
+import { MyBooksQueryDto } from './dto/my-books-query.dto';
+import { I18nService } from '../i18n/i18n.service';
+import { SEED_BOOKS, SEED_AUDIOBOOKS } from './books.seed';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface FormattedUserBook {
+  id: string;
+  bookId: string | null;
+  audiobookId: string | null;
+  title: string;
+  author: string | null;
+  narrator?: string | null;
+  category: string | null;
+  type: 'ebook' | 'audiobook' | 'both';
+  contentType: 'ebook' | 'audiobook' | 'both';
+  hasEbook: boolean;
+  hasAudio: boolean;
+  availableFormats: ('ebook' | 'audiobook')[];
+  coverUrl: string | null;
+  audioUrl?: string | null;
+  duration?: number | null;
+  status: 'finished' | 'reading' | 'want_to_read';
+  progress: number;
+  rating: number;
+  readsCount: number;
+  listensCount: number;
+  views: number;
+  startedAt: Date | null;
+  finishedAt: Date | null;
+  createdAt: Date;
+}
 
 @Injectable()
-export class BooksService {
+export class BooksService implements OnModuleInit {
   constructor(
     @InjectRepository(Book)
     private readonly booksRepository: Repository<Book>,
+    @InjectRepository(Audiobook)
+    private readonly audiobooksRepository: Repository<Audiobook>,
+    @InjectRepository(UserBook)
+    private readonly userBooksRepository: Repository<UserBook>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    private readonly i18n: I18nService,
   ) {}
 
-  async findAll(
-    page = 1,
-    limit = 20,
-  ): Promise<{ data: Book[]; total: number }> {
+  async onModuleInit() {
+    await this.seedBooksAndAudiobooks();
+  }
+
+  private async seedBooksAndAudiobooks() {
+    // 1. Seed or update e-books in 'books' table
+    for (const item of SEED_BOOKS) {
+      const existing = await this.booksRepository.findOne({
+        where: { title: item.title },
+      });
+      if (!existing) {
+        const book = this.booksRepository.create(item);
+        await this.booksRepository.save(book);
+      } else {
+        existing.author = existing.author || item.author;
+        existing.category = existing.category || item.category;
+        existing.coverUrl = existing.coverUrl || item.coverUrl;
+        existing.rating = item.rating;
+        existing.views = item.views;
+        existing.readsCount = item.readsCount;
+        existing.contentType = 'ebook';
+        await this.booksRepository.save(existing);
+      }
+    }
+
+    // 2. Seed or update audiobooks in 'audiobooks' table
+    const allBooks = await this.booksRepository.find();
+    const booksByTitle = new Map(allBooks.map((b) => [b.title, b]));
+
+    for (const item of SEED_AUDIOBOOKS) {
+      const companionBook = item.companionBookTitle
+        ? booksByTitle.get(item.companionBookTitle)
+        : null;
+
+      const existing = await this.audiobooksRepository.findOne({
+        where: { title: item.title },
+      });
+
+      if (!existing) {
+        const audiobook = this.audiobooksRepository.create({
+          title: item.title,
+          author: item.author,
+          narrator: item.narrator,
+          category: item.category,
+          description: item.description,
+          coverUrl: item.coverUrl,
+          audioUrl: item.audioUrl || null,
+          duration: item.duration,
+          rating: item.rating,
+          views: item.views,
+          listensCount: item.listensCount,
+          bookId: companionBook?.id || null,
+        });
+        await this.audiobooksRepository.save(audiobook);
+      } else {
+        existing.author = item.author;
+        existing.narrator = item.narrator;
+        existing.category = item.category;
+        existing.description = item.description;
+        existing.coverUrl = item.coverUrl;
+        existing.audioUrl = item.audioUrl || existing.audioUrl;
+        existing.duration = item.duration;
+        existing.rating = item.rating;
+        existing.views = item.views;
+        existing.listensCount = item.listensCount;
+        existing.bookId = companionBook?.id || existing.bookId;
+        await this.audiobooksRepository.save(existing);
+      }
+    }
+
+    // 3. Seed reading & listening list for existing users if needed
+    const allUsers = await this.usersRepository.find({
+      select: { id: true, email: true, name: true },
+    });
+    if (allUsers.length === 0) return;
+
+    const allAudiobooks = await this.audiobooksRepository.find();
+    const audiobooksByTitle = new Map(allAudiobooks.map((ab) => [ab.title, ab]));
+
+    const userBooksCount = await this.userBooksRepository.count();
+
+    if (userBooksCount === 0) {
+      const now = new Date();
+      const pastDate1 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const pastDate2 = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+
+      // Book candidates
+      const weakPointsBook = booksByTitle.get('نقاط ضعفك');
+      const weakPointsAudio = audiobooksByTitle.get('نقاط ضعفك');
+
+      const executionerBook = booksByTitle.get('الجلاد تحت جلدي');
+      const executionerAudio = audiobooksByTitle.get('الجلاد تحت جلدي');
+
+      const atomicHabitsBook = booksByTitle.get('العادات الذرية');
+      const atomicHabitsAudio = audiobooksByTitle.get('العادات الذرية');
+
+      const loveRulesBook = booksByTitle.get('قواعد العشق الأربعون');
+
+      const subtleArtBook = booksByTitle.get('فن اللامبالاة');
+      const subtleArtAudio = audiobooksByTitle.get('فن اللامبالاة');
+
+      const granadaBook = booksByTitle.get('ثلاثية غرناطة');
+
+      const fnjanAudio = audiobooksByTitle.get('أسرار القراءة والتفكير - بودكاست فنجان');
+
+      const sealedNectarBook = booksByTitle.get('الرحيق المختوم');
+      const sealedNectarAudio = audiobooksByTitle.get('الرحيق المختوم');
+
+      const elakkadAudio = audiobooksByTitle.get('عبقريات العقاد الصوتية');
+
+      for (const user of allUsers) {
+        // Finished 1: نقاط ضعفك (both)
+        if (weakPointsBook) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: weakPointsBook.id,
+              audiobookId: weakPointsAudio?.id || null,
+              status: 'finished',
+              progress: 100,
+              rating: 4.5,
+              startedAt: pastDate2,
+              finishedAt: pastDate1,
+            }),
+          );
+        }
+
+        // Finished 2: الجلاد تحت جلدي (both)
+        if (executionerBook) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: executionerBook.id,
+              audiobookId: executionerAudio?.id || null,
+              status: 'finished',
+              progress: 100,
+              rating: 4.5,
+              startedAt: pastDate2,
+              finishedAt: pastDate1,
+            }),
+          );
+        }
+
+        // Finished 3: العادات الذرية (both)
+        if (atomicHabitsBook) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: atomicHabitsBook.id,
+              audiobookId: atomicHabitsAudio?.id || null,
+              status: 'finished',
+              progress: 100,
+              rating: 4.8,
+              startedAt: pastDate1,
+              finishedAt: now,
+            }),
+          );
+        }
+
+        // Finished 4: قواعد العشق الأربعون (ebook only)
+        if (loveRulesBook) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: loveRulesBook.id,
+              audiobookId: null,
+              status: 'finished',
+              progress: 100,
+              rating: 4.6,
+              startedAt: pastDate1,
+              finishedAt: now,
+            }),
+          );
+        }
+
+        // Reading 1: فن اللامبالاة (both)
+        if (subtleArtBook) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: subtleArtBook.id,
+              audiobookId: subtleArtAudio?.id || null,
+              status: 'reading',
+              progress: 65,
+              rating: null,
+              startedAt: now,
+              finishedAt: null,
+            }),
+          );
+        }
+
+        // Reading 2: ثلاثية غرناطة (ebook only)
+        if (granadaBook) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: granadaBook.id,
+              audiobookId: null,
+              status: 'reading',
+              progress: 40,
+              rating: null,
+              startedAt: now,
+              finishedAt: null,
+            }),
+          );
+        }
+
+        // Reading 3: أسرار القراءة والتفكير - بودكاست فنجان (audiobook only)
+        if (fnjanAudio) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: null,
+              audiobookId: fnjanAudio.id,
+              status: 'reading',
+              progress: 80,
+              rating: null,
+              startedAt: now,
+              finishedAt: null,
+            }),
+          );
+        }
+
+        // Want to read 1: الرحيق المختوم (both)
+        if (sealedNectarBook) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: sealedNectarBook.id,
+              audiobookId: sealedNectarAudio?.id || null,
+              status: 'want_to_read',
+              progress: 0,
+              rating: null,
+              startedAt: null,
+              finishedAt: null,
+            }),
+          );
+        }
+
+        // Want to read 2: عبقريات العقاد الصوتية (audiobook only)
+        if (elakkadAudio) {
+          await this.userBooksRepository.save(
+            this.userBooksRepository.create({
+              userId: user.id,
+              bookId: null,
+              audiobookId: elakkadAudio.id,
+              status: 'want_to_read',
+              progress: 0,
+              rating: null,
+              startedAt: null,
+              finishedAt: null,
+            }),
+          );
+        }
+      }
+    }
+  }
+
+  // E-Books CRUD
+  async findAll(page = 1, limit = 20): Promise<PaginatedResult<Book>> {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
     const [data, total] = await this.booksRepository.findAndCount({
+      relations: { audiobooks: true },
       order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
+      skip: (safePage - 1) * safeLimit,
+      take: safeLimit,
     });
 
-    return { data, total };
+    return {
+      data,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.ceil(total / safeLimit) || 1,
+    };
   }
 
   async create(createBookDto: CreateBookDto): Promise<Book> {
@@ -31,10 +346,7 @@ export class BooksService {
     return this.booksRepository.save(book);
   }
 
-  async update(
-    id: string,
-    updateBookDto: UpdateBookDto,
-  ): Promise<Book> {
+  async update(id: string, updateBookDto: UpdateBookDto): Promise<Book> {
     const existingBook = await this.findOne(id);
     const updatedBook = this.booksRepository.merge(existingBook, updateBookDto);
     return this.booksRepository.save(updatedBook);
@@ -42,19 +354,19 @@ export class BooksService {
 
   async remove(id: string): Promise<void> {
     const result = await this.booksRepository.delete(id);
-
     if (result.affected === 0) {
-      throw new NotFoundException('الكتاب غير موجود');
+      throw new NotFoundException(this.i18n.t('books.not_found'));
     }
   }
 
   async findOne(id: string): Promise<Book> {
     const book = await this.booksRepository.findOne({
       where: { id },
+      relations: { audiobooks: true },
     });
 
     if (!book) {
-      throw new NotFoundException('الكتاب غير موجود');
+      throw new NotFoundException(this.i18n.t('books.not_found'));
     }
 
     return book;
@@ -64,9 +376,12 @@ export class BooksService {
     query: string,
     page = 1,
     limit = 20,
-  ): Promise<{ data: Book[]; total: number }> {
+  ): Promise<PaginatedResult<Book>> {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
     const [data, total] = await this.booksRepository
       .createQueryBuilder('book')
+      .leftJoinAndSelect('book.audiobooks', 'audiobooks')
       .where(
         `(
           book.title ILIKE :query
@@ -76,26 +391,40 @@ export class BooksService {
         { query: `%${query}%` },
       )
       .orderBy('book.createdAt', 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit)
+      .skip((safePage - 1) * safeLimit)
+      .take(safeLimit)
       .getManyAndCount();
 
-    return { data, total };
+    return {
+      data,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.ceil(total / safeLimit) || 1,
+    };
   }
 
   async findByType(
-    type: 'ebook' | 'audiobook',
+    type: string,
     page = 1,
     limit = 20,
-  ): Promise<{ data: Book[]; total: number }> {
+  ): Promise<PaginatedResult<Book>> {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
     const [data, total] = await this.booksRepository.findAndCount({
       where: { contentType: type },
       order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
+      skip: (safePage - 1) * safeLimit,
+      take: safeLimit,
     });
 
-    return { data, total };
+    return {
+      data,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.ceil(total / safeLimit) || 1,
+    };
   }
 
   async filterBooks(
@@ -104,8 +433,12 @@ export class BooksService {
     query?: string,
     type?: 'ebook' | 'audiobook',
     category?: string,
-  ): Promise<{ data: Book[]; total: number }> {
-    const qb = this.booksRepository.createQueryBuilder('book');
+  ): Promise<PaginatedResult<Book>> {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    const qb = this.booksRepository
+      .createQueryBuilder('book')
+      .leftJoinAndSelect('book.audiobooks', 'audiobooks');
 
     if (query?.trim()) {
       qb.andWhere(
@@ -124,32 +457,502 @@ export class BooksService {
       });
     }
 
-    const [data, total] = await qb
-      .orderBy('book.createdAt', 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
+    qb.orderBy('book.createdAt', 'DESC')
+      .skip((safePage - 1) * safeLimit)
+      .take(safeLimit);
 
-    return { data, total };
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.ceil(total / safeLimit) || 1,
+    };
   }
 
-async getCategoryCounts(): Promise<
-  { category: string; count: number }[]
-> {
-  const results = await this.booksRepository
-    .createQueryBuilder('book')
-    .select('book.category', 'category')
-    .addSelect('COUNT(*)', 'count')
-    .where('book.category IS NOT NULL')
-    .andWhere("TRIM(book.category) <> ''")
-    .groupBy('book.category')
-    .orderBy('count', 'DESC')
-    .getRawMany();
+  async getCategoryCounts(): Promise<{ category: string; count: number }[]> {
+    const results = await this.booksRepository
+      .createQueryBuilder('book')
+      .select('book.category', 'category')
+      .addSelect('COUNT(*)', 'count')
+      .where('book.category IS NOT NULL')
+      .andWhere("TRIM(book.category) <> ''")
+      .groupBy('book.category')
+      .orderBy('count', 'DESC')
+      .getRawMany();
 
-  return results.map((item) => ({
-    category: item.category,
-    count: Number(item.count),
-  }));
-}
+    return results.map((item) => ({
+      category: item.category,
+      count: Number(item.count),
+    }));
+  }
 
+  // Audiobooks CRUD
+  async findAllAudiobooks(
+    page = 1,
+    limit = 20,
+    category?: string,
+    query?: string,
+  ): Promise<PaginatedResult<Audiobook>> {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    const qb = this.audiobooksRepository
+      .createQueryBuilder('audiobook')
+      .leftJoinAndSelect('audiobook.book', 'book');
+
+    if (query?.trim()) {
+      qb.andWhere(
+        '(audiobook.title ILIKE :query OR audiobook.author ILIKE :query OR audiobook.narrator ILIKE :query OR audiobook.category ILIKE :query)',
+        { query: `%${query.trim()}%` },
+      );
+    }
+
+    if (category?.trim()) {
+      qb.andWhere('audiobook.category ILIKE :category', {
+        category: `%${category.trim()}%`,
+      });
+    }
+
+    qb.orderBy('audiobook.createdAt', 'DESC')
+      .skip((safePage - 1) * safeLimit)
+      .take(safeLimit);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.ceil(total / safeLimit) || 1,
+    };
+  }
+
+  async findLatestAudiobooks(
+    limit = 20,
+  ): Promise<PaginatedResult<Audiobook>> {
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    return this.findAllAudiobooks(1, safeLimit);
+  }
+
+  async searchAudiobooks(
+    query: string,
+    page = 1,
+    limit = 20,
+  ): Promise<PaginatedResult<Audiobook>> {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    const [data, total] = await this.audiobooksRepository
+      .createQueryBuilder('audiobook')
+      .leftJoinAndSelect('audiobook.book', 'book')
+      .where(
+        `(
+          audiobook.title ILIKE :query
+          OR audiobook.author ILIKE :query
+          OR audiobook.narrator ILIKE :query
+          OR audiobook.category ILIKE :query
+        )`,
+        { query: `%${query}%` },
+      )
+      .orderBy('audiobook.createdAt', 'DESC')
+      .skip((safePage - 1) * safeLimit)
+      .take(safeLimit)
+      .getManyAndCount();
+
+    return {
+      data,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.ceil(total / safeLimit) || 1,
+    };
+  }
+
+  async getAudiobookCategoryCounts(): Promise<{ category: string; count: number }[]> {
+    const results = await this.audiobooksRepository
+      .createQueryBuilder('audiobook')
+      .select('audiobook.category', 'category')
+      .addSelect('COUNT(*)', 'count')
+      .where('audiobook.category IS NOT NULL')
+      .andWhere("TRIM(audiobook.category) <> ''")
+      .groupBy('audiobook.category')
+      .orderBy('count', 'DESC')
+      .getRawMany();
+
+    return results.map((item) => ({
+      category: item.category,
+      count: Number(item.count),
+    }));
+  }
+
+  async findOneAudiobook(id: string): Promise<Audiobook> {
+    const audiobook = await this.audiobooksRepository.findOne({
+      where: { id },
+      relations: { book: true },
+    });
+    if (!audiobook) {
+      throw new NotFoundException(this.i18n.t('audiobooks.not_found'));
+    }
+    return audiobook;
+  }
+
+  async createAudiobook(dto: CreateAudiobookDto): Promise<Audiobook> {
+    const audiobook = this.audiobooksRepository.create(dto);
+    return this.audiobooksRepository.save(audiobook);
+  }
+
+  async updateAudiobook(
+    id: string,
+    dto: UpdateAudiobookDto,
+  ): Promise<Audiobook> {
+    const existing = await this.findOneAudiobook(id);
+    const updated = this.audiobooksRepository.merge(existing, dto);
+    return this.audiobooksRepository.save(updated);
+  }
+
+  async removeAudiobook(id: string): Promise<void> {
+    const result = await this.audiobooksRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(this.i18n.t('audiobooks.not_found'));
+    }
+  }
+
+  // Combined Reading & Listening Tracker (My Books)
+  async getMyBooks(
+    userId: string,
+    query: MyBooksQueryDto,
+  ): Promise<{
+    data: FormattedUserBook[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Math.min(100, Number(query.limit) || 20));
+
+    const qb = this.userBooksRepository
+      .createQueryBuilder('ub')
+      .leftJoinAndSelect('ub.book', 'book')
+      .leftJoinAndSelect('ub.audiobook', 'audiobook')
+      .where('ub.user_id = :userId', { userId });
+
+    if (query.status && query.status !== 'all') {
+      qb.andWhere('ub.status = :status', { status: query.status });
+    }
+
+    if (query.search?.trim()) {
+      qb.andWhere(
+        `(
+          book.title ILIKE :search OR book.author ILIKE :search OR book.category ILIKE :search
+          OR audiobook.title ILIKE :search OR audiobook.author ILIKE :search OR audiobook.narrator ILIKE :search
+        )`,
+        { search: `%${query.search.trim()}%` },
+      );
+    }
+
+    qb.orderBy('ub.finishedAt', 'DESC', 'NULLS LAST')
+      .addOrderBy('ub.updatedAt', 'DESC');
+
+    const allItems = await qb.getMany();
+
+    const formattedData: FormattedUserBook[] = allItems.map((ub) => {
+      const b = ub.book;
+      const ab = ub.audiobook;
+
+      const hasEbook = !!b;
+      const hasAudio = !!ab;
+      const type: 'ebook' | 'audiobook' | 'both' =
+        hasEbook && hasAudio ? 'both' : hasAudio ? 'audiobook' : 'ebook';
+
+      const availableFormats: ('ebook' | 'audiobook')[] = [];
+      if (hasEbook) availableFormats.push('ebook');
+      if (hasAudio) availableFormats.push('audiobook');
+
+      const title = b?.title || ab?.title || '';
+      const author = b?.author || ab?.author || null;
+      const category = b?.category || ab?.category || null;
+      const coverUrl = b?.coverUrl || ab?.coverUrl || null;
+      const rating = ub.rating
+        ? Number(ub.rating)
+        : Number(b?.rating || ab?.rating || 4.5);
+      const views = (b?.views || 0) + (ab?.views || 0);
+      const readsCount = b?.readsCount || 0;
+      const listensCount = ab?.listensCount || 0;
+      const narrator = ab?.narrator || null;
+      const duration = ab?.duration || null;
+      const audioUrl = ab?.audioUrl || null;
+
+      return {
+        id: ub.id,
+        bookId: ub.bookId || b?.id || null,
+        audiobookId: ub.audiobookId || ab?.id || null,
+        title,
+        author,
+        narrator,
+        category,
+        type,
+        contentType: type,
+        hasEbook,
+        hasAudio,
+        availableFormats,
+        coverUrl,
+        audioUrl,
+        duration,
+        status: ub.status,
+        progress: ub.progress,
+        rating,
+        readsCount,
+        listensCount,
+        views,
+        startedAt: ub.startedAt,
+        finishedAt: ub.finishedAt,
+        createdAt: ub.createdAt,
+      };
+    });
+
+    let filtered = formattedData;
+    if (query.type && query.type !== 'all') {
+      if (query.type === 'both') {
+        filtered = filtered.filter((item) => item.type === 'both');
+      } else if (query.type === 'ebook') {
+        filtered = filtered.filter((item) => item.hasEbook);
+      } else if (query.type === 'audiobook') {
+        filtered = filtered.filter((item) => item.hasAudio);
+      }
+    }
+
+    const total = filtered.length;
+    const paginated = filtered.slice((page - 1) * limit, page * limit);
+
+    return {
+      data: paginated,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    };
+  }
+
+  async updateReadingStatus(
+    userId: string,
+    id: string,
+    dto: UpdateReadingStatusDto,
+  ): Promise<{
+    message: string;
+    data: FormattedUserBook;
+  }> {
+    let book = await this.booksRepository.findOne({ where: { id } });
+    let audiobook = await this.audiobooksRepository.findOne({ where: { id } });
+    let userBookDirect: UserBook | null = null;
+
+    if (!book && !audiobook) {
+      userBookDirect = await this.userBooksRepository.findOne({
+        where: { id, userId },
+        relations: { book: true, audiobook: true },
+      });
+      if (userBookDirect) {
+        book =
+          userBookDirect.book ||
+          (userBookDirect.bookId
+            ? await this.booksRepository.findOne({
+                where: { id: userBookDirect.bookId },
+              })
+            : null);
+        audiobook =
+          userBookDirect.audiobook ||
+          (userBookDirect.audiobookId
+            ? await this.audiobooksRepository.findOne({
+                where: { id: userBookDirect.audiobookId },
+              })
+            : null);
+      }
+    }
+
+    if (!book && !audiobook && !userBookDirect) {
+      throw new NotFoundException(this.i18n.t('books.not_found'));
+    }
+
+    // Link complementary format if available
+    if (book && !audiobook) {
+      const conditions: FindOptionsWhere<Audiobook>[] = [{ bookId: book.id }];
+      if (book.author) {
+        conditions.push({ title: book.title, author: book.author });
+      } else {
+        conditions.push({ title: book.title });
+      }
+      audiobook = await this.audiobooksRepository.findOne({
+        where: conditions,
+      });
+    } else if (audiobook && !book) {
+      if (audiobook.bookId) {
+        book = await this.booksRepository.findOne({
+          where: { id: audiobook.bookId },
+        });
+      }
+      if (!book) {
+        const conditions: FindOptionsWhere<Book>[] = [];
+        if (audiobook.author) {
+          conditions.push({ title: audiobook.title, author: audiobook.author });
+        } else {
+          conditions.push({ title: audiobook.title });
+        }
+        book = await this.booksRepository.findOne({
+          where: conditions,
+        });
+      }
+    }
+
+    const bookId = book?.id || null;
+    const audiobookId = audiobook?.id || null;
+
+    let userBook: UserBook | null = userBookDirect;
+    if (!userBook) {
+      if (bookId && audiobookId) {
+        userBook = await this.userBooksRepository.findOne({
+          where: [
+            { userId, bookId },
+            { userId, audiobookId },
+          ],
+          relations: { book: true, audiobook: true },
+        });
+      } else if (bookId) {
+        userBook = await this.userBooksRepository.findOne({
+          where: { userId, bookId },
+          relations: { book: true, audiobook: true },
+        });
+      } else if (audiobookId) {
+        userBook = await this.userBooksRepository.findOne({
+          where: { userId, audiobookId },
+          relations: { book: true, audiobook: true },
+        });
+      }
+    }
+
+    const now = new Date();
+
+    if (!userBook) {
+      userBook = this.userBooksRepository.create({
+        userId,
+        bookId,
+        audiobookId,
+        book: book || undefined,
+        audiobook: audiobook || undefined,
+      });
+    } else {
+      if (bookId && !userBook.bookId) userBook.bookId = bookId;
+      if (audiobookId && !userBook.audiobookId) {
+        userBook.audiobookId = audiobookId;
+      }
+      if (book) userBook.book = book;
+      if (audiobook) userBook.audiobook = audiobook;
+    }
+
+    userBook.status = dto.status;
+    if (dto.progress !== undefined) {
+      userBook.progress = dto.progress;
+    }
+    if (dto.rating !== undefined) {
+      userBook.rating = dto.rating;
+    }
+    if (dto.notes !== undefined) {
+      userBook.notes = dto.notes;
+    }
+
+    if (dto.status === 'finished') {
+      if (dto.progress === undefined) {
+        userBook.progress = 100;
+      }
+      if (!userBook.finishedAt) {
+        userBook.finishedAt = now;
+      }
+      if (book) {
+        book.readsCount = (book.readsCount || 0) + 1;
+        await this.booksRepository.save(book);
+      }
+      if (audiobook) {
+        audiobook.listensCount = (audiobook.listensCount || 0) + 1;
+        await this.audiobooksRepository.save(audiobook);
+      }
+    } else if (dto.status === 'reading') {
+      if (!userBook.startedAt) {
+        userBook.startedAt = now;
+      }
+      userBook.finishedAt = null;
+    } else if (dto.status === 'want_to_read') {
+      userBook.progress = 0;
+      userBook.finishedAt = null;
+    }
+
+    const saved = await this.userBooksRepository.save(userBook);
+    saved.book = book;
+    saved.audiobook = audiobook;
+
+    const hasEbook = !!book;
+    const hasAudio = !!audiobook;
+    const type: 'ebook' | 'audiobook' | 'both' =
+      hasEbook && hasAudio ? 'both' : hasAudio ? 'audiobook' : 'ebook';
+
+    return {
+      message: this.i18n.t('books.status_updated'),
+      data: {
+        id: saved.id,
+        bookId: saved.bookId,
+        audiobookId: saved.audiobookId,
+        title: book?.title || audiobook?.title || '',
+        author: book?.author || audiobook?.author || null,
+        narrator: audiobook?.narrator || null,
+        category: book?.category || audiobook?.category || null,
+        type,
+        contentType: type,
+        hasEbook,
+        hasAudio,
+        availableFormats:
+          hasEbook && hasAudio
+            ? ['ebook', 'audiobook']
+            : hasAudio
+              ? ['audiobook']
+              : ['ebook'],
+        coverUrl: book?.coverUrl || audiobook?.coverUrl || null,
+        audioUrl: audiobook?.audioUrl || null,
+        duration: audiobook?.duration || null,
+        status: saved.status,
+        progress: saved.progress,
+        rating: saved.rating
+          ? Number(saved.rating)
+          : Number(book?.rating || audiobook?.rating || 4.5),
+        readsCount: book?.readsCount || 0,
+        listensCount: audiobook?.listensCount || 0,
+        views: (book?.views || 0) + (audiobook?.views || 0),
+        startedAt: saved.startedAt,
+        finishedAt: saved.finishedAt,
+        createdAt: saved.createdAt,
+      },
+    };
+  }
+
+  async removeReadingStatus(
+    userId: string,
+    id: string,
+  ): Promise<{ message: string }> {
+    const existing = await this.userBooksRepository.findOne({
+      where: [
+        { id, userId },
+        { userId, bookId: id },
+        { userId, audiobookId: id },
+      ],
+    });
+
+    if (!existing) {
+      throw new NotFoundException(this.i18n.t('books.not_found'));
+    }
+
+    await this.userBooksRepository.delete(existing.id);
+
+    return {
+      message: this.i18n.t('books.status_removed'),
+    };
+  }
 }

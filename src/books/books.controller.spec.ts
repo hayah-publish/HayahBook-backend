@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BooksController } from './books.controller';
 import { BooksService } from './books.service';
+import { I18nService } from '../i18n/i18n.service';
 
 describe('BooksController', () => {
   let controller: BooksController;
@@ -21,6 +22,7 @@ describe('BooksController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BooksController],
       providers: [
+        I18nService,
         {
           provide: BooksService,
           useValue: mockBooksService,

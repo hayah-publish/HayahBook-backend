@@ -1,4 +1,3 @@
-
 import { AuthController } from './auth.controller';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -9,11 +8,18 @@ import { EmailOtp } from './otp.entity';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import { CountriesModule } from '../countries/countries.module';
+import { UploadModule } from '../upload/upload.module';
+import { AuthSession } from './auth-session.entity';
+import { AuthRateLimit } from './auth-rate-limit.entity';
+import { AuthRateLimitService } from './auth-rate-limit.service';
 
 @Module({
   imports: [
     UsersModule,
-    TypeOrmModule.forFeature([EmailOtp]),
+    CountriesModule,
+    UploadModule,
+    TypeOrmModule.forFeature([EmailOtp, AuthSession, AuthRateLimit]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -26,7 +32,7 @@ import { JwtStrategy } from './jwt.strategy';
         return {
           secret,
           signOptions: {
-            expiresIn: '15m',
+            expiresIn: (configService.get<string>('JWT_EXPIRES_IN') ?? '30d') as any,
           },
         };
       },
@@ -34,7 +40,7 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy, AuthRateLimitService],
+  exports: [AuthService, AuthRateLimitService],
 })
 export class AuthModule {}
