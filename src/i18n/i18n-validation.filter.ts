@@ -44,16 +44,22 @@ export class I18nValidationExceptionFilter implements ExceptionFilter {
       message = exceptionResponse;
     }
 
-    if (lang === 'ar') {
-      if (Array.isArray(message)) {
-        message = message.map((msg) =>
-          typeof msg === 'string'
-            ? this.i18nService.translateValidationMessage(msg, 'ar')
-            : msg,
-        );
-      } else if (typeof message === 'string') {
-        message = this.i18nService.translateValidationMessage(message, 'ar');
+    const translateMsg = (msg: string): string => {
+      // 1. If it matches an i18n key in our messages, translate it for the target language
+      const translated = this.i18nService.t(msg, lang);
+      if (translated !== msg) {
+        return translated;
       }
+      // 2. Otherwise run through regex/pattern translator (class-validator default strings)
+      return this.i18nService.translateValidationMessage(msg, lang);
+    };
+
+    if (Array.isArray(message)) {
+      message = message.map((msg) =>
+        typeof msg === 'string' ? translateMsg(msg) : msg,
+      );
+    } else if (typeof message === 'string') {
+      message = translateMsg(message);
     }
 
     return response.status(status).json({

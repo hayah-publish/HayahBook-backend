@@ -2100,6 +2100,22 @@ describe('AppController (e2e)', () => {
       expect(res.body.message).toContain('نص المقال مطلوب');
     });
 
+    it('POST /v1/articles fails with 400 and translates in English when content is missing and Accept-Language is en', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/v1/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Accept-Language', 'en')
+        .send({
+          agreeToTerms: true,
+          title: 'Article Title',
+          category: 'Self development',
+          coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
+        })
+        .expect(400);
+
+      expect(res.body.message).toContain('Article content is required');
+    });
+
     it('GET /v1/articles returns feed of articles', async () => {
       const res = await request(app.getHttpServer())
         .get('/v1/articles')

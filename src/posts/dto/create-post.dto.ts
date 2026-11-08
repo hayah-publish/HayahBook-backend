@@ -26,7 +26,7 @@ export class CreatePostDto {
   @IsIn(['post', 'article'])
   type?: 'post' | 'article' = 'post';
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'posts.content_required' })
   @IsString()
   content: string;
 

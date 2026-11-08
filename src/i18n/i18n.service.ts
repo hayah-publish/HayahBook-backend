@@ -179,9 +179,14 @@ export class I18nService {
   }
 
   translateValidationMessage(message: string, lang: SupportedLanguage): string {
+    const trimmed = message.trim();
+
+    if (this.messages[lang]?.[trimmed] || this.messages[DEFAULT_LANGUAGE]?.[trimmed]) {
+      return this.t(trimmed, lang);
+    }
+
     if (lang !== 'ar') return message;
 
-    const trimmed = message.trim();
     if (VALIDATION_MESSAGES_AR[trimmed]) {
       return VALIDATION_MESSAGES_AR[trimmed];
     }
