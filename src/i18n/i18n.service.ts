@@ -209,6 +209,18 @@ export class I18nService {
       return `${prop} يجب ألا يقل عن ${longerMatch[2]} حرفاً`;
     }
 
+    const maxWordsMatch = trimmed.match(/^(.+?)\s+must not exceed\s+(\d+)\s+words$/i);
+    if (maxWordsMatch) {
+      const prop = PROPERTY_NAMES_AR[maxWordsMatch[1]] ?? maxWordsMatch[1];
+      return `${prop} يجب ألا يتجاوز ${maxWordsMatch[2]} كلمة`;
+    }
+
+    const minWordsMatch = trimmed.match(/^(.+?)\s+must be at least\s+(\d+)\s+words$/i);
+    if (minWordsMatch) {
+      const prop = PROPERTY_NAMES_AR[minWordsMatch[1]] ?? minWordsMatch[1];
+      return `${prop} يجب ألا يقل عن ${minWordsMatch[2]} كلمة`;
+    }
+
     const stringMatch = trimmed.match(/^(.+?)\s+must be a string$/i);
     if (stringMatch) {
       const prop = PROPERTY_NAMES_AR[stringMatch[1]] ?? stringMatch[1];

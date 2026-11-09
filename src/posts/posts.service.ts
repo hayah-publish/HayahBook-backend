@@ -23,6 +23,7 @@ import { SupportedLanguage } from '../i18n/i18n.types';
 import { UploadService } from '../upload/upload.service';
 import { UploadFile } from '../upload/upload-file.interface';
 import { InterestsService } from '../interests/interests.service';
+import { countWords } from './validators/word-count.validator';
 
 export interface FormattedPostPublisher {
   id: string;
@@ -677,6 +678,15 @@ export class PostsService {
       );
     }
 
+    if (hasText) {
+      const wordCount = countWords(trimmedContent);
+      if (wordCount > 500) {
+        throw new BadRequestException(
+          this.i18n.t('posts.max_words_exceeded'),
+        );
+      }
+    }
+
     let linkUrl = dto.link?.url || dto.linkUrl || null;
     let linkTitle = dto.link?.title || dto.linkTitle || null;
 
@@ -809,6 +819,14 @@ export class PostsService {
     // 3. Content validation (إجباري)
     if (!dto.content || !dto.content.trim()) {
       throw new BadRequestException(this.i18n.t('articles.content_required'));
+    }
+
+    const wordCount = countWords(dto.content);
+    if (wordCount < 500) {
+      throw new BadRequestException(this.i18n.t('articles.min_words_required'));
+    }
+    if (wordCount > 5000) {
+      throw new BadRequestException(this.i18n.t('articles.max_words_exceeded'));
     }
 
     // 4. Category validation (إجباري)

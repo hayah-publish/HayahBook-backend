@@ -45,6 +45,8 @@ const CONSTRAINT_PRIORITY: string[] = [
   'isUuid',
   'matches',
   'isValidPhoneForCountry',
+  'minWords',
+  'maxWords',
   'maxLength',
   'min',
   'max',

@@ -148,6 +148,7 @@ export const ar = {
   'posts.unauthorized': 'غير مصرح لك بحذف هذا المنشور',
   'posts.content_required': 'محتوى المنشور مطلوب',
   'posts.content_or_media_required': 'محتوى المنشور مطلوب',
+  'posts.max_words_exceeded': 'يجب ألا يتجاوز محتوى المنشور 500 كلمة',
 
   // Articles
   'articles.created': 'تم نشر المقال بنجاح',
@@ -159,6 +160,8 @@ export const ar = {
   'articles.category_required': 'تصنيف المقال مطلوب، يرجى اختيار تصنيف من قائمة الفئات',
   'articles.category_invalid': 'التصنيف المحدد غير صالح. يرجى اختيار تصنيف من فئات المقالات المعتمدة',
   'articles.content_required': 'نص المقال مطلوب',
+  'articles.min_words_required': 'يجب ألا يقل محتوى المقال عن 500 كلمة',
+  'articles.max_words_exceeded': 'يجب ألا يتجاوز محتوى المقال 5000 كلمة',
   'articles.terms_required': 'يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook لنشر المقال',
 
   // Bookmarks / Saved (المحفوظات)

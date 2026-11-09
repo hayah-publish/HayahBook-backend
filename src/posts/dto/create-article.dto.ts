@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 import { Transform, Type, plainToInstance } from 'class-transformer';
 import { PostLinkDto } from './create-post.dto';
+import { MaxWords, MinWords } from '../validators/word-count.validator';
 
 export class CreateArticleDto {
   @IsNotEmpty({ message: 'articles.title_required' })
@@ -20,6 +21,8 @@ export class CreateArticleDto {
 
   @IsNotEmpty({ message: 'articles.content_required' })
   @IsString()
+  @MinWords(500, { message: 'articles.min_words_required' })
+  @MaxWords(5000, { message: 'articles.max_words_exceeded' })
   content: string;
 
   @IsOptional()

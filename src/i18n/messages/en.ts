@@ -148,6 +148,7 @@ export const en = {
   'posts.unauthorized': 'You are not authorized to delete this post',
   'posts.content_required': 'Post content is required',
   'posts.content_or_media_required': 'Post content is required',
+  'posts.max_words_exceeded': 'Post content must not exceed 500 words',
 
   // Articles
   'articles.created': 'Article published successfully',
@@ -159,6 +160,8 @@ export const en = {
   'articles.category_required': 'Article category is required, please select a valid category',
   'articles.category_invalid': 'Invalid category. Please select from the approved article categories',
   'articles.content_required': 'Article content is required',
+  'articles.min_words_required': 'Article content must be at least 500 words',
+  'articles.max_words_exceeded': 'Article content must not exceed 5000 words',
   'articles.terms_required': 'You must agree to the terms and privacy of Hayahbook community to publish the article',
 
   // Bookmarks / Saved
