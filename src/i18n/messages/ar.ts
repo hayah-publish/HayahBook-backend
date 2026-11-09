@@ -220,5 +220,10 @@ export const ar = {
   'reports.scam_or_fraud': 'احتيال أو خداع',
   'reports.false_information': 'معلومات كاذبة أو مضللة',
   'reports.something_else': 'سبب آخر',
+  'reports.details_too_long': 'يجب ألا تتجاوز تفاصيل البلاغ 160 حرفاً',
+  'reports.details_title': 'إضافة المزيد من التفاصيل',
+  'reports.details_subtitle': 'اختياري. يساعد السياق فريقنا على مراجعة هذا التعليق بشكل أسرع.',
+  'reports.details_placeholder': 'أخبرنا ما المشكلة في هذا التعليق...',
+  'reports.submit_button': 'إرسال',
 };
 

@@ -25,6 +25,9 @@ export class CommentReport {
   @Column({ type: 'text', nullable: true })
   reason: string | null;
 
+  @Column({ type: 'varchar', length: 160, nullable: true })
+  details: string | null;
+
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;

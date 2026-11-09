@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class ReportCommentDto {
   @IsOptional()
@@ -7,6 +7,12 @@ export class ReportCommentDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(160, { message: 'reports.details_too_long' })
+  details?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160, { message: 'reports.details_too_long' })
   notes?: string;
 }
 

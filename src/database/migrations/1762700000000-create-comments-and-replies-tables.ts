@@ -57,6 +57,7 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
         comment_id uuid NOT NULL,
         user_id uuid NOT NULL,
         reason text NULL,
+        details varchar(160) NULL,
         "createdAt" timestamptz NOT NULL DEFAULT now()
       )
     `);
@@ -78,6 +79,9 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
         END IF;
         IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'comment_reports' AND column_name = 'created_at') THEN
           ALTER TABLE comment_reports RENAME COLUMN created_at TO "createdAt";
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'comment_reports' AND column_name = 'details') THEN
+          ALTER TABLE comment_reports ADD COLUMN details varchar(160) NULL;
         END IF;
       END $$;
     `);

@@ -247,11 +247,12 @@ export class CommentsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ReportCommentDto,
   ) {
+    const details = dto.details !== undefined ? dto.details : dto.notes;
     return this.commentsService.reportComment(
       req.user!.userId,
       id,
       dto.reason,
-      ...(dto.notes !== undefined ? [dto.notes] : []),
+      ...(details !== undefined ? [details] : []),
     );
   }
 

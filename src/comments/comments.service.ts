@@ -239,6 +239,13 @@ export class CommentsService {
       return {
         title: this.i18n.t('reports.title'),
         subtitle: this.i18n.t('reports.subtitle'),
+        detailsStep: {
+          title: this.i18n.t('reports.details_title'),
+          subtitle: this.i18n.t('reports.details_subtitle'),
+          placeholder: this.i18n.t('reports.details_placeholder'),
+          submitButton: this.i18n.t('reports.submit_button'),
+          maxCharacters: 160,
+        },
         reasons,
       };
     }
@@ -1170,6 +1177,7 @@ export class CommentsService {
     reportId?: string;
     reason?: string | null;
     displayName?: string | null;
+    details?: string | null;
   }> {
     const comment = await this.commentsRepo.findOne({
       where: { id: commentId },
@@ -1194,6 +1202,7 @@ export class CommentsService {
     }
 
     const resolved = this.resolveReportReason(reason);
+    const details = notes?.trim() ? notes.trim().slice(0, 160) : null;
     let storedReason: string | null = null;
     if (reason && reason.trim()) {
       if (notes && notes.trim()) {
@@ -1209,6 +1218,7 @@ export class CommentsService {
       commentId,
       userId,
       reason: storedReason,
+      ...(details ? { details } : {}),
     });
     const saved = await this.commentReportsRepo.save(report);
 
@@ -1217,6 +1227,7 @@ export class CommentsService {
       reportId: saved.id,
       reason: resolved ? resolved.key : (storedReason || null),
       displayName: resolved ? resolved.displayName : null,
+      details,
     };
   }
 

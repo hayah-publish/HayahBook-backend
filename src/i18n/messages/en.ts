@@ -220,5 +220,10 @@ export const en = {
   'reports.scam_or_fraud': 'Scam or fraud',
   'reports.false_information': 'False information',
   'reports.something_else': 'Something else',
+  'reports.details_too_long': 'Report details must not exceed 160 characters',
+  'reports.details_title': 'Add more details',
+  'reports.details_subtitle': 'Optional. Context helps our team review this faster.',
+  'reports.details_placeholder': "Tell us what's wrong with this comment...",
+  'reports.submit_button': 'Submit',
 };
 

@@ -445,9 +445,11 @@ describe('CommentsService', () => {
         commentId: 'comment-2',
         userId: 'user-1',
         reason: 'something_else: Detailed notes here',
+        details: 'Detailed notes here',
       });
       expect(res.message).toBe('comments.reported');
       expect(res.reason).toBe('something_else');
+      expect(res.details).toBe('Detailed notes here');
     });
   });
 
