@@ -71,6 +71,7 @@ describe('CommentsService', () => {
     };
 
     commentReportsRepo = {
+      findOne: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockImplementation((dto) => ({ id: 'report-1', ...dto })),
       save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
     };
@@ -106,6 +107,7 @@ describe('CommentsService', () => {
 
     i18nService = {
       t: jest.fn().mockImplementation((k) => k),
+      getCurrentLanguage: jest.fn().mockReturnValue('ar'),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -414,6 +416,64 @@ describe('CommentsService', () => {
         reason: 'محتوى مسيء',
       });
       expect(res.message).toBe('comments.reported');
+    });
+
+    it('rejects when author attempts to report their own comment', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-1', userId: 'user-1' });
+      await expect(
+        service.reportComment('user-1', 'comment-1', 'spam'),
+      ).rejects.toThrow();
+    });
+
+    it('rejects when user already reported the same comment', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-1', userId: 'author-9' });
+      commentReportsRepo.findOne.mockResolvedValueOnce({ id: 'report-prev' });
+      await expect(
+        service.reportComment('user-1', 'comment-1', 'spam'),
+      ).rejects.toThrow();
+    });
+
+    it('handles something_else with notes correctly', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-2', userId: 'other-user' });
+      const res = await service.reportComment(
+        'user-1',
+        'comment-2',
+        'something_else',
+        'Detailed notes here',
+      );
+      expect(commentReportsRepo.create).toHaveBeenCalledWith({
+        commentId: 'comment-2',
+        userId: 'user-1',
+        reason: 'something_else: Detailed notes here',
+      });
+      expect(res.message).toBe('comments.reported');
+      expect(res.reason).toBe('something_else');
+    });
+  });
+
+  describe('getReportReasons', () => {
+    it('returns the 8 report reasons with localized displayName in Arabic and English', () => {
+      const arReasons = service.getReportReasons('ar');
+      expect(arReasons).toHaveLength(8);
+      expect(arReasons[0].key).toBe('spam');
+      expect(arReasons[0].displayName).toBe('محتوى غير مرغوب فيه');
+      expect(arReasons[0].name_ar).toBe('محتوى غير مرغوب فيه');
+      expect(arReasons[0].name_en).toBe('Spam');
+
+      const enReasons = service.getReportReasons('en');
+      expect(enReasons).toHaveLength(8);
+      expect(enReasons[0].key).toBe('spam');
+      expect(enReasons[0].displayName).toBe('Spam');
+      expect(enReasons[0].name_en).toBe('Spam');
+      expect(enReasons[0].name_ar).toBe('محتوى غير مرغوب فيه');
+    });
+
+    it('returns metadata title and subtitle when includeMeta is true', () => {
+      const metaResponse = service.getReportReasons('en', true) as any;
+      expect(metaResponse).toHaveProperty('title');
+      expect(metaResponse).toHaveProperty('subtitle');
+      expect(metaResponse).toHaveProperty('reasons');
+      expect(metaResponse.reasons).toHaveLength(8);
     });
   });
 

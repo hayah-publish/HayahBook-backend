@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
   Inject,
   Optional,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import { User } from '../users/user.entity';
 import { UserUserFollow } from '../users/user-user-follow.entity';
 import { UploadService } from '../upload/upload.service';
 import { I18nService } from '../i18n/i18n.service';
+import { SupportedLanguage } from '../i18n/i18n.types';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { CommentsQueryDto, CommentSortType } from './dto/comments-query.dto';
@@ -68,6 +70,69 @@ export interface FormattedComment {
   updatedAt: Date;
   replies?: FormattedComment[];
 }
+
+export interface ReportReasonOption {
+  key: string;
+  displayName: string;
+  name_ar: string;
+  name_en: string;
+}
+
+export const REPORT_REASONS: Array<{
+  key: string;
+  name_ar: string;
+  name_en: string;
+  aliases?: string[];
+}> = [
+  {
+    key: 'spam',
+    name_ar: 'محتوى غير مرغوب فيه',
+    name_en: 'Spam',
+    aliases: ['spam', 'سبام', 'محتوى غير مرغوب فيه', 'رسائل غير مرغوب فيها', 'محتوى غير مرغوب فيه (سبام)'],
+  },
+  {
+    key: 'harassment_or_bullying',
+    name_ar: 'مضايقة أو تنمر',
+    name_en: 'Harassment or bullying',
+    aliases: ['harassment_or_bullying', 'harassment', 'bullying', 'مضايقة أو تنمر', 'مضايقة', 'تنمر', 'محتوى مسيء'],
+  },
+  {
+    key: 'hate_speech',
+    name_ar: 'خطاب كراهية',
+    name_en: 'Hate speech',
+    aliases: ['hate_speech', 'hate', 'خطاب كراهية', 'كراهية'],
+  },
+  {
+    key: 'violence_or_threats',
+    name_ar: 'عنف أو تهديدات',
+    name_en: 'Violence or threats',
+    aliases: ['violence_or_threats', 'violence', 'threats', 'عنف أو تهديدات', 'عنف', 'تهديد'],
+  },
+  {
+    key: 'nudity_or_sexual_content',
+    name_ar: 'عري أو محتوى جنسي',
+    name_en: 'Nudity or sexual content',
+    aliases: ['nudity_or_sexual_content', 'nudity', 'sexual_content', 'عري أو محتوى جنسي', 'عري', 'محتوى جنسي', 'إباحية'],
+  },
+  {
+    key: 'scam_or_fraud',
+    name_ar: 'احتيال أو خداع',
+    name_en: 'Scam or fraud',
+    aliases: ['scam_or_fraud', 'scam', 'fraud', 'احتيال أو خداع', 'احتيال', 'خداع', 'نصب'],
+  },
+  {
+    key: 'false_information',
+    name_ar: 'معلومات كاذبة أو مضللة',
+    name_en: 'False information',
+    aliases: ['false_information', 'fake_news', 'misinformation', 'معلومات كاذبة أو مضللة', 'معلومات كاذبة', 'معلومات مضللة', 'معلومات زائفة'],
+  },
+  {
+    key: 'something_else',
+    name_ar: 'سبب آخر',
+    name_en: 'Something else',
+    aliases: ['something_else', 'other', 'else', 'سبب آخر', 'شيء آخر', 'أخرى'],
+  },
+];
 
 @Injectable()
 export class CommentsService {
@@ -155,6 +220,67 @@ export class CommentsService {
         isDefault: false,
       },
     ];
+  }
+
+  /**
+   * Return the 8 comment report reasons with localized displayName
+   */
+  getReportReasons(lang?: SupportedLanguage, includeMeta: boolean = false) {
+    const currentLang =
+      lang || (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
+    const reasons: ReportReasonOption[] = REPORT_REASONS.map((r) => ({
+      key: r.key,
+      displayName: currentLang === 'en' ? r.name_en : r.name_ar,
+      name_ar: r.name_ar,
+      name_en: r.name_en,
+    }));
+
+    if (includeMeta) {
+      return {
+        title: this.i18n.t('reports.title'),
+        subtitle: this.i18n.t('reports.subtitle'),
+        reasons,
+      };
+    }
+
+    return reasons;
+  }
+
+  /**
+   * Resolve an incoming report reason key or name into a canonical ReportReasonOption
+   */
+  resolveReportReason(input?: string, lang?: SupportedLanguage): ReportReasonOption | null {
+    if (!input || !input.trim()) return null;
+    const q = input.trim().toLowerCase();
+    const normalizeAr = (s: string) =>
+      s
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .trim()
+        .toLowerCase();
+    const qNorm = normalizeAr(q);
+
+    const found = REPORT_REASONS.find((r) => {
+      if (r.key.toLowerCase() === q) return true;
+      if (r.name_en.toLowerCase() === q) return true;
+      if (normalizeAr(r.name_ar) === qNorm) return true;
+      if (r.aliases && r.aliases.some((a) => a.toLowerCase() === q || normalizeAr(a) === qNorm)) {
+        return true;
+      }
+      return false;
+    });
+
+    if (!found) return null;
+
+    const currentLang =
+      lang || (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
+    return {
+      key: found.key,
+      displayName: currentLang === 'en' ? found.name_en : found.name_ar,
+      name_ar: found.name_ar,
+      name_en: found.name_en,
+    };
   }
 
   /**
@@ -1038,7 +1164,13 @@ export class CommentsService {
     userId: string,
     commentId: string,
     reason?: string,
-  ): Promise<{ message: string }> {
+    notes?: string,
+  ): Promise<{
+    message: string;
+    reportId?: string;
+    reason?: string | null;
+    displayName?: string | null;
+  }> {
     const comment = await this.commentsRepo.findOne({
       where: { id: commentId },
     });
@@ -1046,15 +1178,45 @@ export class CommentsService {
       throw new NotFoundException(this.i18n.t('comments.not_found'));
     }
 
+    if (comment.userId === userId) {
+      throw new BadRequestException(
+        this.i18n.t('comments.cannot_report_own_comment'),
+      );
+    }
+
+    const existingReport = await this.commentReportsRepo.findOne({
+      where: { commentId, userId },
+    });
+    if (existingReport) {
+      throw new ConflictException(
+        this.i18n.t('comments.already_reported'),
+      );
+    }
+
+    const resolved = this.resolveReportReason(reason);
+    let storedReason: string | null = null;
+    if (reason && reason.trim()) {
+      if (notes && notes.trim()) {
+        storedReason = `${(resolved ? resolved.key : reason).trim()}: ${notes.trim()}`;
+      } else {
+        storedReason = reason.trim();
+      }
+    } else if (notes && notes.trim()) {
+      storedReason = `something_else: ${notes.trim()}`;
+    }
+
     const report = this.commentReportsRepo.create({
       commentId,
       userId,
-      reason: reason?.trim() || null,
+      reason: storedReason,
     });
-    await this.commentReportsRepo.save(report);
+    const saved = await this.commentReportsRepo.save(report);
 
     return {
       message: this.i18n.t('comments.reported'),
+      reportId: saved.id,
+      reason: resolved ? resolved.key : (storedReason || null),
+      displayName: resolved ? resolved.displayName : null,
     };
   }
 

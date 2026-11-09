@@ -27,6 +27,7 @@ import { ReportCommentDto } from './dto/report-comment.dto';
 import { ReactionsQueryDto } from '../posts/dto/reactions-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
+import type { SupportedLanguage } from '../i18n/i18n.types';
 import type { UploadFile } from '../upload/upload-file.interface';
 
 interface AuthenticatedRequest extends Request {
@@ -92,6 +93,21 @@ export class CommentsController {
   @Get('sort-options')
   getSortOptions() {
     return this.commentsService.getSortOptions();
+  }
+
+  /**
+   * Get comment report reasons matching the design sheet (Spam, Harassment, Hate speech, etc.)
+   * GET /v1/comments/report-reasons
+   * GET /v1/comments/reports/reasons
+   */
+  @Get(['report-reasons', 'reports/reasons'])
+  getReportReasons(
+    @Query('lang') lang?: string,
+    @Query('meta') meta?: string,
+  ) {
+    const supportedLang: SupportedLanguage | undefined =
+      lang === 'ar' || lang === 'en' ? lang : undefined;
+    return this.commentsService.getReportReasons(supportedLang, meta === 'true');
   }
 
   /**
@@ -231,7 +247,12 @@ export class CommentsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ReportCommentDto,
   ) {
-    return this.commentsService.reportComment(req.user!.userId, id, dto.reason);
+    return this.commentsService.reportComment(
+      req.user!.userId,
+      id,
+      dto.reason,
+      ...(dto.notes !== undefined ? [dto.notes] : []),
+    );
   }
 
   /**

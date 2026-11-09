@@ -29,6 +29,9 @@ describe('CommentsController', () => {
         { key: 'newest' },
         { key: 'all_comments' },
       ]),
+      getReportReasons: jest.fn().mockReturnValue([
+        { key: 'spam', displayName: 'Spam', name_ar: 'محتوى غير مرغوب فيه', name_en: 'Spam' },
+      ]),
       getPostComments: jest.fn().mockResolvedValue({
         data: [],
         total: 0,
@@ -117,6 +120,14 @@ describe('CommentsController', () => {
       const res = controller.getSortOptions();
       expect(res).toHaveLength(3);
       expect(service.getSortOptions).toHaveBeenCalled();
+    });
+  });
+
+  describe('getReportReasons', () => {
+    it('delegates to service.getReportReasons with lang and meta', () => {
+      const res = controller.getReportReasons('ar', 'false');
+      expect(res).toBeDefined();
+      expect(service.getReportReasons).toHaveBeenCalledWith('ar', false);
     });
   });
 

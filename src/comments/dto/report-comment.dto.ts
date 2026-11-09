@@ -4,5 +4,9 @@ export class ReportCommentDto {
   @IsOptional()
   @IsString()
   reason?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }
 

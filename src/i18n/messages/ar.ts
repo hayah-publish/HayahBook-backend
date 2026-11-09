@@ -199,5 +199,26 @@ export const ar = {
   'comments.muted': 'تم كتم إشعارات هذا التعليق',
   'comments.unmuted': 'تم تفعيل إشعارات هذا التعليق',
   'comments.reported': 'تم إرسال البلاغ بنجاح وسيتم مراجعته',
+  'comments.already_reported': 'لقد قمت بالإبلاغ عن هذا التعليق مسبقاً وسيتم مراجعته',
+  'comments.cannot_report_own_comment': 'لا يمكنك الإبلاغ عن تعليقك الخاص',
+  'comments.invalid_report_reason': 'سبب الإبلاغ غير صالح',
+  'comments.report_title': 'الإبلاغ عن تعليق',
+  'comments.report_subtitle': 'لماذا تبلغ عن هذا التعليق؟ بلاغك سري ومجهول الهوية.',
+
+  // Report Reasons (أسباب الإبلاغ)
+  'reports.title': 'الإبلاغ عن تعليق',
+  'reports.subtitle': 'لماذا تبلغ عن هذا التعليق؟ بلاغك سري ومجهول الهوية.',
+  'reports.submitted': 'تم إرسال البلاغ بنجاح وسيتم مراجعته',
+  'reports.already_reported': 'لقد قمت بالإبلاغ عن هذا التعليق مسبقاً وسيتم مراجعته',
+  'reports.cannot_report_own_comment': 'لا يمكنك الإبلاغ عن تعليقك الخاص',
+  'reports.invalid_reason': 'سبب الإبلاغ غير صالح',
+  'reports.spam': 'محتوى غير مرغوب فيه',
+  'reports.harassment_or_bullying': 'مضايقة أو تنمر',
+  'reports.hate_speech': 'خطاب كراهية',
+  'reports.violence_or_threats': 'عنف أو تهديدات',
+  'reports.nudity_or_sexual_content': 'عري أو محتوى جنسي',
+  'reports.scam_or_fraud': 'احتيال أو خداع',
+  'reports.false_information': 'معلومات كاذبة أو مضللة',
+  'reports.something_else': 'سبب آخر',
 };
 

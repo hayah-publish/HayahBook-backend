@@ -199,5 +199,26 @@ export const en = {
   'comments.muted': 'Comment notifications muted',
   'comments.unmuted': 'Comment notifications unmuted',
   'comments.reported': 'Report submitted successfully and will be reviewed',
+  'comments.already_reported': 'You have already reported this comment and it is under review',
+  'comments.cannot_report_own_comment': 'You cannot report your own comment',
+  'comments.invalid_report_reason': 'Invalid report reason',
+  'comments.report_title': 'Report comment',
+  'comments.report_subtitle': 'Why are you reporting this comment? Your report is anonymous.',
+
+  // Report Reasons
+  'reports.title': 'Report comment',
+  'reports.subtitle': 'Why are you reporting this comment? Your report is anonymous.',
+  'reports.submitted': 'Report submitted successfully and will be reviewed',
+  'reports.already_reported': 'You have already reported this comment and it is under review',
+  'reports.cannot_report_own_comment': 'You cannot report your own comment',
+  'reports.invalid_reason': 'Invalid report reason',
+  'reports.spam': 'Spam',
+  'reports.harassment_or_bullying': 'Harassment or bullying',
+  'reports.hate_speech': 'Hate speech',
+  'reports.violence_or_threats': 'Violence or threats',
+  'reports.nudity_or_sexual_content': 'Nudity or sexual content',
+  'reports.scam_or_fraud': 'Scam or fraud',
+  'reports.false_information': 'False information',
+  'reports.something_else': 'Something else',
 };
 
