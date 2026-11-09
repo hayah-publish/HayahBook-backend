@@ -64,10 +64,6 @@ export interface FormattedComment {
   isEdited: boolean;
   isMuted: boolean;
   permissions: FormattedCommentPermissions;
-  canEdit: boolean;
-  canDelete: boolean;
-  canPin: boolean;
-  canHide: boolean;
   createdAt: Date;
   updatedAt: Date;
   replies?: FormattedComment[];
@@ -1264,10 +1260,6 @@ export class CommentsService {
       isEdited: comment.isEdited || false,
       isMuted,
       permissions,
-      canEdit: isAuthor,
-      canDelete: isAuthor || isPostOwner,
-      canPin: isPostOwner,
-      canHide: isAuthor || isPostOwner,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
     };

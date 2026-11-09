@@ -152,8 +152,7 @@ describe('CommentsService', () => {
       expect(res.data.parentId).toBeNull();
       expect(res.data.publisher.id).toBe('user-1');
       expect(res.data.permissions.canEdit).toBe(true);
-      expect(res.data.canEdit).toBe(true);
-      expect(res.data.canDelete).toBe(true);
+      expect(res.data.permissions.canDelete).toBe(true);
     });
 
     it('uploads image when file is provided with the comment', async () => {
