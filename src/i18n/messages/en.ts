@@ -177,5 +177,24 @@ export const en = {
   'reactions.applaud': 'Bravo',
   'reactions.insightful': 'Insightful',
   'reactions.disagree': 'Disagree',
+
+  // Comments
+  'comments.created': 'Comment published successfully',
+  'comments.reply_created': 'Reply published successfully',
+  'comments.updated': 'Comment updated successfully',
+  'comments.deleted': 'Comment deleted successfully',
+  'comments.not_found': 'Comment not found',
+  'comments.content_required': 'Comment content is required',
+  'comments.post_required': 'Post ID is required',
+  'comments.unauthorized_edit': 'You are not authorized to edit this comment',
+  'comments.unauthorized_delete': 'You are not authorized to delete this comment',
+  'comments.unauthorized_pin': 'Only the post author can pin comments',
+  'comments.pinned': 'Comment pinned to top successfully',
+  'comments.unpinned': 'Comment unpinned',
+  'comments.hidden': 'Comment hidden successfully',
+  'comments.unhidden': 'Comment unhidden successfully',
+  'comments.muted': 'Comment notifications muted',
+  'comments.unmuted': 'Comment notifications unmuted',
+  'comments.reported': 'Report submitted successfully and will be reviewed',
 };
 

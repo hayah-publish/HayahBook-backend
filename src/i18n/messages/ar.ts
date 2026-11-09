@@ -177,5 +177,24 @@ export const ar = {
   'reactions.applaud': 'احسنت',
   'reactions.insightful': 'يستحق التفكير',
   'reactions.disagree': 'اعترض',
+
+  // Comments (التعليقات)
+  'comments.created': 'تم نشر التعليق بنجاح',
+  'comments.reply_created': 'تم نشر الرد بنجاح',
+  'comments.updated': 'تم تعديل التعليق بنجاح',
+  'comments.deleted': 'تم حذف التعليق بنجاح',
+  'comments.not_found': 'التعليق غير موجود',
+  'comments.content_required': 'محتوى التعليق مطلوب',
+  'comments.post_required': 'معرف المنشور مطلوب',
+  'comments.unauthorized_edit': 'غير مصرح لك بتعديل هذا التعليق',
+  'comments.unauthorized_delete': 'غير مصرح لك بحذف هذا التعليق',
+  'comments.unauthorized_pin': 'يسمح لصاحب المنشور فقط بتثبيت التعليقات',
+  'comments.pinned': 'تم تثبيت التعليق في الأعلى بنجاح',
+  'comments.unpinned': 'تم إلغاء تثبيت التعليق',
+  'comments.hidden': 'تم إخفاء التعليق بنجاح',
+  'comments.unhidden': 'تم إظهار التعليق بنجاح',
+  'comments.muted': 'تم كتم إشعارات هذا التعليق',
+  'comments.unmuted': 'تم تفعيل إشعارات هذا التعليق',
+  'comments.reported': 'تم إرسال البلاغ بنجاح وسيتم مراجعته',
 };
 

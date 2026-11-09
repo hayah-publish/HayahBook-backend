@@ -15,6 +15,7 @@ import { UploadModule } from './upload/upload.module';
 import { PostsModule } from './posts/posts.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { HomeModule } from './home/home.module';
+import { CommentsModule } from './comments/comments.module';
 import { I18nModule } from './i18n/i18n.module';
 import { I18nMiddleware } from './i18n/i18n.middleware';
 import { I18nValidationExceptionFilter } from './i18n/i18n-validation.filter';
@@ -24,6 +25,7 @@ import { AuthSecurityTables1762300000000 } from './database/migrations/176230000
 import { CreateBookmarksTable1762400000000 } from './database/migrations/1762400000000-create-bookmarks-table';
 import { ProfilePrivacyMailReadingIntegrity1762500000000 } from './database/migrations/1762500000000-profile-privacy-mail-reading-integrity';
 import { CreatePostReactionsTable1762600000000 } from './database/migrations/1762600000000-create-post-reactions-table';
+import { CreateCommentsAndRepliesTables1762700000000 } from './database/migrations/1762700000000-create-comments-and-replies-tables';
 
 @Module({
   imports: [
@@ -56,6 +58,7 @@ import { CreatePostReactionsTable1762600000000 } from './database/migrations/176
               CreateBookmarksTable1762400000000,
               ProfilePrivacyMailReadingIntegrity1762500000000,
               CreatePostReactionsTable1762600000000,
+              CreateCommentsAndRepliesTables1762700000000,
             ],
             migrationsRun: true,
           };
@@ -76,6 +79,7 @@ import { CreatePostReactionsTable1762600000000 } from './database/migrations/176
             CreateBookmarksTable1762400000000,
             ProfilePrivacyMailReadingIntegrity1762500000000,
             CreatePostReactionsTable1762600000000,
+            CreateCommentsAndRepliesTables1762700000000,
           ],
           migrationsRun: true,
         };
@@ -94,6 +98,7 @@ import { CreatePostReactionsTable1762600000000 } from './database/migrations/176
     PostsModule,
     BookmarksModule,
     HomeModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [

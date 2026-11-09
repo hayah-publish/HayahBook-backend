@@ -1,0 +1,399 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { CommentsService } from './comments.service';
+import { Comment } from './comment.entity';
+import { CommentReaction } from './comment-reaction.entity';
+import { CommentMute } from './comment-mute.entity';
+import { CommentReport } from './comment-report.entity';
+import { Post } from '../posts/post.entity';
+import { User } from '../users/user.entity';
+import { UploadService } from '../upload/upload.service';
+import { I18nService } from '../i18n/i18n.service';
+
+describe('CommentsService', () => {
+  let service: CommentsService;
+  let commentsRepo: any;
+  let commentReactionsRepo: any;
+  let commentMutesRepo: any;
+  let commentReportsRepo: any;
+  let postsRepo: any;
+  let usersRepo: any;
+  let uploadService: any;
+  let i18nService: any;
+
+  const mockPost: any = {
+    id: 'post-1',
+    userId: 'author-post-1',
+    commentsCount: 5,
+  };
+
+  beforeEach(async () => {
+    commentsRepo = {
+      create: jest.fn().mockImplementation((dto) => ({
+        id: 'comment-new-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ...dto,
+      })),
+      save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
+      findOne: jest.fn(),
+      find: jest.fn().mockResolvedValue([]),
+      count: jest.fn().mockResolvedValue(0),
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
+      delete: jest.fn().mockResolvedValue({ affected: 1 }),
+      increment: jest.fn().mockResolvedValue({ affected: 1 }),
+      decrement: jest.fn().mockResolvedValue({ affected: 1 }),
+      createQueryBuilder: jest.fn(),
+    };
+
+    commentReactionsRepo = {
+      create: jest.fn().mockImplementation((dto) => ({ id: 'react-1', ...dto })),
+      save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
+      findOne: jest.fn(),
+      find: jest.fn().mockResolvedValue([]),
+      delete: jest.fn().mockResolvedValue({ affected: 1 }),
+    };
+
+    commentMutesRepo = {
+      create: jest.fn().mockImplementation((dto) => ({ id: 'mute-1', ...dto })),
+      save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
+      findOne: jest.fn(),
+      find: jest.fn().mockResolvedValue([]),
+      delete: jest.fn().mockResolvedValue({ affected: 1 }),
+    };
+
+    commentReportsRepo = {
+      create: jest.fn().mockImplementation((dto) => ({ id: 'report-1', ...dto })),
+      save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
+    };
+
+    postsRepo = {
+      findOne: jest.fn().mockResolvedValue(mockPost),
+      increment: jest.fn().mockResolvedValue({ affected: 1 }),
+      decrement: jest.fn().mockResolvedValue({ affected: 1 }),
+    };
+
+    usersRepo = {
+      findOne: jest.fn().mockImplementation(({ where }) => {
+        const id = where?.id || 'user-1';
+        return Promise.resolve({
+          id,
+          name: id === 'author-comment-1' ? 'Author 1' : id === 'sara-ali' ? 'Sara Ali' : 'User ' + id,
+          profileUrl: 'https://cdn.hayahbook.com/avatars/' + id + '.jpg',
+          role: 'user',
+          userType: 'Reader',
+        });
+      }),
+    };
+
+    uploadService = {
+      uploadCommentImage: jest.fn().mockResolvedValue('https://cdn.hayahbook.com/comments/images/image.jpg'),
+      deleteFileByUrl: jest.fn().mockResolvedValue(undefined),
+    };
+
+    i18nService = {
+      t: jest.fn().mockImplementation((k) => k),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        CommentsService,
+        { provide: getRepositoryToken(Comment), useValue: commentsRepo },
+        { provide: getRepositoryToken(CommentReaction), useValue: commentReactionsRepo },
+        { provide: getRepositoryToken(CommentMute), useValue: commentMutesRepo },
+        { provide: getRepositoryToken(CommentReport), useValue: commentReportsRepo },
+        { provide: getRepositoryToken(Post), useValue: postsRepo },
+        { provide: getRepositoryToken(User), useValue: usersRepo },
+        { provide: UploadService, useValue: uploadService },
+        { provide: I18nService, useValue: i18nService },
+      ],
+    }).compile();
+
+    service = module.get<CommentsService>(CommentsService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  describe('createComment', () => {
+    it('creates a root comment successfully and increments post commentsCount', async () => {
+      const res = await service.createComment('user-1', {
+        postId: 'post-1',
+        content: 'تعليق رائع ومميز',
+      });
+
+      expect(postsRepo.increment).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 1);
+      expect(res.data.content).toBe('تعليق رائع ومميز');
+      expect(res.data.parentId).toBeNull();
+      expect(res.data.canEdit).toBe(true);
+      expect(res.data.canDelete).toBe(true);
+    });
+
+    it('uploads image when file is provided with the comment', async () => {
+      const mockFile: any = { buffer: Buffer.from('test'), mimetype: 'image/jpeg', size: 1024 };
+      const res = await service.createComment(
+        'user-1',
+        { postId: 'post-1', content: 'صورة رائعة' },
+        undefined,
+        mockFile,
+      );
+
+      expect(uploadService.uploadCommentImage).toHaveBeenCalledWith('user-1', mockFile);
+      expect(res.data.imageUrl).toBe('https://cdn.hayahbook.com/comments/images/image.jpg');
+    });
+
+    it('throws NotFoundException when post does not exist', async () => {
+      postsRepo.findOne.mockResolvedValueOnce(null);
+      await expect(
+        service.createComment('user-1', { postId: 'invalid', content: 'test' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('createReply', () => {
+    it('creates a reply to a root comment and increments parent repliesCount and post commentsCount', async () => {
+      const rootComment: any = {
+        id: 'root-comment-1',
+        postId: 'post-1',
+        parentId: null,
+        userId: 'author-comment-1',
+        post: mockPost,
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(rootComment);
+
+      const res = await service.createReply('user-1', 'root-comment-1', {
+        content: 'أتفق معك تماماً',
+      });
+
+      expect(commentsRepo.increment).toHaveBeenCalledWith({ id: 'root-comment-1' }, 'repliesCount', 1);
+      expect(postsRepo.increment).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 1);
+      expect(res.data.parentId).toBe('root-comment-1');
+      expect(res.data.replyToUser?.id).toBe('author-comment-1');
+    });
+
+    it('flattens nested reply to stay under root comment for clean mobile layout', async () => {
+      const nestedReply: any = {
+        id: 'nested-reply-1',
+        postId: 'post-1',
+        parentId: 'root-comment-1', // Already a reply!
+        userId: 'sara-ali',
+        post: mockPost,
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(nestedReply);
+
+      const res = await service.createReply('user-1', 'nested-reply-1', {
+        content: '@Sara Ali رد على رد',
+      });
+
+      // The new reply's parentId is the root comment
+      expect(res.data.parentId).toBe('root-comment-1');
+      // The replyToUser is Sara Ali
+      expect(res.data.replyToUser?.id).toBe('sara-ali');
+    });
+  });
+
+  describe('reactToComment', () => {
+    const mockComment: any = {
+      id: 'comment-1',
+      postId: 'post-1',
+      likesCount: 1,
+      reactionsCount: { total: 1, agree: 0, love: 1, applaud: 0, insightful: 0, disagree: 0 },
+    };
+
+    it('adds new reaction when user has not reacted yet', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ ...mockComment, likesCount: 0, reactionsCount: { total: 0 } });
+      commentReactionsRepo.findOne.mockResolvedValueOnce(null);
+
+      const res = await service.reactToComment('user-1', 'comment-1', 'love');
+      expect(res.action).toBe('added');
+      expect(res.userReaction).toBe('love');
+      expect(res.reactionsCount.love).toBe(1);
+      expect(res.topReactions).toContain('love');
+    });
+
+    it('toggles OFF reaction when same reaction is clicked again', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ ...mockComment });
+      commentReactionsRepo.findOne.mockResolvedValueOnce({ id: 'react-1', reactionType: 'love' });
+
+      const res = await service.reactToComment('user-1', 'comment-1', 'love');
+      expect(res.action).toBe('removed');
+      expect(res.userReaction).toBeNull();
+      expect(res.reactionsCount.love).toBe(0);
+      expect(commentReactionsRepo.delete).toHaveBeenCalledWith({ id: 'react-1' });
+    });
+
+    it('switches reaction when different reaction is selected', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ ...mockComment });
+      commentReactionsRepo.findOne.mockResolvedValueOnce({ id: 'react-1', reactionType: 'love' });
+
+      const res = await service.reactToComment('user-1', 'comment-1', 'insightful');
+      expect(res.action).toBe('updated');
+      expect(res.userReaction).toBe('insightful');
+      expect(res.reactionsCount.love).toBe(0);
+      expect(res.reactionsCount.insightful).toBe(1);
+    });
+
+    it('throws BadRequestException on invalid reaction type', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ ...mockComment });
+      await expect(
+        service.reactToComment('user-1', 'comment-1', 'unknown_type'),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('updateComment', () => {
+    it('allows comment author to update content and sets isEdited to true', async () => {
+      const comment: any = {
+        id: 'comment-1',
+        userId: 'user-1',
+        content: 'القديم',
+        isEdited: false,
+        post: mockPost,
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+
+      const res = await service.updateComment('user-1', 'comment-1', 'المحتوى الجديد');
+      expect(res.data.content).toBe('المحتوى الجديد');
+      expect(res.data.isEdited).toBe(true);
+    });
+
+    it('throws ForbiddenException if non-author attempts to edit', async () => {
+      const comment: any = { id: 'comment-1', userId: 'user-other' };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+
+      await expect(
+        service.updateComment('user-1', 'comment-1', 'تعديل غير مصرح'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('deleteComment', () => {
+    it('allows comment author to delete comment and decrements post commentsCount', async () => {
+      const comment: any = {
+        id: 'comment-1',
+        userId: 'user-1',
+        postId: 'post-1',
+        parentId: null,
+        post: mockPost,
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+      commentsRepo.count.mockResolvedValueOnce(2); // Has 2 replies
+
+      const res = await service.deleteComment('user-1', 'comment-1');
+      expect(postsRepo.decrement).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 3);
+      expect(commentsRepo.delete).toHaveBeenCalledWith({ id: 'comment-1' });
+      expect(res.message).toBe('comments.deleted');
+    });
+
+    it('allows post owner to delete anyone’s comment on their post (moderation)', async () => {
+      const comment: any = {
+        id: 'comment-1',
+        userId: 'stranger-user',
+        postId: 'post-1',
+        post: { id: 'post-1', userId: 'author-post-1' }, // user is author of post
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+      commentsRepo.count.mockResolvedValueOnce(0);
+
+      const res = await service.deleteComment('author-post-1', 'comment-1');
+      expect(commentsRepo.delete).toHaveBeenCalledWith({ id: 'comment-1' });
+      expect(res.message).toBe('comments.deleted');
+    });
+
+    it('throws ForbiddenException if unauthorized user tries to delete', async () => {
+      const comment: any = {
+        id: 'comment-1',
+        userId: 'stranger',
+        postId: 'post-1',
+        post: { id: 'post-1', userId: 'other-author' },
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+
+      await expect(
+        service.deleteComment('user-1', 'comment-1', false),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('togglePinComment', () => {
+    it('allows post owner to pin a comment and unpins previous pinned comment', async () => {
+      const comment: any = {
+        id: 'comment-1',
+        postId: 'post-1',
+        isPinned: false,
+        post: { id: 'post-1', userId: 'author-post-1' },
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+
+      const res = await service.togglePinComment('author-post-1', 'comment-1');
+      expect(commentsRepo.update).toHaveBeenCalledWith(
+        { postId: 'post-1', isPinned: true },
+        { isPinned: false, pinnedAt: null },
+      );
+      expect(res.isPinned).toBe(true);
+    });
+
+    it('throws ForbiddenException if non-post-owner tries to pin', async () => {
+      const comment: any = {
+        id: 'comment-1',
+        postId: 'post-1',
+        post: { id: 'post-1', userId: 'author-post-1' },
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+
+      await expect(
+        service.togglePinComment('random-user', 'comment-1'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('toggleHideComment', () => {
+    it('toggles isHidden boolean on comment', async () => {
+      const comment: any = {
+        id: 'comment-1',
+        userId: 'user-1',
+        isHidden: false,
+        post: mockPost,
+      };
+      commentsRepo.findOne.mockResolvedValueOnce(comment);
+
+      const res = await service.toggleHideComment('user-1', 'comment-1');
+      expect(res.isHidden).toBe(true);
+    });
+  });
+
+  describe('toggleMuteComment', () => {
+    it('mutes comment when not muted and unmutes when already muted', async () => {
+      commentsRepo.findOne.mockResolvedValue({ id: 'comment-1' });
+
+      // First call: not muted -> mutes
+      commentMutesRepo.findOne.mockResolvedValueOnce(null);
+      const res1 = await service.toggleMuteComment('user-1', 'comment-1');
+      expect(res1.isMuted).toBe(true);
+
+      // Second call: already muted -> unmutes
+      commentMutesRepo.findOne.mockResolvedValueOnce({ id: 'mute-1' });
+      const res2 = await service.toggleMuteComment('user-1', 'comment-1');
+      expect(res2.isMuted).toBe(false);
+    });
+  });
+
+  describe('reportComment', () => {
+    it('creates comment report successfully', async () => {
+      commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-1' });
+      const res = await service.reportComment('user-1', 'comment-1', 'محتوى مسيء');
+      expect(commentReportsRepo.create).toHaveBeenCalledWith({
+        commentId: 'comment-1',
+        userId: 'user-1',
+        reason: 'محتوى مسيء',
+      });
+      expect(res.message).toBe('comments.reported');
+    });
+  });
+});

@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   Index,
 } from 'typeorm';
@@ -12,6 +13,7 @@ import { User } from '../users/user.entity';
 import { Book } from '../books/book.entity';
 import { Audiobook } from '../books/audiobook.entity';
 import type { PostReactionsCount } from './post-reaction.entity';
+import type { Comment } from '../comments/comment.entity';
 
 export type PostType = 'post' | 'article';
 
@@ -88,6 +90,9 @@ export class Post {
 
   @Column({ name: 'comments_count', type: 'integer', default: 0 })
   commentsCount: number;
+
+  @OneToMany('Comment', 'post')
+  comments?: Comment[];
 
   @Column({ name: 'shares_count', type: 'integer', default: 0 })
   sharesCount: number;
