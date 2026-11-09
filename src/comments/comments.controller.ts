@@ -24,6 +24,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentsQueryDto } from './dto/comments-query.dto';
 import { ReactCommentDto } from './dto/react-comment.dto';
 import { ReportCommentDto } from './dto/report-comment.dto';
+import { ReactionsQueryDto } from '../posts/dto/reactions-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import type { UploadFile } from '../upload/upload-file.interface';
@@ -155,6 +156,20 @@ export class CommentsController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
     return this.commentsService.removeCommentReaction(req.user!.userId, id);
+  }
+
+  /**
+   * Get reactions modal list for a comment with tabs filtering (All, 🤝, ❤️, 👏, 💭, 🙅)
+   * GET /v1/comments/:id/reacts
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get(':id/reacts')
+  async getCommentReactions(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query() query: ReactionsQueryDto,
+    @Req() req?: AuthenticatedRequest,
+  ) {
+    return this.commentsService.getCommentReactions(id, query, req?.user?.userId);
   }
 
   /**

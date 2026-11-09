@@ -53,6 +53,14 @@ describe('CommentsController', () => {
         action: 'removed',
         userReaction: null,
       }),
+      getCommentReactions: jest.fn().mockResolvedValue({
+        counts: { all: 1, total: 1, agree: 1, love: 0, applaud: 0, insightful: 0, disagree: 0 },
+        data: [],
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      }),
       togglePinComment: jest.fn().mockResolvedValue({
         message: 'تم تثبيت التعليق في الأعلى بنجاح',
         isPinned: true,
@@ -218,6 +226,15 @@ describe('CommentsController', () => {
       const res = await controller.getCommentsByPostId('post-uuid-1', query, mockUserReq);
       expect(service.getPostComments).toHaveBeenCalledWith('post-uuid-1', query, 'user-1');
       expect(res.total).toBe(0);
+    });
+  });
+
+  describe('getCommentReactions', () => {
+    it('delegates to service.getCommentReactions', async () => {
+      const query = { page: 1, limit: 20, type: 'all' };
+      const res = await controller.getCommentReactions('comment-1', query, mockUserReq);
+      expect(service.getCommentReactions).toHaveBeenCalledWith('comment-1', query, 'user-1');
+      expect(res.counts.all).toBe(1);
     });
   });
 

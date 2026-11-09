@@ -20,6 +20,10 @@ export class CreateCommentDto {
   imageUrl?: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  image?: any;
+
+  @IsOptional()
   @IsArray()
   @Transform(({ value }) => {
     if (typeof value === 'string') {

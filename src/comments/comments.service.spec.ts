@@ -59,6 +59,7 @@ describe('CommentsService', () => {
       findOne: jest.fn(),
       find: jest.fn().mockResolvedValue([]),
       delete: jest.fn().mockResolvedValue({ affected: 1 }),
+      createQueryBuilder: jest.fn(),
     };
 
     commentMutesRepo = {
@@ -483,6 +484,71 @@ describe('CommentsService', () => {
       expect(res.sort).toBe('all_comments');
       // When all_comments is selected, andWhere with is_hidden should NOT be called
       expect(mockQb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('is_hidden'), expect.anything());
+    });
+  });
+
+  describe('getCommentReactions', () => {
+    it('throws NotFoundException if comment does not exist', async () => {
+      commentsRepo.findOne.mockResolvedValue(null);
+      await expect(
+        service.getCommentReactions('non-existent', { type: 'all' }, 'user-1'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('returns tabbed counts and paginated user reactions list', async () => {
+      commentsRepo.findOne.mockResolvedValue({ id: 'comment-1' });
+
+      const mockCountQb: any = {
+        where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([
+          { type: 'love', count: '3' },
+          { type: 'agree', count: '2' },
+        ]),
+      };
+
+      const mockListQb: any = {
+        innerJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([
+          [
+            {
+              id: 'react-1',
+              reactionType: 'love',
+              createdAt: new Date(),
+              user: {
+                id: 'reactor-1',
+                name: 'Reactor User',
+                profileUrl: null,
+                userType: 'reader',
+              },
+            },
+          ],
+          1,
+        ]),
+      };
+
+      commentReactionsRepo.createQueryBuilder
+        .mockReturnValueOnce(mockCountQb)
+        .mockReturnValueOnce(mockListQb);
+
+      userFollowRepo.find.mockResolvedValue([{ followingId: 'reactor-1' }]);
+
+      const result = await service.getCommentReactions('comment-1', { page: 1, limit: 20 }, 'current-user');
+
+      expect(result.counts.all).toBe(5);
+      expect(result.counts.love).toBe(3);
+      expect(result.counts.agree).toBe(2);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].reaction).toBe('love');
+      expect(result.data[0].reactionIcon).toBe('❤️');
+      expect(result.data[0].user.isFollowing).toBe(true);
+      expect(result.total).toBe(1);
     });
   });
 });

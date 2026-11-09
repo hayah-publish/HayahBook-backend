@@ -20,6 +20,7 @@ import { I18nService } from '../i18n/i18n.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { CommentsQueryDto, CommentSortType } from './dto/comments-query.dto';
+import { ReactionsQueryDto } from '../posts/dto/reactions-query.dto';
 import { UploadFile } from '../upload/upload-file.interface';
 import type { ReactionType, PostReactionsCount } from '../posts/post-reaction.entity';
 
@@ -683,6 +684,157 @@ export class CommentsService {
       userReaction: null,
       reactionsCount: counts,
       topReactions,
+    };
+  }
+
+  getReactionLabels(type: ReactionType): { ar: string; en: string; icon: string } {
+    switch (type) {
+      case 'agree':
+        return { ar: 'اتفق', en: 'Agree', icon: '🤝' };
+      case 'love':
+        return { ar: 'احببته', en: 'Love', icon: '❤️' };
+      case 'applaud':
+        return { ar: 'احسنت', en: 'Bravo', icon: '👏' };
+      case 'insightful':
+        return { ar: 'يستحق التفكير', en: 'Insightful', icon: '💭' };
+      case 'disagree':
+        return { ar: 'اعترض', en: 'Disagree', icon: '🙅' };
+    }
+  }
+
+  /**
+   * Get reactions modal list for a comment with tabs filtering (All, 🤝, ❤️, 👏, 💭, 🙅)
+   */
+  async getCommentReactions(
+    commentId: string,
+    query: ReactionsQueryDto,
+    currentUserId?: string,
+  ): Promise<{
+    counts: PostReactionsCount & { all: number };
+    data: Array<{
+      id: string;
+      reaction: ReactionType;
+      reactionIcon: string;
+      reactionLabelAr: string;
+      reactionLabelEn: string;
+      createdAt: Date;
+      user: {
+        id: string;
+        name: string;
+        profileUrl: string | null;
+        userType: string;
+        isVerified: boolean;
+        isFollowing: boolean;
+      };
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const comment = await this.commentsRepo.findOne({ where: { id: commentId } });
+    if (!comment) {
+      throw new NotFoundException(this.i18n.t('comments.not_found'));
+    }
+
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Math.min(50, Number(query.limit) || 20));
+
+    const counts = {
+      all: 0,
+      total: 0,
+      agree: 0,
+      love: 0,
+      applaud: 0,
+      insightful: 0,
+      disagree: 0,
+    };
+
+    if (this.commentReactionsRepo) {
+      const rawCounts = await this.commentReactionsRepo
+        .createQueryBuilder('r')
+        .where('r.commentId = :commentId', { commentId })
+        .select(['r.reactionType AS type', 'COUNT(r.id) AS count'])
+        .groupBy('r.reactionType')
+        .getRawMany();
+
+      for (const row of rawCounts) {
+        const t = row.type as ReactionType;
+        const c = Number(row.count) || 0;
+        if (counts[t] !== undefined) counts[t] = c;
+        counts.all += c;
+        counts.total += c;
+      }
+    }
+
+    let items: CommentReaction[] = [];
+    let total = 0;
+
+    if (this.commentReactionsRepo) {
+      const qb = this.commentReactionsRepo
+        .createQueryBuilder('r')
+        .innerJoinAndSelect('r.user', 'user')
+        .where('r.commentId = :commentId', { commentId });
+
+      if (query.type && query.type !== 'all' && query.type !== 'الكل') {
+        const targetType = this.normalizeReactionType(query.type);
+        if (targetType) {
+          qb.andWhere('r.reactionType = :targetType', { targetType });
+        }
+      }
+
+      qb.orderBy('r.createdAt', 'DESC')
+        .skip((page - 1) * limit)
+        .take(limit);
+
+      [items, total] = await qb.getManyAndCount();
+    }
+
+    const followingSet = new Set<string>();
+    if (currentUserId && items.length > 0 && this.userFollowRepo) {
+      const targetUserIds = items.map((i) => i.user?.id).filter(Boolean);
+      if (targetUserIds.length > 0) {
+        try {
+          const userFollows = await this.userFollowRepo.find({
+            where: { followerId: currentUserId, followingId: In(targetUserIds) },
+            select: { followingId: true },
+          });
+          for (const f of userFollows) {
+            followingSet.add(f.followingId);
+          }
+        } catch {
+          // Ignore if follow table mocked in tests
+        }
+      }
+    }
+
+    const data = items.map((i) => {
+      const labels = this.getReactionLabels(i.reactionType);
+      return {
+        id: i.id,
+        reaction: i.reactionType,
+        reactionIcon: labels.icon,
+        reactionLabelAr: labels.ar,
+        reactionLabelEn: labels.en,
+        createdAt: i.createdAt,
+        user: {
+          id: i.user?.id || i.userId,
+          name: i.user?.name || '',
+          profileUrl: i.user?.profileUrl || null,
+          userType: i.user?.userType || 'reader',
+          isVerified: i.user?.role === 'admin' || i.user?.userType === 'Author' || !!(i.user as any)?.isVerified,
+          isFollowing: followingSet.has(i.user?.id || i.userId),
+        },
+      };
+    });
+
+    return {
+      counts,
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
     };
   }
 

@@ -22,8 +22,8 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
         pinned_at timestamptz NULL,
         is_hidden boolean NOT NULL DEFAULT false,
         is_edited boolean NOT NULL DEFAULT false,
-        created_at timestamptz NOT NULL DEFAULT now(),
-        updated_at timestamptz NOT NULL DEFAULT now()
+        "createdAt" timestamptz NOT NULL DEFAULT now(),
+        "updatedAt" timestamptz NOT NULL DEFAULT now()
       )
     `);
 
@@ -34,7 +34,7 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
         comment_id uuid NOT NULL,
         user_id uuid NOT NULL,
         reaction_type varchar(20) NOT NULL,
-        created_at timestamptz NOT NULL DEFAULT now(),
+        "createdAt" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT uq_comment_reactions_comment_user UNIQUE (comment_id, user_id)
       )
     `);
@@ -45,7 +45,7 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         comment_id uuid NOT NULL,
         user_id uuid NOT NULL,
-        created_at timestamptz NOT NULL DEFAULT now(),
+        "createdAt" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT uq_comment_mutes_comment_user UNIQUE (comment_id, user_id)
       )
     `);
@@ -57,8 +57,29 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
         comment_id uuid NOT NULL,
         user_id uuid NOT NULL,
         reason text NULL,
-        created_at timestamptz NOT NULL DEFAULT now()
+        "createdAt" timestamptz NOT NULL DEFAULT now()
       )
+    `);
+
+    // Ensure camelCase column names for compatibility across all environments
+    await queryRunner.query(`
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'comments' AND column_name = 'created_at') THEN
+          ALTER TABLE comments RENAME COLUMN created_at TO "createdAt";
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'comments' AND column_name = 'updated_at') THEN
+          ALTER TABLE comments RENAME COLUMN updated_at TO "updatedAt";
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'comment_reactions' AND column_name = 'created_at') THEN
+          ALTER TABLE comment_reactions RENAME COLUMN created_at TO "createdAt";
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'comment_mutes' AND column_name = 'created_at') THEN
+          ALTER TABLE comment_mutes RENAME COLUMN created_at TO "createdAt";
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'comment_reports' AND column_name = 'created_at') THEN
+          ALTER TABLE comment_reports RENAME COLUMN created_at TO "createdAt";
+        END IF;
+      END $$;
     `);
 
     // Foreign Keys with conditional checks
@@ -156,7 +177,7 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
     // Indexes
     await queryRunner.query(`
       CREATE INDEX IF NOT EXISTS idx_comments_post_parent
-      ON comments (post_id, parent_id, created_at DESC)
+      ON comments (post_id, parent_id, "createdAt" DESC)
     `);
 
     await queryRunner.query(`
@@ -171,7 +192,7 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
 
     await queryRunner.query(`
       CREATE INDEX IF NOT EXISTS idx_comments_post_pinned
-      ON comments (post_id, is_pinned DESC, created_at DESC)
+      ON comments (post_id, is_pinned DESC, "createdAt" DESC)
     `);
 
     await queryRunner.query(`

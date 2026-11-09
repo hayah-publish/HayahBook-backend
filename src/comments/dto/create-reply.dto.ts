@@ -16,6 +16,10 @@ export class CreateReplyDto {
   imageUrl?: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  image?: any;
+
+  @IsOptional()
   @IsArray()
   @Transform(({ value }) => {
     if (typeof value === 'string') {
