@@ -380,25 +380,25 @@ export class CommentsService {
     const qb = this.commentsRepo
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
-      .where('comment.post_id = :postId', { postId })
-      .andWhere('comment.parent_id IS NULL');
+      .where('comment.postId = :postId', { postId })
+      .andWhere('comment.parentId IS NULL');
 
     // Filter hidden comments:
     // Option 3: 'all_comments' ("Show all comments, including potentially offensive ones.")
     // In 'all_comments' mode, do NOT exclude hidden/offensive comments.
     if (sort !== 'all_comments') {
       if (currentUserId && currentUserId !== post.userId) {
-        qb.andWhere('(comment.is_hidden = false OR comment.user_id = :currentUserId)', {
+        qb.andWhere('(comment.isHidden = false OR comment.userId = :currentUserId)', {
           currentUserId,
         });
       } else if (!currentUserId) {
-        qb.andWhere('comment.is_hidden = false');
+        qb.andWhere('comment.isHidden = false');
       }
     }
 
     // 1. Pinned comments always appear at the very top
-    qb.orderBy('comment.is_pinned', 'DESC');
-    qb.addOrderBy('comment.pinned_at', 'DESC');
+    qb.orderBy('comment.isPinned', 'DESC');
+    qb.addOrderBy('comment.pinnedAt', 'DESC');
 
     // 2. Sorting based on the selected mode:
     if (sort === 'most_relevant' || sort === 'most_interactive') {
@@ -415,8 +415,8 @@ export class CommentsService {
       if (friendUserIds.length > 0) {
         qb.addOrderBy(
           `CASE 
-             WHEN comment.user_id = :postAuthorId THEN 2 
-             WHEN comment.user_id IN (:...friendUserIds) THEN 1 
+             WHEN comment.userId = :postAuthorId THEN 2 
+             WHEN comment.userId IN (:...friendUserIds) THEN 1 
              ELSE 0 
            END`,
           'DESC',
@@ -425,7 +425,7 @@ export class CommentsService {
         qb.setParameter('friendUserIds', friendUserIds);
       } else {
         qb.addOrderBy(
-          `CASE WHEN comment.user_id = :postAuthorId THEN 1 ELSE 0 END`,
+          `CASE WHEN comment.userId = :postAuthorId THEN 1 ELSE 0 END`,
           'DESC',
         );
         qb.setParameter('postAuthorId', post.userId);
@@ -433,15 +433,15 @@ export class CommentsService {
 
       // Relevance score: likes * 2 + replies * 3
       qb.addOrderBy(
-        '((comment.likes_count * 2) + (comment.replies_count * 3))',
+        '((comment.likesCount * 2) + (comment.repliesCount * 3))',
         'DESC',
       );
-      qb.addOrderBy('comment.created_at', 'DESC');
+      qb.addOrderBy('comment.createdAt', 'DESC');
     } else if (sort === 'oldest') {
-      qb.addOrderBy('comment.created_at', 'ASC');
+      qb.addOrderBy('comment.createdAt', 'ASC');
     } else {
       // Option 2 & 3: 'newest' and 'all_comments' (newest first)
-      qb.addOrderBy('comment.created_at', 'DESC');
+      qb.addOrderBy('comment.createdAt', 'DESC');
     }
 
     qb.skip((page - 1) * limit).take(limit);
@@ -490,8 +490,8 @@ export class CommentsService {
       .createQueryBuilder('reply')
       .leftJoinAndSelect('reply.user', 'user')
       .leftJoinAndSelect('reply.replyToUser', 'replyToUser')
-      .where('reply.parent_id = :commentId', { commentId })
-      .orderBy('reply.created_at', 'ASC') // Chronological ordering for conversational replies
+      .where('reply.parentId = :commentId', { commentId })
+      .orderBy('reply.createdAt', 'ASC') // Chronological ordering for conversational replies
       .skip((page - 1) * limit)
       .take(limit);
 

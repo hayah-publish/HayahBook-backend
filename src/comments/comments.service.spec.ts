@@ -458,7 +458,7 @@ describe('CommentsService', () => {
         where: { followerId: 'user-1' },
         select: { followingId: true },
       });
-      expect(mockQb.orderBy).toHaveBeenCalledWith('comment.is_pinned', 'DESC');
+      expect(mockQb.orderBy).toHaveBeenCalledWith('comment.isPinned', 'DESC');
     });
 
     it('does not filter out hidden comments when sort is all_comments', async () => {
