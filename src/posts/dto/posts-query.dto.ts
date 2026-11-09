@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsInt,
   IsOptional,
@@ -52,7 +53,19 @@ export class PostsQueryDto {
   @IsString()
   scope?: string;
 
-  // Internal filter passed to query builder
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        return value.split(',').map((v) => v.trim()).filter(Boolean);
+      }
+    }
+    return Array.isArray(value) ? value : undefined;
+  })
   followingUserIds?: string[];
 }
 
