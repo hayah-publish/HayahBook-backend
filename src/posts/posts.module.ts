@@ -9,6 +9,7 @@ import { Audiobook } from '../books/audiobook.entity';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { ArticlesController } from './articles.controller';
+import { ReactionsController } from './reactions.controller';
 import { UploadModule } from '../upload/upload.module';
 import { I18nModule } from '../i18n/i18n.module';
 import { InterestsModule } from '../interests/interests.module';
@@ -20,7 +21,7 @@ import { InterestsModule } from '../interests/interests.module';
     I18nModule,
     InterestsModule,
   ],
-  controllers: [PostsController, ArticlesController],
+  controllers: [PostsController, ArticlesController, ReactionsController],
   providers: [PostsService],
   exports: [PostsService],
 })

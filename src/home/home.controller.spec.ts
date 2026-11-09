@@ -32,6 +32,20 @@ describe('HomeController', () => {
         snippets: 1,
       }),
       getFollowedUserIds: jest.fn().mockResolvedValue(['user-followed-1']),
+      reactToPost: jest.fn().mockResolvedValue({
+        message: 'تم التفاعل بنجاح',
+        action: 'added',
+        userReaction: 'love',
+      }),
+      removeReaction: jest.fn().mockResolvedValue({
+        message: 'تمت إزالة التفاعل بنجاح',
+        action: 'removed',
+        userReaction: null,
+      }),
+      getPostReactions: jest.fn().mockResolvedValue({
+        counts: { total: 1 },
+        data: [],
+      }),
     };
 
     i18nService = {
@@ -135,6 +149,39 @@ describe('HomeController', () => {
       await expect(controller.getFeedCounts(mockReq, {})).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+  });
+
+  describe('feed items reactions', () => {
+    it('reacts to feed item via reactToFeedItem', async () => {
+      const mockReq: any = { user: { userId: 'user-viewer-1' } };
+      const res = await controller.reactToFeedItem('item-1', { reaction: 'love' }, mockReq);
+
+      expect(postsService.reactToPost).toHaveBeenCalledWith('user-viewer-1', 'item-1', 'love');
+      expect(res.action).toBe('added');
+    });
+
+    it('throws UnauthorizedException when reactToFeedItem is called without token', async () => {
+      const mockReq: any = { headers: {} };
+      await expect(controller.reactToFeedItem('item-1', { reaction: 'love' }, mockReq)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('removes reaction via removeFeedItemReaction', async () => {
+      const mockReq: any = { user: { userId: 'user-viewer-1' } };
+      const res = await controller.removeFeedItemReaction('item-1', mockReq);
+
+      expect(postsService.removeReaction).toHaveBeenCalledWith('user-viewer-1', 'item-1');
+      expect(res.action).toBe('removed');
+    });
+
+    it('gets reactions list via getFeedItemReactions', async () => {
+      const mockReq: any = { user: { userId: 'user-viewer-1' } };
+      const res = await controller.getFeedItemReactions('item-1', { type: 'all' }, mockReq);
+
+      expect(postsService.getPostReactions).toHaveBeenCalledWith('item-1', { type: 'all' }, 'user-viewer-1');
+      expect(res.counts.total).toBe(1);
     });
   });
 });

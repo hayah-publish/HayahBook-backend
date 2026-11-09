@@ -1,14 +1,23 @@
 import {
   Controller,
   Get,
+  Post,
+  Delete,
+  Param,
+  Body,
   Query,
   Req,
   UseGuards,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { PostsService } from '../posts/posts.service';
 import { PostsQueryDto } from '../posts/dto/posts-query.dto';
+import { ReactPostDto } from '../posts/dto/react-post.dto';
+import { ReactionsQueryDto } from '../posts/dto/reactions-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { I18nService } from '../i18n/i18n.service';
 
@@ -113,5 +122,60 @@ export class HomeController {
       ? await this.postsService.getFollowedUserIds(userId)
       : undefined;
     return this.postsService.getFeedCounts(filterUserIds);
+  }
+
+  /**
+   * POST /v1/home/:id/react
+   * POST /v1/feed/:id/react
+   * React to any feed item (posts, articles, visuals, snippets)
+   */
+  @Post(':id/react')
+  async reactToFeedItem(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: ReactPostDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException(
+        this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
+      );
+    }
+    return this.postsService.reactToPost(userId, id, dto.reaction);
+  }
+
+  /**
+   * DELETE /v1/home/:id/react
+   * DELETE /v1/feed/:id/react
+   * Remove reaction from any feed item (posts, articles, visuals, snippets)
+   */
+  @Delete(':id/react')
+  @HttpCode(HttpStatus.OK)
+  async removeFeedItemReaction(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException(
+        this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
+      );
+    }
+    return this.postsService.removeReaction(userId, id);
+  }
+
+  /**
+   * GET /v1/home/:id/reacts
+   * GET /v1/feed/:id/reacts
+   * Get reactions modal list for any feed item
+   */
+  @Get(':id/reacts')
+  async getFeedItemReactions(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query() query: ReactionsQueryDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.userId;
+    return this.postsService.getPostReactions(id, query, userId);
   }
 }
