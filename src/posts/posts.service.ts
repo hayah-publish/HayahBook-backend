@@ -1182,16 +1182,12 @@ export class PostsService {
       );
     }
 
-    const isFollowingQuery = Array.isArray(query.followingUserIds);
-    if (isFollowingQuery) {
-      // In following feed: Strict reverse-chronological order (merging all 4 types)
-      qb.orderBy('post.createdAt', 'DESC');
-    } else if (currentUserId) {
-      // In "For You" (personalized feed):
+    if (currentUserId) {
+      // Personalized smart algorithm applied for both "For You" (following: false)
+      // and "Following" (following: true, where content is strictly restricted to followed accounts)
       const interestKeywords = await this.getUserInterestKeywords(currentUserId);
       if (
         interestKeywords.length > 0 &&
-        typeof (qb as any).setParameters === 'function' &&
         typeof (qb as any).addSelect === 'function' &&
         typeof (qb as any).addOrderBy === 'function'
       ) {
@@ -1202,7 +1198,15 @@ export class PostsService {
           clauses.push(`post.category ILIKE :ikw_${i}`);
           clauses.push(`book.category ILIKE :ikw_${i}`);
         });
-        (qb as any).setParameters(params);
+
+        if (typeof (qb as any).setParameters === 'function') {
+          const currentParams =
+            typeof (qb as any).getParameters === 'function'
+              ? (qb as any).getParameters()
+              : {};
+          (qb as any).setParameters({ ...currentParams, ...params });
+        }
+
         (qb as any).addSelect(
           `(CASE WHEN (${clauses.join(' OR ')}) THEN 1 ELSE 0 END)`,
           'interest_match',

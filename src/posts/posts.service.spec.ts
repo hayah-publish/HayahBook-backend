@@ -915,6 +915,80 @@ describe('PostsService public post formatting', () => {
         expect(res.counts.visuals).toBe(1);
         expect(res.counts.snippets).toBe(1);
       });
+
+      it('applies smart personalized ranking to followed accounts feed when user has interests', async () => {
+        const mockFollowRepo: any = {
+          find: jest.fn().mockResolvedValue([
+            { followingId: 'followed-user-1' },
+          ]),
+        };
+        const mockDataSource: any = {
+          query: jest.fn().mockImplementation((sql: string) => {
+            if (sql.includes('user_author_follows') || sql.includes('user_creator_follows')) {
+              return Promise.resolve([]);
+            }
+            if (sql.includes('user_interests')) {
+              return Promise.resolve([
+                { name: 'روايات', name_ar: 'روايات', category: 'الكتب', category_ar: 'الكتب' },
+              ]);
+            }
+            return Promise.resolve([]);
+          }),
+        };
+
+        const qb: any = {
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          addOrderBy: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+          select: jest.fn().mockReturnThis(),
+          addSelect: jest.fn().mockReturnThis(),
+          setParameters: jest.fn().mockReturnThis(),
+          getParameters: jest.fn().mockReturnValue({}),
+          getRawOne: jest.fn().mockResolvedValue({ all: '1', posts: '1', articles: '0', visuals: '0', snippets: '0' }),
+        };
+
+        const mockPostsRepo: any = {
+          createQueryBuilder: jest.fn().mockReturnValue(qb),
+        };
+
+        const postService = new PostsService(
+          mockPostsRepo,
+          { find: jest.fn().mockResolvedValue([]) } as any,
+          {} as any,
+          {} as any,
+          {} as any,
+          { t: jest.fn().mockImplementation((k) => k) } as any,
+          undefined,
+          mockFollowRepo,
+          mockDataSource,
+        );
+
+        const res = await postService.getHomeFeed(
+          { following: true, type: 'all' },
+          'user-viewer-1',
+        );
+
+        // Restricts content strictly to followed accounts
+        expect(qb.andWhere).toHaveBeenCalledWith(
+          'post.user_id IN (:...followingUserIds)',
+          expect.objectContaining({
+            followingUserIds: expect.arrayContaining(['followed-user-1']),
+          }),
+        );
+        // Applies smart personalized ranking to the followed accounts content
+        expect(qb.addSelect).toHaveBeenCalledWith(
+          expect.stringContaining('CASE WHEN'),
+          'interest_match',
+        );
+        expect(qb.orderBy).toHaveBeenCalledWith('interest_match', 'DESC');
+        expect(qb.addOrderBy).toHaveBeenCalledWith('post.createdAt', 'DESC');
+        expect(res.counts.all).toBe(1);
+      });
     });
   });
 });
