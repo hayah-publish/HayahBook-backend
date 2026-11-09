@@ -72,3 +72,4 @@ export function MinWords(min: number, validationOptions?: ValidationOptions) {
     });
   };
 }
+

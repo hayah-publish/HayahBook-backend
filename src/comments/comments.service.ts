@@ -428,29 +428,32 @@ export class CommentsService {
       }
 
       if (friendUserIds.length > 0) {
-        qb.addOrderBy(
+        qb.addSelect(
           `CASE 
              WHEN comment.userId = :postAuthorId THEN 2 
              WHEN comment.userId IN (:...friendUserIds) THEN 1 
              ELSE 0 
            END`,
-          'DESC',
+          'friend_priority',
         );
         qb.setParameter('postAuthorId', post.userId);
         qb.setParameter('friendUserIds', friendUserIds);
+        qb.addOrderBy('friend_priority', 'DESC');
       } else {
-        qb.addOrderBy(
+        qb.addSelect(
           `CASE WHEN comment.userId = :postAuthorId THEN 1 ELSE 0 END`,
-          'DESC',
+          'friend_priority',
         );
         qb.setParameter('postAuthorId', post.userId);
+        qb.addOrderBy('friend_priority', 'DESC');
       }
 
       // Relevance score: likes * 2 + replies * 3
-      qb.addOrderBy(
+      qb.addSelect(
         '((comment.likesCount * 2) + (comment.repliesCount * 3))',
-        'DESC',
+        'engagement_score',
       );
+      qb.addOrderBy('engagement_score', 'DESC');
       qb.addOrderBy('comment.createdAt', 'DESC');
     } else if (sort === 'oldest') {
       qb.addOrderBy('comment.createdAt', 'ASC');
