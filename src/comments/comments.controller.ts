@@ -53,10 +53,11 @@ export class CommentsController {
     @Body() dto: CreateCommentDto,
     @UploadedFile() image?: UploadFile,
   ) {
+    const targetId = dto.contentId || dto.postId;
     return this.commentsService.createComment(
       req.user!.userId,
       dto,
-      dto.postId,
+      targetId,
       image,
     );
   }
@@ -84,8 +85,8 @@ export class CommentsController {
   }
 
   /**
-   * 3. Get root comments for a post/article/visual/snippet
-   * GET /v1/comments?postId=...&sort=most_interactive&page=1&limit=20
+   * 3. Get root comments for any content item (post, article, visual, snippet)
+   * GET /v1/comments?contentId=...&sort=most_interactive&page=1&limit=20
    */
   @UseGuards(OptionalJwtAuthGuard)
   @Get()
@@ -93,11 +94,11 @@ export class CommentsController {
     @Query() query: CommentsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
-    const postId = query.postId;
-    if (!postId) {
+    const targetId = query.contentId || query.postId;
+    if (!targetId) {
       return { data: [], total: 0, page: 1, limit: 20, totalPages: 1 };
     }
-    return this.commentsService.getPostComments(postId, query, req?.user?.userId);
+    return this.commentsService.getPostComments(targetId, query, req?.user?.userId);
   }
 
   /**
@@ -149,10 +150,12 @@ export class CommentsController {
 
   /**
    * 7. Pin / Unpin comment
+   * POST /v1/comments/:id/pin
    * PATCH /v1/comments/:id/pin
    * Post Owner or Admin only
    */
   @UseGuards(JwtAuthGuard)
+  @Post(':id/pin')
   @Patch(':id/pin')
   async togglePin(
     @Req() req: AuthenticatedRequest,
@@ -164,9 +167,11 @@ export class CommentsController {
 
   /**
    * 8. Hide / Unhide comment
+   * POST /v1/comments/:id/hide
    * PATCH /v1/comments/:id/hide
    */
   @UseGuards(JwtAuthGuard)
+  @Post(':id/hide')
   @Patch(':id/hide')
   async toggleHide(
     @Req() req: AuthenticatedRequest,
@@ -178,9 +183,11 @@ export class CommentsController {
 
   /**
    * 9. Mute / Unmute comment notifications
+   * POST /v1/comments/:id/mute
    * PATCH /v1/comments/:id/mute
    */
   @UseGuards(JwtAuthGuard)
+  @Post(':id/mute')
   @Patch(':id/mute')
   async toggleMute(
     @Req() req: AuthenticatedRequest,
@@ -234,5 +241,42 @@ export class CommentsController {
   ) {
     const isAdmin = req.user?.role === 'admin';
     return this.commentsService.deleteComment(req.user!.userId, id, isAdmin);
+  }
+
+  /**
+   * 13. Get comments for any content item (post, article, visual, snippet)
+   * GET /v1/comments/:contentId
+   * GET /v1/comments/content/:contentId
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get([':contentId', 'content/:contentId'])
+  async getCommentsByContentId(
+    @Param('contentId', new ParseUUIDPipe()) contentId: string,
+    @Query() query: CommentsQueryDto,
+    @Req() req?: AuthenticatedRequest,
+  ) {
+    return this.commentsService.getPostComments(contentId, query, req?.user?.userId);
+  }
+
+  /**
+   * 14. Create comment for any content item (post, article, visual, snippet)
+   * POST /v1/comments/:contentId
+   * POST /v1/comments/content/:contentId
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post([':contentId', 'content/:contentId'])
+  @UseInterceptors(FileInterceptor('image'))
+  async createCommentByContentId(
+    @Req() req: AuthenticatedRequest,
+    @Param('contentId', new ParseUUIDPipe()) contentId: string,
+    @Body() dto: CreateCommentDto,
+    @UploadedFile() image?: UploadFile,
+  ) {
+    return this.commentsService.createComment(
+      req.user!.userId,
+      dto,
+      contentId,
+      image,
+    );
   }
 }

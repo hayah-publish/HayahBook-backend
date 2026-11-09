@@ -32,3 +32,4 @@ describe('CreateCommentsAndRepliesTables1762700000000 migration', () => {
     expect(sql).toContain('DROP TABLE IF EXISTS comments');
   });
 });
+

@@ -185,7 +185,7 @@ export const en = {
   'comments.deleted': 'Comment deleted successfully',
   'comments.not_found': 'Comment not found',
   'comments.content_required': 'Comment content is required',
-  'comments.post_required': 'Post ID is required',
+  'comments.post_required': 'Content ID is required',
   'comments.unauthorized_edit': 'You are not authorized to edit this comment',
   'comments.unauthorized_delete': 'You are not authorized to delete this comment',
   'comments.unauthorized_pin': 'Only the post author can pin comments',

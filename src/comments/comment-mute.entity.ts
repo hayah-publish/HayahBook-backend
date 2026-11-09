@@ -30,3 +30,4 @@ export class CommentMute {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
+

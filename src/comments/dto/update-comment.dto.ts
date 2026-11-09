@@ -7,3 +7,4 @@ export class UpdateCommentDto {
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   content: string;
 }
+

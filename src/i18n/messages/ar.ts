@@ -185,7 +185,7 @@ export const ar = {
   'comments.deleted': 'تم حذف التعليق بنجاح',
   'comments.not_found': 'التعليق غير موجود',
   'comments.content_required': 'محتوى التعليق مطلوب',
-  'comments.post_required': 'معرف المنشور مطلوب',
+  'comments.post_required': 'معرف المحتوى مطلوب',
   'comments.unauthorized_edit': 'غير مصرح لك بتعديل هذا التعليق',
   'comments.unauthorized_delete': 'غير مصرح لك بحذف هذا التعليق',
   'comments.unauthorized_pin': 'يسمح لصاحب المنشور فقط بتثبيت التعليقات',

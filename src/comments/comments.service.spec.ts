@@ -122,6 +122,16 @@ describe('CommentsService', () => {
   });
 
   describe('createComment', () => {
+    it('creates a root comment successfully using contentId instead of postId', async () => {
+      const res = await service.createComment('user-1', {
+        contentId: 'post-1',
+        content: 'تعليق باستخدام contentId',
+      });
+
+      expect(postsRepo.increment).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 1);
+      expect(res.data.content).toBe('تعليق باستخدام contentId');
+    });
+
     it('creates a root comment successfully and increments post commentsCount', async () => {
       const res = await service.createComment('user-1', {
         postId: 'post-1',

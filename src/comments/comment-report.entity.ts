@@ -32,3 +32,4 @@ export class CommentReport {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
+

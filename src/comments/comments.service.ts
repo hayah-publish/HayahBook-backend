@@ -153,7 +153,7 @@ export class CommentsService {
     postIdParam?: string,
     imageFile?: UploadFile,
   ): Promise<{ message: string; data: FormattedComment }> {
-    const targetPostId = postIdParam || dto.postId;
+    const targetPostId = postIdParam || dto.contentId || dto.postId;
     if (!targetPostId) {
       throw new BadRequestException(this.i18n.t('comments.post_required'));
     }
@@ -937,3 +937,4 @@ export class CommentsService {
     };
   }
 }
+

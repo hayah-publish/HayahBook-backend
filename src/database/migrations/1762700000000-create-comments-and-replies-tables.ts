@@ -187,3 +187,4 @@ export class CreateCommentsAndRepliesTables1762700000000 implements MigrationInt
     await queryRunner.query(`DROP TABLE IF EXISTS comments`);
   }
 }
+

@@ -8,6 +8,7 @@ import { Post } from '../posts/post.entity';
 import { User } from '../users/user.entity';
 import { CommentsService } from './comments.service';
 import { CommentsController } from './comments.controller';
+import { ContentCommentsController } from './content-comments.controller';
 import { UploadModule } from '../upload/upload.module';
 import { I18nModule } from '../i18n/i18n.module';
 
@@ -24,8 +25,9 @@ import { I18nModule } from '../i18n/i18n.module';
     UploadModule,
     I18nModule,
   ],
-  controllers: [CommentsController],
+  controllers: [CommentsController, ContentCommentsController],
   providers: [CommentsService],
   exports: [CommentsService],
 })
 export class CommentsModule {}
+

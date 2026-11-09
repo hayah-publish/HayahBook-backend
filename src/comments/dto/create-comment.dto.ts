@@ -4,6 +4,10 @@ import { Transform } from 'class-transformer';
 export class CreateCommentDto {
   @IsOptional()
   @IsUUID('4')
+  contentId?: string;
+
+  @IsOptional()
+  @IsUUID('4')
   postId?: string;
 
   @IsNotEmpty({ message: 'comments.content_required' })
@@ -30,3 +34,4 @@ export class CreateCommentDto {
   })
   mentions?: string[];
 }
+

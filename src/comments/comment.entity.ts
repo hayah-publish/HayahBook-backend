@@ -103,3 +103,4 @@ export class Comment {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }
+

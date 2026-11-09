@@ -6,6 +6,10 @@ export type CommentSortType = 'most_interactive' | 'newest' | 'oldest';
 export class CommentsQueryDto {
   @IsOptional()
   @IsUUID('4')
+  contentId?: string;
+
+  @IsOptional()
+  @IsUUID('4')
   postId?: string;
 
   @IsOptional()
@@ -25,3 +29,4 @@ export class CommentsQueryDto {
   @Max(50)
   limit?: number = 20;
 }
+
