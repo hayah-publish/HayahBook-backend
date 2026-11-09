@@ -212,20 +212,20 @@ describe('CommentsController', () => {
     });
   });
 
-  describe('getCommentsByContentId', () => {
-    it('delegates to service.getPostComments with contentId path param', async () => {
+  describe('getCommentsByPostId', () => {
+    it('delegates to service.getPostComments with postId path param', async () => {
       const query = { sort: 'most_interactive', page: 1, limit: 10 };
-      const res = await controller.getCommentsByContentId('content-uuid-1', query, mockUserReq);
-      expect(service.getPostComments).toHaveBeenCalledWith('content-uuid-1', query, 'user-1');
+      const res = await controller.getCommentsByPostId('post-uuid-1', query, mockUserReq);
+      expect(service.getPostComments).toHaveBeenCalledWith('post-uuid-1', query, 'user-1');
       expect(res.total).toBe(0);
     });
   });
 
-  describe('createCommentByContentId', () => {
-    it('delegates to service.createComment with contentId path param', async () => {
+  describe('createCommentByPostId', () => {
+    it('delegates to service.createComment with postId path param', async () => {
       const dto = { content: 'nice article' };
-      const res = await controller.createCommentByContentId(mockUserReq, 'content-uuid-1', dto);
-      expect(service.createComment).toHaveBeenCalledWith('user-1', dto, 'content-uuid-1', undefined);
+      const res = await controller.createCommentByPostId(mockUserReq, 'post-uuid-1', dto);
+      expect(service.createComment).toHaveBeenCalledWith('user-1', dto, 'post-uuid-1', undefined);
       expect(res.data.id).toBe('comment-1');
     });
   });

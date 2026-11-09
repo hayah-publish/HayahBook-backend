@@ -253,38 +253,38 @@ export class CommentsController {
   }
 
   /**
-   * 13. Get comments for any content item (post, article, visual, snippet)
-   * GET /v1/comments/:contentId
-   * GET /v1/comments/content/:contentId
+   * 13. Get comments for any post or content item
+   * GET /v1/comments/:postId
+   * GET /v1/comments/content/:postId
    */
   @UseGuards(OptionalJwtAuthGuard)
-  @Get([':contentId', 'content/:contentId'])
-  async getCommentsByContentId(
-    @Param('contentId', new ParseUUIDPipe()) contentId: string,
+  @Get([':postId', 'content/:postId'])
+  async getCommentsByPostId(
+    @Param('postId', new ParseUUIDPipe()) postId: string,
     @Query() query: CommentsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
-    return this.commentsService.getPostComments(contentId, query, req?.user?.userId);
+    return this.commentsService.getPostComments(postId, query, req?.user?.userId);
   }
 
   /**
-   * 14. Create comment for any content item (post, article, visual, snippet)
-   * POST /v1/comments/:contentId
-   * POST /v1/comments/content/:contentId
+   * 14. Create comment for any post or content item
+   * POST /v1/comments/:postId
+   * POST /v1/comments/content/:postId
    */
   @UseGuards(JwtAuthGuard)
-  @Post([':contentId', 'content/:contentId'])
+  @Post([':postId', 'content/:postId'])
   @UseInterceptors(FileInterceptor('image'))
-  async createCommentByContentId(
+  async createCommentByPostId(
     @Req() req: AuthenticatedRequest,
-    @Param('contentId', new ParseUUIDPipe()) contentId: string,
+    @Param('postId', new ParseUUIDPipe()) postId: string,
     @Body() dto: CreateCommentDto,
     @UploadedFile() image?: UploadFile,
   ) {
     return this.commentsService.createComment(
       req.user!.userId,
       dto,
-      contentId,
+      postId,
       image,
     );
   }

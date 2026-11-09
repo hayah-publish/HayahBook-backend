@@ -47,19 +47,19 @@ describe('ContentCommentsController', () => {
   });
 
   describe('getContentComments', () => {
-    it('delegates to service.getPostComments with content ID and query', async () => {
+    it('delegates to service.getPostComments with post ID and query', async () => {
       const query = { sort: 'newest', page: 1, limit: 10 };
-      const res = await controller.getContentComments('content-id-1', query, mockUserReq);
-      expect(service.getPostComments).toHaveBeenCalledWith('content-id-1', query, 'user-1');
+      const res = await controller.getContentComments('post-id-1', query, mockUserReq);
+      expect(service.getPostComments).toHaveBeenCalledWith('post-id-1', query, 'user-1');
       expect(res.total).toBe(0);
     });
   });
 
   describe('createContentComment', () => {
-    it('delegates to service.createComment with content ID and dto', async () => {
+    it('delegates to service.createComment with post ID and dto', async () => {
       const dto = { content: 'comment content' };
-      const res = await controller.createContentComment(mockUserReq, 'content-id-1', dto);
-      expect(service.createComment).toHaveBeenCalledWith('user-1', dto, 'content-id-1', undefined);
+      const res = await controller.createContentComment(mockUserReq, 'post-id-1', dto);
+      expect(service.createComment).toHaveBeenCalledWith('user-1', dto, 'post-id-1', undefined);
       expect(res.data.id).toBe('comment-1');
     });
   });

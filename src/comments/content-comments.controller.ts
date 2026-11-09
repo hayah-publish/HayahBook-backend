@@ -33,38 +33,38 @@ export class ContentCommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   /**
-   * GET /v1/content/:id/comments
-   * (also supports /v1/posts/:id/comments and /v1/articles/:id/comments)
+   * GET /v1/content/:postId/comments
+   * (also supports /v1/posts/:postId/comments and /v1/articles/:postId/comments)
    * Universal comments feed for any content type (post, article, visual, snippet)
    */
   @UseGuards(OptionalJwtAuthGuard)
-  @Get(':id/comments')
+  @Get(':postId/comments')
   async getContentComments(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('postId', new ParseUUIDPipe()) postId: string,
     @Query() query: CommentsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
-    return this.commentsService.getPostComments(id, query, req?.user?.userId);
+    return this.commentsService.getPostComments(postId, query, req?.user?.userId);
   }
 
   /**
-   * POST /v1/content/:id/comments
-   * (also supports /v1/posts/:id/comments and /v1/articles/:id/comments)
+   * POST /v1/content/:postId/comments
+   * (also supports /v1/posts/:postId/comments and /v1/articles/:postId/comments)
    * Universal endpoint to create a comment on any content type
    */
   @UseGuards(JwtAuthGuard)
-  @Post(':id/comments')
+  @Post(':postId/comments')
   @UseInterceptors(FileInterceptor('image'))
   async createContentComment(
     @Req() req: AuthenticatedRequest,
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('postId', new ParseUUIDPipe()) postId: string,
     @Body() dto: CreateCommentDto,
     @UploadedFile() image?: UploadFile,
   ) {
     return this.commentsService.createComment(
       req.user!.userId,
       dto,
-      id,
+      postId,
       image,
     );
   }

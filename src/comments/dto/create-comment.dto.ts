@@ -4,11 +4,11 @@ import { Transform } from 'class-transformer';
 export class CreateCommentDto {
   @IsOptional()
   @IsUUID('4')
-  contentId?: string;
+  postId?: string;
 
   @IsOptional()
   @IsUUID('4')
-  postId?: string;
+  contentId?: string;
 
   @IsNotEmpty({ message: 'comments.content_required' })
   @IsString()

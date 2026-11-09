@@ -11,11 +11,11 @@ export type CommentSortType =
 export class CommentsQueryDto {
   @IsOptional()
   @IsUUID('4')
-  contentId?: string;
+  postId?: string;
 
   @IsOptional()
   @IsUUID('4')
-  postId?: string;
+  contentId?: string;
 
   @IsOptional()
   @IsString()
