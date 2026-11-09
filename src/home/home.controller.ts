@@ -10,7 +10,6 @@ import type { Request } from 'express';
 import { PostsService } from '../posts/posts.service';
 import { PostsQueryDto } from '../posts/dto/posts-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { I18nService } from '../i18n/i18n.service';
 
 interface AuthenticatedRequest extends Request {
@@ -22,6 +21,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller(['home', 'feed'])
+@UseGuards(JwtAuthGuard)
 export class HomeController {
   constructor(
     private readonly postsService: PostsService,
@@ -32,18 +32,24 @@ export class HomeController {
    * GET /v1/home
    * GET /v1/feed
    * Unified Home Feed combining posts, articles, visuals, and snippets.
+   * Strictly requires Bearer Token (no unregistered guests allowed).
    * Query params:
    *  - type: all | posts | articles | visuals | snippets
    *  - following: true | false (filter to followed accounts)
    *  - scope: all | following
    */
   @Get()
-  @UseGuards(OptionalJwtAuthGuard)
   async getHomeFeed(
     @Req() req: AuthenticatedRequest,
     @Query() query: PostsQueryDto,
   ) {
-    return this.postsService.getHomeFeed(query, req.user?.userId);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException(
+        this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
+      );
+    }
+    return this.postsService.getHomeFeed(query, userId);
   }
 
   /**
@@ -52,14 +58,19 @@ export class HomeController {
    * Dedicated endpoint for followed accounts across all 4 types (posts, articles, visuals, snippets)
    */
   @Get('following')
-  @UseGuards(JwtAuthGuard)
   async getFollowingFeed(
     @Req() req: AuthenticatedRequest,
     @Query() query: PostsQueryDto,
   ) {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException(
+        this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
+      );
+    }
     return this.postsService.getHomeFeed(
       Object.assign(query, { following: true, scope: 'following' as const }),
-      req.user!.userId,
+      userId,
     );
   }
 
@@ -67,12 +78,17 @@ export class HomeController {
    * GET /v1/home/feed
    */
   @Get('feed')
-  @UseGuards(OptionalJwtAuthGuard)
   async getFeed(
     @Req() req: AuthenticatedRequest,
     @Query() query: PostsQueryDto,
   ) {
-    return this.postsService.getHomeFeed(query, req.user?.userId);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException(
+        this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
+      );
+    }
+    return this.postsService.getHomeFeed(query, userId);
   }
 
   /**
@@ -82,19 +98,18 @@ export class HomeController {
    * Supports ?following=true to get counts for followed accounts
    */
   @Get('counts')
-  @UseGuards(OptionalJwtAuthGuard)
   async getFeedCounts(
     @Req() req: AuthenticatedRequest,
     @Query() query: PostsQueryDto,
   ) {
     const userId = req.user?.userId;
-    const isFollowing = query.following === true || query.scope === 'following';
-    if (isFollowing && !userId) {
+    if (!userId) {
       throw new UnauthorizedException(
         this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
       );
     }
-    const filterUserIds = isFollowing && userId
+    const isFollowing = query.following === true || query.scope === 'following';
+    const filterUserIds = isFollowing
       ? await this.postsService.getFollowedUserIds(userId)
       : undefined;
     return this.postsService.getFeedCounts(filterUserIds);

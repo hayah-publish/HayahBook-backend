@@ -817,6 +817,10 @@ describe('PostsService public post formatting', () => {
         await expect(
           postService.getHomeFeed({ following: true }),
         ).rejects.toThrow(UnauthorizedException);
+
+        await expect(
+          postService.getHomeFeed({ following: false }),
+        ).rejects.toThrow(UnauthorizedException);
       });
 
       it('returns empty list and zero counts if user follows no one', async () => {

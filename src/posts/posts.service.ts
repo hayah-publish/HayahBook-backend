@@ -173,6 +173,40 @@ export class PostsService {
   }
 
   /**
+   * Retrieve keyword list from user interests (names and categories) to personalize the "For You" feed
+   */
+  async getUserInterestKeywords(userId?: string): Promise<string[]> {
+    if (!userId || !this.dataSource) return [];
+    try {
+      const rows: Array<{
+        name?: string;
+        name_ar?: string;
+        name_en?: string;
+        category?: string;
+        category_ar?: string;
+        category_en?: string;
+      }> = await this.dataSource.query(
+        `SELECT i.name, i.name_ar, i.name_en, i.category, i.category_ar, i.category_en
+         FROM user_interests ui
+         JOIN interests i ON i.id = ui.interest_id
+         WHERE ui.user_id = $1`,
+        [userId],
+      );
+      const keywords = new Set<string>();
+      for (const r of rows || []) {
+        for (const val of [r.name, r.name_ar, r.name_en, r.category, r.category_ar, r.category_en]) {
+          if (val && typeof val === 'string' && val.trim().length > 1) {
+            keywords.add(val.trim().toLowerCase());
+          }
+        }
+      }
+      return Array.from(keywords);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
    * Normalize input reaction string from English or Arabic into standard canonical ReactionType
    */
   normalizeReactionType(input?: string): ReactionType | null {
@@ -1060,14 +1094,14 @@ export class PostsService {
       query.following === true ||
       query.scope === 'following';
 
-    if (isFollowing && !currentUserId) {
+    if (!currentUserId) {
       throw new UnauthorizedException(
         this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
       );
     }
 
     let filterUserIds: string[] | undefined = undefined;
-    if (isFollowing && currentUserId) {
+    if (isFollowing) {
       const followed = await this.getFollowedUserIds(currentUserId);
       if (followed.length === 0) {
         return {
@@ -1148,8 +1182,41 @@ export class PostsService {
       );
     }
 
-    qb.orderBy('post.createdAt', 'DESC')
-      .skip((page - 1) * limit)
+    const isFollowingQuery = Array.isArray(query.followingUserIds);
+    if (isFollowingQuery) {
+      // In following feed: Strict reverse-chronological order (merging all 4 types)
+      qb.orderBy('post.createdAt', 'DESC');
+    } else if (currentUserId) {
+      // In "For You" (personalized feed):
+      const interestKeywords = await this.getUserInterestKeywords(currentUserId);
+      if (
+        interestKeywords.length > 0 &&
+        typeof (qb as any).setParameters === 'function' &&
+        typeof (qb as any).addSelect === 'function' &&
+        typeof (qb as any).addOrderBy === 'function'
+      ) {
+        const clauses: string[] = [];
+        const params: Record<string, string> = {};
+        interestKeywords.slice(0, 10).forEach((kw, i) => {
+          params[`ikw_${i}`] = `%${kw}%`;
+          clauses.push(`post.category ILIKE :ikw_${i}`);
+          clauses.push(`book.category ILIKE :ikw_${i}`);
+        });
+        (qb as any).setParameters(params);
+        (qb as any).addSelect(
+          `(CASE WHEN (${clauses.join(' OR ')}) THEN 1 ELSE 0 END)`,
+          'interest_match',
+        );
+        qb.orderBy('interest_match', 'DESC');
+        (qb as any).addOrderBy('post.createdAt', 'DESC');
+      } else {
+        qb.orderBy('post.createdAt', 'DESC');
+      }
+    } else {
+      qb.orderBy('post.createdAt', 'DESC');
+    }
+
+    qb.skip((page - 1) * limit)
       .take(limit);
 
     const [items, total] = await qb.getManyAndCount();

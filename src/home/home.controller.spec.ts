@@ -12,7 +12,7 @@ describe('HomeController', () => {
   beforeEach(async () => {
     postsService = {
       getHomeFeed: jest.fn().mockImplementation((query, userId) => {
-        if ((query.following || query.scope === 'following') && !userId) {
+        if (!userId) {
           throw new UnauthorizedException('Unauthorized');
         }
         return Promise.resolve({
@@ -60,17 +60,17 @@ describe('HomeController', () => {
   });
 
   describe('getHomeFeed', () => {
-    it('delegates to postsService.getHomeFeed publicly when not following', async () => {
-      const mockReq: any = { headers: {} };
+    it('delegates to postsService.getHomeFeed for authenticated user when following=false (For You)', async () => {
+      const mockReq: any = { user: { userId: 'user-viewer-1' } };
       const query = { page: 1, limit: 10, type: 'all' };
       const res = await controller.getHomeFeed(mockReq, query);
 
-      expect(postsService.getHomeFeed).toHaveBeenCalledWith(query, undefined);
+      expect(postsService.getHomeFeed).toHaveBeenCalledWith(query, 'user-viewer-1');
       expect(res.total).toBe(10);
       expect(res.counts.all).toBe(10);
     });
 
-    it('passes resolved userId when token is present with following=true', async () => {
+    it('passes resolved userId when token is present with following=true (Following)', async () => {
       const mockReq: any = { user: { userId: 'user-viewer-1' } };
       const query = { type: 'posts', following: true };
       const res = await controller.getHomeFeed(mockReq, query);
@@ -79,9 +79,9 @@ describe('HomeController', () => {
       expect(res.counts.posts).toBe(5);
     });
 
-    it('throws UnauthorizedException when following=true is requested without token', async () => {
+    it('throws UnauthorizedException when getHomeFeed is requested without token (no guest mode)', async () => {
       const mockReq: any = { headers: {} };
-      const query = { following: true };
+      const query = { following: false };
 
       await expect(controller.getHomeFeed(mockReq, query)).rejects.toThrow(
         UnauthorizedException,
@@ -101,11 +101,20 @@ describe('HomeController', () => {
       );
       expect(res.counts.articles).toBe(3);
     });
+
+    it('throws UnauthorizedException when getFollowingFeed is requested without token', async () => {
+      const mockReq: any = { headers: {} };
+      const query = { type: 'articles' };
+
+      await expect(controller.getFollowingFeed(mockReq, query)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
   });
 
   describe('getFeedCounts', () => {
-    it('delegates to postsService.getFeedCounts without followedIds when public', async () => {
-      const mockReq: any = { headers: {} };
+    it('delegates to postsService.getFeedCounts without followedIds when following=false for authenticated user', async () => {
+      const mockReq: any = { user: { userId: 'user-viewer-1' } };
       const res = await controller.getFeedCounts(mockReq, {});
 
       expect(postsService.getFeedCounts).toHaveBeenCalledWith(undefined);
@@ -119,6 +128,13 @@ describe('HomeController', () => {
       expect(postsService.getFollowedUserIds).toHaveBeenCalledWith('user-viewer-1');
       expect(postsService.getFeedCounts).toHaveBeenCalledWith(['user-followed-1']);
       expect(res.all).toBe(10);
+    });
+
+    it('throws UnauthorizedException when getFeedCounts is requested without token', async () => {
+      const mockReq: any = { headers: {} };
+      await expect(controller.getFeedCounts(mockReq, {})).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });
