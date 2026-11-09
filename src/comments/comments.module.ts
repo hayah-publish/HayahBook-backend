@@ -6,6 +6,7 @@ import { CommentMute } from './comment-mute.entity';
 import { CommentReport } from './comment-report.entity';
 import { Post } from '../posts/post.entity';
 import { User } from '../users/user.entity';
+import { UserUserFollow } from '../users/user-user-follow.entity';
 import { CommentsService } from './comments.service';
 import { CommentsController } from './comments.controller';
 import { ContentCommentsController } from './content-comments.controller';
@@ -21,6 +22,7 @@ import { I18nModule } from '../i18n/i18n.module';
       CommentReport,
       Post,
       User,
+      UserUserFollow,
     ]),
     UploadModule,
     I18nModule,

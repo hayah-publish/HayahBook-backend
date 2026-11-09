@@ -85,6 +85,15 @@ export class CommentsController {
   }
 
   /**
+   * Get comments sorting options matching the design sheet (Most Relevant, Newest, All Comments)
+   * GET /v1/comments/sort-options
+   */
+  @Get('sort-options')
+  getSortOptions() {
+    return this.commentsService.getSortOptions();
+  }
+
+  /**
    * 3. Get root comments for any content item (post, article, visual, snippet)
    * GET /v1/comments?contentId=...&sort=most_interactive&page=1&limit=20
    */

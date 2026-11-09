@@ -1,7 +1,12 @@
 import { IsOptional, IsString, IsInt, Min, Max, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export type CommentSortType = 'most_interactive' | 'newest' | 'oldest';
+export type CommentSortType =
+  | 'most_relevant'
+  | 'newest'
+  | 'all_comments'
+  | 'most_interactive'
+  | 'oldest';
 
 export class CommentsQueryDto {
   @IsOptional()

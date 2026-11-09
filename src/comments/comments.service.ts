@@ -14,6 +14,7 @@ import { CommentMute } from './comment-mute.entity';
 import { CommentReport } from './comment-report.entity';
 import { Post } from '../posts/post.entity';
 import { User } from '../users/user.entity';
+import { UserUserFollow } from '../users/user-user-follow.entity';
 import { UploadService } from '../upload/upload.service';
 import { I18nService } from '../i18n/i18n.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -73,6 +74,8 @@ export class CommentsService {
     private readonly postsRepo: Repository<Post>,
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
+    @InjectRepository(UserUserFollow)
+    private readonly userFollowRepo: Repository<UserUserFollow>,
     @Inject(UploadService)
     private readonly uploadService: UploadService,
     private readonly i18n: I18nService,
@@ -113,27 +116,91 @@ export class CommentsService {
   }
 
   /**
+   * Return the 3 standard comment sorting options matching the design sheet
+   */
+  getSortOptions() {
+    return [
+      {
+        key: 'most_relevant',
+        titleEn: 'Most Relevant',
+        titleAr: 'الأكثر صلة',
+        descriptionEn: 'See comments from friends and the most relevant comments first.',
+        descriptionAr: 'عرض تعليقات الأصدقاء والتعليقات الأكثر ملاءمة أولاً.',
+        isDefault: true,
+      },
+      {
+        key: 'newest',
+        titleEn: 'Newest',
+        titleAr: 'الأحدث',
+        descriptionEn: 'See all comments, with the newest comments first.',
+        descriptionAr: 'عرض جميع التعليقات مع ظهور أحدثها أولاً.',
+        isDefault: false,
+      },
+      {
+        key: 'all_comments',
+        titleEn: 'All Comments',
+        titleAr: 'كل التعليقات',
+        descriptionEn: 'Show all comments, including potentially offensive ones.',
+        descriptionAr: 'عرض جميع التعليقات بما في ذلك التعليقات المحتمل أنها مسيئة.',
+        isDefault: false,
+      },
+    ];
+  }
+
+  /**
    * Normalize sort parameter from English or Arabic
+   * Options:
+   * 1. 'most_relevant' (default): See comments from friends and the most relevant comments first.
+   * 2. 'newest': See all comments, with the newest comments first.
+   * 3. 'all_comments': Show all comments, including potentially offensive ones.
    */
   normalizeSort(input?: string): CommentSortType {
-    if (!input) return 'most_interactive';
+    if (!input) return 'most_relevant';
     const val = input.trim().toLowerCase();
+
+    // 1. Most Relevant (friends + engagement + author)
     if (
+      val === 'most_relevant' ||
+      val === 'relevant' ||
+      val === 'friends' ||
       val === 'most_interactive' ||
       val === 'interactive' ||
-      val === 'الاكثر تفاعلا' ||
+      val === 'popular' ||
+      val === 'الأكثر صلة' ||
+      val === 'الاكثر صلة' ||
       val === 'الأكثر تفاعلاً' ||
-      val === 'popular'
+      val === 'الاكثر تفاعلا'
     ) {
-      return 'most_interactive';
+      return 'most_relevant';
     }
+
+    // 2. Newest (chronological descending)
+    if (
+      val === 'newest' ||
+      val === 'recent' ||
+      val === 'latest' ||
+      val === 'الأحدث' ||
+      val === 'الاحدث'
+    ) {
+      return 'newest';
+    }
+
+    // 3. All Comments (including offensive/hidden)
+    if (
+      val === 'all_comments' ||
+      val === 'all' ||
+      val === 'كل التعليقات' ||
+      val === 'جميع التعليقات' ||
+      val === 'الكل'
+    ) {
+      return 'all_comments';
+    }
+
     if (val === 'oldest' || val === 'الأقدم' || val === 'الاقدم') {
       return 'oldest';
     }
-    if (val === 'newest' || val === 'الأحدث' || val === 'الاحدث' || val === 'recent') {
-      return 'newest';
-    }
-    return 'most_interactive';
+
+    return 'most_relevant';
   }
 
   /**
@@ -296,6 +363,7 @@ export class CommentsService {
     page: number;
     limit: number;
     totalPages: number;
+    sort?: CommentSortType;
   }> {
     const post = await this.postsRepo.findOne({
       where: { id: postId },
@@ -315,20 +383,55 @@ export class CommentsService {
       .where('comment.post_id = :postId', { postId })
       .andWhere('comment.parent_id IS NULL');
 
-    // Filter hidden comments for general viewers (keep visible for post owner or author)
-    if (currentUserId && currentUserId !== post.userId) {
-      qb.andWhere('(comment.is_hidden = false OR comment.user_id = :currentUserId)', {
-        currentUserId,
-      });
-    } else if (!currentUserId) {
-      qb.andWhere('comment.is_hidden = false');
+    // Filter hidden comments:
+    // Option 3: 'all_comments' ("Show all comments, including potentially offensive ones.")
+    // In 'all_comments' mode, do NOT exclude hidden/offensive comments.
+    if (sort !== 'all_comments') {
+      if (currentUserId && currentUserId !== post.userId) {
+        qb.andWhere('(comment.is_hidden = false OR comment.user_id = :currentUserId)', {
+          currentUserId,
+        });
+      } else if (!currentUserId) {
+        qb.andWhere('comment.is_hidden = false');
+      }
     }
 
     // 1. Pinned comments always appear at the very top
     qb.orderBy('comment.is_pinned', 'DESC');
+    qb.addOrderBy('comment.pinned_at', 'DESC');
 
-    // 2. Secondary sort
-    if (sort === 'most_interactive') {
+    // 2. Sorting based on the selected mode:
+    if (sort === 'most_relevant' || sort === 'most_interactive') {
+      // Option 1: "See comments from friends and the most relevant comments first."
+      let friendUserIds: string[] = [];
+      if (currentUserId) {
+        const follows = await this.userFollowRepo.find({
+          where: { followerId: currentUserId },
+          select: { followingId: true },
+        });
+        friendUserIds = follows.map((f) => f.followingId);
+      }
+
+      if (friendUserIds.length > 0) {
+        qb.addOrderBy(
+          `CASE 
+             WHEN comment.user_id = :postAuthorId THEN 2 
+             WHEN comment.user_id IN (:...friendUserIds) THEN 1 
+             ELSE 0 
+           END`,
+          'DESC',
+        );
+        qb.setParameter('postAuthorId', post.userId);
+        qb.setParameter('friendUserIds', friendUserIds);
+      } else {
+        qb.addOrderBy(
+          `CASE WHEN comment.user_id = :postAuthorId THEN 1 ELSE 0 END`,
+          'DESC',
+        );
+        qb.setParameter('postAuthorId', post.userId);
+      }
+
+      // Relevance score: likes * 2 + replies * 3
       qb.addOrderBy(
         '((comment.likes_count * 2) + (comment.replies_count * 3))',
         'DESC',
@@ -337,6 +440,7 @@ export class CommentsService {
     } else if (sort === 'oldest') {
       qb.addOrderBy('comment.created_at', 'ASC');
     } else {
+      // Option 2 & 3: 'newest' and 'all_comments' (newest first)
       qb.addOrderBy('comment.created_at', 'DESC');
     }
 
@@ -352,6 +456,7 @@ export class CommentsService {
       page,
       limit,
       totalPages: Math.ceil(total / limit) || 1,
+      sort,
     };
   }
 
@@ -368,6 +473,7 @@ export class CommentsService {
     page: number;
     limit: number;
     totalPages: number;
+    sort?: CommentSortType;
   }> {
     const parent = await this.commentsRepo.findOne({
       where: { id: commentId },

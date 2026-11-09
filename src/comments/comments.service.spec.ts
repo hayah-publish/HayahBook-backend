@@ -12,6 +12,7 @@ import { CommentMute } from './comment-mute.entity';
 import { CommentReport } from './comment-report.entity';
 import { Post } from '../posts/post.entity';
 import { User } from '../users/user.entity';
+import { UserUserFollow } from '../users/user-user-follow.entity';
 import { UploadService } from '../upload/upload.service';
 import { I18nService } from '../i18n/i18n.service';
 
@@ -23,6 +24,7 @@ describe('CommentsService', () => {
   let commentReportsRepo: any;
   let postsRepo: any;
   let usersRepo: any;
+  let userFollowRepo: any;
   let uploadService: any;
   let i18nService: any;
 
@@ -91,6 +93,11 @@ describe('CommentsService', () => {
       }),
     };
 
+    userFollowRepo = {
+      find: jest.fn().mockResolvedValue([{ followingId: 'friend-1' }]),
+      findOne: jest.fn(),
+    };
+
     uploadService = {
       uploadCommentImage: jest.fn().mockResolvedValue('https://cdn.hayahbook.com/comments/images/image.jpg'),
       deleteFileByUrl: jest.fn().mockResolvedValue(undefined),
@@ -109,6 +116,7 @@ describe('CommentsService', () => {
         { provide: getRepositoryToken(CommentReport), useValue: commentReportsRepo },
         { provide: getRepositoryToken(Post), useValue: postsRepo },
         { provide: getRepositoryToken(User), useValue: usersRepo },
+        { provide: getRepositoryToken(UserUserFollow), useValue: userFollowRepo },
         { provide: UploadService, useValue: uploadService },
         { provide: I18nService, useValue: i18nService },
       ],
@@ -404,6 +412,73 @@ describe('CommentsService', () => {
         reason: 'محتوى مسيء',
       });
       expect(res.message).toBe('comments.reported');
+    });
+  });
+
+  describe('getSortOptions and normalizeSort', () => {
+    it('returns 3 standard sorting options matching the design sheet', () => {
+      const options = service.getSortOptions();
+      expect(options).toHaveLength(3);
+      expect(options[0].key).toBe('most_relevant');
+      expect(options[1].key).toBe('newest');
+      expect(options[2].key).toBe('all_comments');
+    });
+
+    it('normalizes various English and Arabic sort inputs correctly', () => {
+      expect(service.normalizeSort(undefined)).toBe('most_relevant');
+      expect(service.normalizeSort('most_relevant')).toBe('most_relevant');
+      expect(service.normalizeSort('الأكثر صلة')).toBe('most_relevant');
+      expect(service.normalizeSort('friends')).toBe('most_relevant');
+      expect(service.normalizeSort('newest')).toBe('newest');
+      expect(service.normalizeSort('الأحدث')).toBe('newest');
+      expect(service.normalizeSort('all_comments')).toBe('all_comments');
+      expect(service.normalizeSort('كل التعليقات')).toBe('all_comments');
+      expect(service.normalizeSort('oldest')).toBe('oldest');
+    });
+  });
+
+  describe('getPostComments', () => {
+    it('fetches comments and applies most_relevant ordering with friends boost', async () => {
+      const mockQb: any = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        setParameter: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+      commentsRepo.createQueryBuilder.mockReturnValue(mockQb);
+
+      const res = await service.getPostComments('post-1', { sort: 'most_relevant' }, 'user-1');
+      expect(res.sort).toBe('most_relevant');
+      expect(userFollowRepo.find).toHaveBeenCalledWith({
+        where: { followerId: 'user-1' },
+        select: { followingId: true },
+      });
+      expect(mockQb.orderBy).toHaveBeenCalledWith('comment.is_pinned', 'DESC');
+    });
+
+    it('does not filter out hidden comments when sort is all_comments', async () => {
+      const mockQb: any = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        setParameter: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+      commentsRepo.createQueryBuilder.mockReturnValue(mockQb);
+
+      const res = await service.getPostComments('post-1', { sort: 'all_comments' }, 'user-1');
+      expect(res.sort).toBe('all_comments');
+      // When all_comments is selected, andWhere with is_hidden should NOT be called
+      expect(mockQb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('is_hidden'), expect.anything());
     });
   });
 });

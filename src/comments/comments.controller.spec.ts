@@ -24,6 +24,11 @@ describe('CommentsController', () => {
         message: 'تم نشر الرد بنجاح',
         data: { id: 'reply-1', content: 'test reply' },
       }),
+      getSortOptions: jest.fn().mockReturnValue([
+        { key: 'most_relevant' },
+        { key: 'newest' },
+        { key: 'all_comments' },
+      ]),
       getPostComments: jest.fn().mockResolvedValue({
         data: [],
         total: 0,
@@ -96,6 +101,14 @@ describe('CommentsController', () => {
 
       expect(service.createComment).toHaveBeenCalledWith('user-1', dto, 'post-1', undefined);
       expect(res.data.id).toBe('comment-1');
+    });
+  });
+
+  describe('getSortOptions', () => {
+    it('returns available sorting options', () => {
+      const res = controller.getSortOptions();
+      expect(res).toHaveLength(3);
+      expect(service.getSortOptions).toHaveBeenCalled();
     });
   });
 
