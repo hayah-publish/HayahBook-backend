@@ -23,7 +23,7 @@ import { CommentsQueryDto, CommentSortType } from './dto/comments-query.dto';
 import { UploadFile } from '../upload/upload-file.interface';
 import type { ReactionType, PostReactionsCount } from '../posts/post-reaction.entity';
 
-export interface FormattedCommentUser {
+export interface FormattedCommentPublisher {
   id: string;
   name: string;
   profileUrl: string | null;
@@ -32,15 +32,28 @@ export interface FormattedCommentUser {
   isVerified: boolean;
 }
 
+export type FormattedCommentUser = FormattedCommentPublisher;
+
+export interface FormattedCommentPermissions {
+  canEdit: boolean;
+  canDelete: boolean;
+  canPin: boolean;
+  canHide: boolean;
+  canReply: boolean;
+  canReport: boolean;
+}
+
 export interface FormattedComment {
   id: string;
   postId: string;
   parentId: string | null;
   content: string;
   imageUrl: string | null;
-  mentions: FormattedCommentUser[];
-  replyToUser: FormattedCommentUser | null;
-  user: FormattedCommentUser;
+  mentions: FormattedCommentPublisher[];
+  replyToUser: FormattedCommentPublisher | null;
+  publisher: FormattedCommentPublisher;
+  author?: FormattedCommentPublisher;
+  user?: FormattedCommentPublisher;
   repliesCount: number;
   likesCount: number;
   reactionsCount: PostReactionsCount;
@@ -51,12 +64,14 @@ export interface FormattedComment {
   isHidden: boolean;
   isEdited: boolean;
   isMuted: boolean;
+  permissions: FormattedCommentPermissions;
   canEdit: boolean;
   canDelete: boolean;
   canPin: boolean;
   canHide: boolean;
   createdAt: Date;
   updatedAt: Date;
+  replies?: FormattedComment[];
 }
 
 @Injectable()
@@ -938,16 +953,68 @@ export class CommentsService {
       }
     }
 
+    // Pre-load preview replies for root comments
+    const rootCommentIdsWithReplies = comments
+      .filter((c) => !c.parentId && (c.repliesCount || 0) > 0)
+      .map((c) => c.id);
+
+    const repliesMap = new Map<string, Comment[]>();
+    if (rootCommentIdsWithReplies.length > 0) {
+      try {
+        const rawReplies = await this.commentsRepo
+          .createQueryBuilder('reply')
+          .leftJoinAndSelect('reply.user', 'user')
+          .leftJoinAndSelect('reply.replyToUser', 'replyToUser')
+          .where('reply.parentId IN (:...rootCommentIdsWithReplies)', { rootCommentIdsWithReplies })
+          .andWhere('reply.isHidden = false')
+          .orderBy('reply.createdAt', 'ASC')
+          .getMany();
+
+        for (const reply of rawReplies) {
+          if (!reply.parentId) continue;
+          const list = repliesMap.get(reply.parentId) || [];
+          if (list.length < 3) {
+            list.push(reply);
+            repliesMap.set(reply.parentId, list);
+          }
+        }
+      } catch {
+        // Ignored
+      }
+    }
+
     return Promise.all(
-      comments.map((c) =>
-        this.formatComment(
+      comments.map(async (c) => {
+        const previewComments = repliesMap.get(c.id) || [];
+        const formattedReplies =
+          previewComments.length > 0
+            ? await Promise.all(
+                previewComments.map((r) =>
+                  this.formatComment(
+                    r,
+                    currentUserId,
+                    postOwnerId || c.post?.userId,
+                    userReactionsMap.get(r.id) || null,
+                    mutedSet.has(r.id),
+                  ),
+                ),
+              )
+            : undefined;
+
+        const formatted = await this.formatComment(
           c,
           currentUserId,
           postOwnerId || c.post?.userId,
           userReactionsMap.get(c.id) || null,
           mutedSet.has(c.id),
-        ),
-      ),
+        );
+
+        if (formattedReplies && formattedReplies.length > 0) {
+          formatted.replies = formattedReplies;
+        }
+
+        return formatted;
+      }),
     );
   }
 
@@ -994,7 +1061,7 @@ export class CommentsService {
     const isAuthor = currentUserId === comment.userId;
     const isPostOwner = currentUserId === (postOwnerId || comment.post?.userId);
 
-    const formattedUser: FormattedCommentUser = {
+    const publisher: FormattedCommentPublisher = {
       id: comment.user?.id || comment.userId,
       name: comment.user?.name || '',
       profileUrl: comment.user?.profileUrl || null,
@@ -1003,7 +1070,7 @@ export class CommentsService {
       isVerified: comment.user?.role === 'admin' || comment.user?.userType === 'Author',
     };
 
-    let formattedReplyToUser: FormattedCommentUser | null = null;
+    let formattedReplyToUser: FormattedCommentPublisher | null = null;
     if (comment.replyToUser) {
       formattedReplyToUser = {
         id: comment.replyToUser.id,
@@ -1015,6 +1082,15 @@ export class CommentsService {
       };
     }
 
+    const permissions: FormattedCommentPermissions = {
+      canEdit: isAuthor,
+      canDelete: isAuthor || isPostOwner,
+      canPin: isPostOwner,
+      canHide: isAuthor || isPostOwner,
+      canReply: true,
+      canReport: !isAuthor,
+    };
+
     return {
       id: comment.id,
       postId: comment.postId,
@@ -1023,7 +1099,9 @@ export class CommentsService {
       imageUrl: comment.imageUrl,
       mentions: [],
       replyToUser: formattedReplyToUser,
-      user: formattedUser,
+      publisher,
+      author: publisher,
+      user: publisher,
       repliesCount: comment.repliesCount || 0,
       likesCount: reactionsCount.total,
       reactionsCount,
@@ -1034,6 +1112,7 @@ export class CommentsService {
       isHidden: comment.isHidden || false,
       isEdited: comment.isEdited || false,
       isMuted,
+      permissions,
       canEdit: isAuthor,
       canDelete: isAuthor || isPostOwner,
       canPin: isPostOwner,

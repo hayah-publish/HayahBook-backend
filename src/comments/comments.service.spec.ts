@@ -149,6 +149,8 @@ describe('CommentsService', () => {
       expect(postsRepo.increment).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 1);
       expect(res.data.content).toBe('تعليق رائع ومميز');
       expect(res.data.parentId).toBeNull();
+      expect(res.data.publisher.id).toBe('user-1');
+      expect(res.data.permissions.canEdit).toBe(true);
       expect(res.data.canEdit).toBe(true);
       expect(res.data.canDelete).toBe(true);
     });
