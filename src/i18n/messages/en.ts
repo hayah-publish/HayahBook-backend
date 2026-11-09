@@ -26,7 +26,7 @@ export const en = {
   'auth.session_revoked': 'Session has been revoked. Please log in again.',
   'auth.invalid_token': 'Invalid or expired token',
   'auth.invalid_token_type': 'Invalid token type',
-  'auth.logged_out': 'Logged out successfully from all devices',
+  'auth.logged_out': 'Logged out successfully',
   'auth.password_changed': 'Password changed successfully',
   'auth.passwords_do_not_match': 'Passwords do not match',
   'auth.current_password_incorrect': 'Current password is incorrect',

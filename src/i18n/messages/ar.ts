@@ -26,7 +26,7 @@ export const ar = {
   'auth.session_revoked': 'تم إلغاء الجلسة. يرجى تسجيل الدخول مجدداً.',
   'auth.invalid_token': 'التوكن غير صالح أو منتهي الصلاحية',
   'auth.invalid_token_type': 'نوع التوكن غير صالح',
-  'auth.logged_out': 'تم تسجيل الخروج بنجاح من جميع الأجهزة',
+  'auth.logged_out': 'تم تسجيل الخروج بنجاح',
   'auth.password_changed': 'تم تغيير كلمة المرور بنجاح',
   'auth.passwords_do_not_match': 'كلمة المرور وتأكيد كلمة المرور غير متطابقين',
   'auth.current_password_incorrect': 'كلمة المرور الحالية غير صحيحة',
