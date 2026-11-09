@@ -52,8 +52,6 @@ export interface FormattedComment {
   mentions: FormattedCommentPublisher[];
   replyToUser: FormattedCommentPublisher | null;
   publisher: FormattedCommentPublisher;
-  author?: FormattedCommentPublisher;
-  user?: FormattedCommentPublisher;
   repliesCount: number;
   likesCount: number;
   reactionsCount: PostReactionsCount;
@@ -1103,8 +1101,6 @@ export class CommentsService {
       mentions: [],
       replyToUser: formattedReplyToUser,
       publisher,
-      author: publisher,
-      user: publisher,
       repliesCount: comment.repliesCount || 0,
       likesCount: reactionsCount.total,
       reactionsCount,
