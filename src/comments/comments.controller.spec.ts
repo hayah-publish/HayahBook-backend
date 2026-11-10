@@ -140,6 +140,14 @@ describe('CommentsController', () => {
       expect(service.createReply).toHaveBeenCalledWith('user-1', 'comment-1', dto, undefined);
       expect(res.data.id).toBe('reply-1');
     });
+
+    it('delegates to service.createReply with dto.commentId when id is not passed in url', async () => {
+      const dto = { commentId: 'comment-2', content: 'hello reply' };
+      const res = await controller.createReply(mockUserReq, undefined, dto);
+
+      expect(service.createReply).toHaveBeenCalledWith('user-1', 'comment-2', dto, undefined);
+      expect(res.data.id).toBe('reply-1');
+    });
   });
 
   describe('getComments', () => {

@@ -2,6 +2,10 @@ import { IsNotEmpty, IsOptional, IsString, IsUUID, IsArray } from 'class-validat
 import { Transform } from 'class-transformer';
 
 export class CreateReplyDto {
+  @IsOptional()
+  @IsUUID('4')
+  commentId?: string;
+
   @IsNotEmpty({ message: 'comments.content_required' })
   @IsString()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))

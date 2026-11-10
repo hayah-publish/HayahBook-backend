@@ -14,6 +14,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
@@ -49,7 +50,9 @@ export class CommentsController {
    */
   @UseGuards(JwtAuthGuard)
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: 20 * 1024 * 1024 } }),
+  )
   async createComment(
     @Req() req: AuthenticatedRequest,
     @Body() dto: CreateCommentDto,
@@ -65,25 +68,29 @@ export class CommentsController {
   }
 
   /**
-   * 2. Create a reply to an existing comment
+   * 2. Create a reply to an existing comment or reply
    * POST /v1/comments/:id/reply
+   * POST /v1/comments/reply (with commentId in body)
    * Supports multipart/form-data with file 'image' or application/json with 'imageUrl'
    */
   @UseGuards(JwtAuthGuard)
-  @Post(':id/reply')
-  @UseInterceptors(FileInterceptor('image'))
+  @Post(['reply', ':id/reply'])
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: 20 * 1024 * 1024 } }),
+  )
   async createReply(
     @Req() req: AuthenticatedRequest,
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() dto: CreateReplyDto,
+    @Param('id', new ParseUUIDPipe({ optional: true })) id?: string,
+    @Body() dto?: CreateReplyDto,
     @UploadedFile() image?: UploadFile,
   ) {
-    return this.commentsService.createReply(
-      req.user!.userId,
-      id,
-      dto,
-      image,
-    );
+    const targetId = id && id !== 'reply' ? id : dto?.commentId;
+    if (!targetId) {
+      throw new BadRequestException(
+        this.commentsService.getCommentRequiredMessage(),
+      );
+    }
+    return this.commentsService.createReply(req.user!.userId, targetId, dto!, image);
   }
 
   /**
@@ -101,13 +108,13 @@ export class CommentsController {
    * GET /v1/comments/reports/reasons
    */
   @Get(['report-reasons', 'reports/reasons'])
-  getReportReasons(
-    @Query('lang') lang?: string,
-    @Query('meta') meta?: string,
-  ) {
+  getReportReasons(@Query('lang') lang?: string, @Query('meta') meta?: string) {
     const supportedLang: SupportedLanguage | undefined =
       lang === 'ar' || lang === 'en' ? lang : undefined;
-    return this.commentsService.getReportReasons(supportedLang, meta === 'true');
+    return this.commentsService.getReportReasons(
+      supportedLang,
+      meta === 'true',
+    );
   }
 
   /**
@@ -124,7 +131,11 @@ export class CommentsController {
     if (!targetId) {
       return { data: [], total: 0, page: 1, limit: 20, totalPages: 1 };
     }
-    return this.commentsService.getPostComments(targetId, query, req?.user?.userId);
+    return this.commentsService.getPostComments(
+      targetId,
+      query,
+      req?.user?.userId,
+    );
   }
 
   /**
@@ -185,7 +196,11 @@ export class CommentsController {
     @Query() query: ReactionsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
-    return this.commentsService.getCommentReactions(id, query, req?.user?.userId);
+    return this.commentsService.getCommentReactions(
+      id,
+      query,
+      req?.user?.userId,
+    );
   }
 
   /**
@@ -218,7 +233,11 @@ export class CommentsController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
     const isAdmin = req.user?.role === 'admin';
-    return this.commentsService.toggleHideComment(req.user!.userId, id, isAdmin);
+    return this.commentsService.toggleHideComment(
+      req.user!.userId,
+      id,
+      isAdmin,
+    );
   }
 
   /**
@@ -301,7 +320,11 @@ export class CommentsController {
     @Query() query: CommentsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
-    return this.commentsService.getPostComments(postId, query, req?.user?.userId);
+    return this.commentsService.getPostComments(
+      postId,
+      query,
+      req?.user?.userId,
+    );
   }
 
   /**
@@ -311,7 +334,9 @@ export class CommentsController {
    */
   @UseGuards(JwtAuthGuard)
   @Post([':postId', 'content/:postId'])
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: 20 * 1024 * 1024 } }),
+  )
   async createCommentByPostId(
     @Req() req: AuthenticatedRequest,
     @Param('postId', new ParseUUIDPipe()) postId: string,

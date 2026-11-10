@@ -24,7 +24,10 @@ import { CreateReplyDto } from './dto/create-reply.dto';
 import { CommentsQueryDto, CommentSortType } from './dto/comments-query.dto';
 import { ReactionsQueryDto } from '../posts/dto/reactions-query.dto';
 import { UploadFile } from '../upload/upload-file.interface';
-import type { ReactionType, PostReactionsCount } from '../posts/post-reaction.entity';
+import type {
+  ReactionType,
+  PostReactionsCount,
+} from '../posts/post-reaction.entity';
 
 export interface FormattedCommentPublisher {
   id: string;
@@ -88,13 +91,27 @@ export const REPORT_REASONS: Array<{
     key: 'spam',
     name_ar: 'محتوى غير مرغوب فيه',
     name_en: 'Spam',
-    aliases: ['spam', 'سبام', 'محتوى غير مرغوب فيه', 'رسائل غير مرغوب فيها', 'محتوى غير مرغوب فيه (سبام)'],
+    aliases: [
+      'spam',
+      'سبام',
+      'محتوى غير مرغوب فيه',
+      'رسائل غير مرغوب فيها',
+      'محتوى غير مرغوب فيه (سبام)',
+    ],
   },
   {
     key: 'harassment_or_bullying',
     name_ar: 'مضايقة أو تنمر',
     name_en: 'Harassment or bullying',
-    aliases: ['harassment_or_bullying', 'harassment', 'bullying', 'مضايقة أو تنمر', 'مضايقة', 'تنمر', 'محتوى مسيء'],
+    aliases: [
+      'harassment_or_bullying',
+      'harassment',
+      'bullying',
+      'مضايقة أو تنمر',
+      'مضايقة',
+      'تنمر',
+      'محتوى مسيء',
+    ],
   },
   {
     key: 'hate_speech',
@@ -106,25 +123,56 @@ export const REPORT_REASONS: Array<{
     key: 'violence_or_threats',
     name_ar: 'عنف أو تهديدات',
     name_en: 'Violence or threats',
-    aliases: ['violence_or_threats', 'violence', 'threats', 'عنف أو تهديدات', 'عنف', 'تهديد'],
+    aliases: [
+      'violence_or_threats',
+      'violence',
+      'threats',
+      'عنف أو تهديدات',
+      'عنف',
+      'تهديد',
+    ],
   },
   {
     key: 'nudity_or_sexual_content',
     name_ar: 'عري أو محتوى جنسي',
     name_en: 'Nudity or sexual content',
-    aliases: ['nudity_or_sexual_content', 'nudity', 'sexual_content', 'عري أو محتوى جنسي', 'عري', 'محتوى جنسي', 'إباحية'],
+    aliases: [
+      'nudity_or_sexual_content',
+      'nudity',
+      'sexual_content',
+      'عري أو محتوى جنسي',
+      'عري',
+      'محتوى جنسي',
+      'إباحية',
+    ],
   },
   {
     key: 'scam_or_fraud',
     name_ar: 'احتيال أو خداع',
     name_en: 'Scam or fraud',
-    aliases: ['scam_or_fraud', 'scam', 'fraud', 'احتيال أو خداع', 'احتيال', 'خداع', 'نصب'],
+    aliases: [
+      'scam_or_fraud',
+      'scam',
+      'fraud',
+      'احتيال أو خداع',
+      'احتيال',
+      'خداع',
+      'نصب',
+    ],
   },
   {
     key: 'false_information',
     name_ar: 'معلومات كاذبة أو مضللة',
     name_en: 'False information',
-    aliases: ['false_information', 'fake_news', 'misinformation', 'معلومات كاذبة أو مضللة', 'معلومات كاذبة', 'معلومات مضللة', 'معلومات زائفة'],
+    aliases: [
+      'false_information',
+      'fake_news',
+      'misinformation',
+      'معلومات كاذبة أو مضللة',
+      'معلومات كاذبة',
+      'معلومات مضللة',
+      'معلومات زائفة',
+    ],
   },
   {
     key: 'something_else',
@@ -165,13 +213,30 @@ export class CommentsService {
     if (!input) return null;
     const val = input.trim().toLowerCase();
 
-    if (val === 'agree' || val === 'اتفق' || val === 'اتفاق' || val === 'like') {
+    if (
+      val === 'agree' ||
+      val === 'اتفق' ||
+      val === 'اتفاق' ||
+      val === 'like'
+    ) {
       return 'agree';
     }
-    if (val === 'love' || val === 'احببته' || val === 'أحببته' || val === 'حب' || val === 'love it') {
+    if (
+      val === 'love' ||
+      val === 'احببته' ||
+      val === 'أحببته' ||
+      val === 'حب' ||
+      val === 'love it'
+    ) {
       return 'love';
     }
-    if (val === 'applaud' || val === 'احسنت' || val === 'أحسنت' || val === 'bravo' || val === 'clap') {
+    if (
+      val === 'applaud' ||
+      val === 'احسنت' ||
+      val === 'أحسنت' ||
+      val === 'bravo' ||
+      val === 'clap'
+    ) {
       return 'applaud';
     }
     if (
@@ -183,15 +248,24 @@ export class CommentsService {
     ) {
       return 'insightful';
     }
-    if (val === 'disagree' || val === 'اعترض' || val === 'أعترض' || val === 'اعتراض') {
+    if (
+      val === 'disagree' ||
+      val === 'اعترض' ||
+      val === 'أعترض' ||
+      val === 'اعتراض'
+    ) {
       return 'disagree';
     }
 
     return null;
   }
 
+  getCommentRequiredMessage(): string {
+    return this.i18n.t('comments.comment_required');
+  }
+
   /**
-   * Return the 3 standard comment sorting options matching the design sheet
+   * Return the 4 standard comment sorting options matching the design sheet
    */
   getSortOptions() {
     return [
@@ -199,7 +273,8 @@ export class CommentsService {
         key: 'most_relevant',
         titleEn: 'Most Relevant',
         titleAr: 'الأكثر صلة',
-        descriptionEn: 'See comments from friends and the most relevant comments first.',
+        descriptionEn:
+          'See comments from friends and the most relevant comments first.',
         descriptionAr: 'عرض تعليقات الأصدقاء والتعليقات الأكثر ملاءمة أولاً.',
         isDefault: true,
       },
@@ -215,8 +290,10 @@ export class CommentsService {
         key: 'all_comments',
         titleEn: 'All Comments',
         titleAr: 'كل التعليقات',
-        descriptionEn: 'Show all comments, including potentially offensive ones.',
-        descriptionAr: 'عرض جميع التعليقات بما في ذلك التعليقات المحتمل أنها مسيئة.',
+        descriptionEn:
+          'Show all comments, including potentially offensive ones.',
+        descriptionAr:
+          'عرض جميع التعليقات بما في ذلك التعليقات المحتمل أنها مسيئة.',
         isDefault: false,
       },
       {
@@ -235,7 +312,8 @@ export class CommentsService {
    */
   getReportReasons(lang?: SupportedLanguage, includeMeta: boolean = false) {
     const currentLang =
-      lang || (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
+      lang ||
+      (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
     const reasons: ReportReasonOption[] = REPORT_REASONS.map((r) => ({
       key: r.key,
       displayName: currentLang === 'en' ? r.name_en : r.name_ar,
@@ -264,7 +342,10 @@ export class CommentsService {
   /**
    * Resolve an incoming report reason key or name into a canonical ReportReasonOption
    */
-  resolveReportReason(input?: string, lang?: SupportedLanguage): ReportReasonOption | null {
+  resolveReportReason(
+    input?: string,
+    lang?: SupportedLanguage,
+  ): ReportReasonOption | null {
     if (!input || !input.trim()) return null;
     const q = input.trim().toLowerCase();
     const normalizeAr = (s: string) =>
@@ -280,7 +361,10 @@ export class CommentsService {
       if (r.key.toLowerCase() === q) return true;
       if (r.name_en.toLowerCase() === q) return true;
       if (normalizeAr(r.name_ar) === qNorm) return true;
-      if (r.aliases && r.aliases.some((a) => a.toLowerCase() === q || normalizeAr(a) === qNorm)) {
+      if (
+        r.aliases &&
+        r.aliases.some((a) => a.toLowerCase() === q || normalizeAr(a) === qNorm)
+      ) {
         return true;
       }
       return false;
@@ -289,7 +373,8 @@ export class CommentsService {
     if (!found) return null;
 
     const currentLang =
-      lang || (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
+      lang ||
+      (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
     return {
       key: found.key,
       displayName: currentLang === 'en' ? found.name_en : found.name_ar,
@@ -383,7 +468,10 @@ export class CommentsService {
 
     let finalImageUrl: string | null = dto.imageUrl?.trim() || null;
     if (imageFile) {
-      finalImageUrl = await this.uploadService.uploadCommentImage(userId, imageFile);
+      finalImageUrl = await this.uploadService.uploadCommentImage(
+        userId,
+        imageFile,
+      );
     }
 
     const comment = this.commentsRepo.create({
@@ -450,7 +538,10 @@ export class CommentsService {
 
     let finalImageUrl: string | null = dto.imageUrl?.trim() || null;
     if (imageFile) {
-      finalImageUrl = await this.uploadService.uploadCommentImage(userId, imageFile);
+      finalImageUrl = await this.uploadService.uploadCommentImage(
+        userId,
+        imageFile,
+      );
     }
 
     const reply = this.commentsRepo.create({
@@ -476,7 +567,11 @@ export class CommentsService {
     const saved = await this.commentsRepo.save(reply);
 
     // Increment root comment's replies_count
-    await this.commentsRepo.increment({ id: effectiveParentId }, 'repliesCount', 1);
+    await this.commentsRepo.increment(
+      { id: effectiveParentId },
+      'repliesCount',
+      1,
+    );
 
     // Increment post's total comments_count
     await this.postsRepo.increment({ id: parent.postId }, 'commentsCount', 1);
@@ -493,7 +588,11 @@ export class CommentsService {
     saved.replyToUser = replyToUser;
     saved.post = parent.post;
 
-    const formatted = await this.formatComment(saved, userId, parent.post?.userId);
+    const formatted = await this.formatComment(
+      saved,
+      userId,
+      parent.post?.userId,
+    );
 
     return {
       message: this.i18n.t('comments.reply_created'),
@@ -539,9 +638,12 @@ export class CommentsService {
     // In 'all_comments' mode, do NOT exclude hidden/offensive comments.
     if (sort !== 'all_comments') {
       if (currentUserId && currentUserId !== post.userId) {
-        qb.andWhere('(comment.isHidden = false OR comment.userId = :currentUserId)', {
-          currentUserId,
-        });
+        qb.andWhere(
+          '(comment.isHidden = false OR comment.userId = :currentUserId)',
+          {
+            currentUserId,
+          },
+        );
       } else if (!currentUserId) {
         qb.andWhere('comment.isHidden = false');
       }
@@ -602,7 +704,11 @@ export class CommentsService {
 
     const [items, total] = await qb.getManyAndCount();
 
-    const data = await this.formatCommentsList(items, currentUserId, post.userId);
+    const data = await this.formatCommentsList(
+      items,
+      currentUserId,
+      post.userId,
+    );
 
     return {
       data,
@@ -639,19 +745,36 @@ export class CommentsService {
 
     const page = Math.max(1, Number(query.page) || 1);
     const limit = Math.max(1, Math.min(50, Number(query.limit) || 20));
+    const sort = this.normalizeSort(query.sort);
 
     const qb = this.commentsRepo
       .createQueryBuilder('reply')
       .leftJoinAndSelect('reply.user', 'user')
       .leftJoinAndSelect('reply.replyToUser', 'replyToUser')
-      .where('reply.parentId = :commentId', { commentId })
-      .orderBy('reply.createdAt', 'ASC') // Chronological ordering for conversational replies
+      .where('reply.parentId = :commentId', { commentId });
+
+    if (sort !== 'all_comments') {
+      if (currentUserId && currentUserId !== parent.post?.userId) {
+        qb.andWhere(
+          '(reply.isHidden = false OR reply.userId = :currentUserId)',
+          { currentUserId },
+        );
+      } else if (!currentUserId) {
+        qb.andWhere('reply.isHidden = false');
+      }
+    }
+
+    qb.orderBy('reply.createdAt', 'ASC') // Chronological ordering for conversational replies
       .skip((page - 1) * limit)
       .take(limit);
 
     const [items, total] = await qb.getManyAndCount();
 
-    const data = await this.formatCommentsList(items, currentUserId, parent.post?.userId);
+    const data = await this.formatCommentsList(
+      items,
+      currentUserId,
+      parent.post?.userId,
+    );
 
     return {
       data,
@@ -749,7 +872,13 @@ export class CommentsService {
     comment.likesCount = counts.total;
     await this.commentsRepo.save(comment);
 
-    const reactionKeys: ReactionType[] = ['agree', 'love', 'applaud', 'insightful', 'disagree'];
+    const reactionKeys: ReactionType[] = [
+      'agree',
+      'love',
+      'applaud',
+      'insightful',
+      'disagree',
+    ];
     const topReactions = reactionKeys
       .filter((k) => (counts[k] || 0) > 0)
       .sort((a, b) => (counts[b] || 0) - (counts[a] || 0))
@@ -809,7 +938,13 @@ export class CommentsService {
       await this.commentsRepo.save(comment);
     }
 
-    const reactionKeys: ReactionType[] = ['agree', 'love', 'applaud', 'insightful', 'disagree'];
+    const reactionKeys: ReactionType[] = [
+      'agree',
+      'love',
+      'applaud',
+      'insightful',
+      'disagree',
+    ];
     const topReactions = reactionKeys
       .filter((k) => (counts[k] || 0) > 0)
       .sort((a, b) => (counts[b] || 0) - (counts[a] || 0))
@@ -824,7 +959,11 @@ export class CommentsService {
     };
   }
 
-  getReactionLabels(type: ReactionType): { ar: string; en: string; icon: string } {
+  getReactionLabels(type: ReactionType): {
+    ar: string;
+    en: string;
+    icon: string;
+  } {
     switch (type) {
       case 'agree':
         return { ar: 'اتفق', en: 'Agree', icon: '🤝' };
@@ -869,7 +1008,9 @@ export class CommentsService {
     limit: number;
     totalPages: number;
   }> {
-    const comment = await this.commentsRepo.findOne({ where: { id: commentId } });
+    const comment = await this.commentsRepo.findOne({
+      where: { id: commentId },
+    });
     if (!comment) {
       throw new NotFoundException(this.i18n.t('comments.not_found'));
     }
@@ -933,7 +1074,10 @@ export class CommentsService {
       if (targetUserIds.length > 0) {
         try {
           const userFollows = await this.userFollowRepo.find({
-            where: { followerId: currentUserId, followingId: In(targetUserIds) },
+            where: {
+              followerId: currentUserId,
+              followingId: In(targetUserIds),
+            },
             select: { followingId: true },
           });
           for (const f of userFollows) {
@@ -959,7 +1103,10 @@ export class CommentsService {
           name: i.user?.name || '',
           profileUrl: i.user?.profileUrl || null,
           userType: i.user?.userType || 'reader',
-          isVerified: i.user?.role === 'admin' || i.user?.userType === 'Author' || !!(i.user as any)?.isVerified,
+          isVerified:
+            i.user?.role === 'admin' ||
+            i.user?.userType === 'Author' ||
+            !!(i.user as any)?.isVerified,
           isFollowing: followingSet.has(i.user?.id || i.userId),
         },
       };
@@ -1000,7 +1147,11 @@ export class CommentsService {
     comment.updatedAt = new Date();
 
     const saved = await this.commentsRepo.save(comment);
-    const formatted = await this.formatComment(saved, userId, comment.post?.userId);
+    const formatted = await this.formatComment(
+      saved,
+      userId,
+      comment.post?.userId,
+    );
 
     return {
       message: this.i18n.t('comments.updated'),
@@ -1040,11 +1191,19 @@ export class CommentsService {
       totalDeleted += childCount;
     } else {
       // Decrement parent's repliesCount
-      await this.commentsRepo.decrement({ id: comment.parentId }, 'repliesCount', 1);
+      await this.commentsRepo.decrement(
+        { id: comment.parentId },
+        'repliesCount',
+        1,
+      );
     }
 
     // Decrement post's commentsCount
-    await this.postsRepo.decrement({ id: comment.postId }, 'commentsCount', totalDeleted);
+    await this.postsRepo.decrement(
+      { id: comment.postId },
+      'commentsCount',
+      totalDeleted,
+    );
 
     // Clean up uploaded image if exists
     if (comment.imageUrl) {
@@ -1133,7 +1292,9 @@ export class CommentsService {
     await this.commentsRepo.save(comment);
 
     return {
-      message: this.i18n.t(comment.isHidden ? 'comments.hidden' : 'comments.unhidden'),
+      message: this.i18n.t(
+        comment.isHidden ? 'comments.hidden' : 'comments.unhidden',
+      ),
       isHidden: comment.isHidden,
     };
   }
@@ -1204,9 +1365,7 @@ export class CommentsService {
       where: { commentId, userId },
     });
     if (existingReport) {
-      throw new ConflictException(
-        this.i18n.t('comments.already_reported'),
-      );
+      throw new ConflictException(this.i18n.t('comments.already_reported'));
     }
 
     const resolved = this.resolveReportReason(reason);
@@ -1233,7 +1392,7 @@ export class CommentsService {
     return {
       message: this.i18n.t('comments.reported'),
       reportId: saved.id,
-      reason: resolved ? resolved.key : (storedReason || null),
+      reason: resolved ? resolved.key : storedReason || null,
       displayName: resolved ? resolved.displayName : null,
       details,
     };
@@ -1295,7 +1454,9 @@ export class CommentsService {
           .createQueryBuilder('reply')
           .leftJoinAndSelect('reply.user', 'user')
           .leftJoinAndSelect('reply.replyToUser', 'replyToUser')
-          .where('reply.parentId IN (:...rootCommentIdsWithReplies)', { rootCommentIdsWithReplies })
+          .where('reply.parentId IN (:...rootCommentIdsWithReplies)', {
+            rootCommentIdsWithReplies,
+          })
           .andWhere('reply.isHidden = false')
           .orderBy('reply.createdAt', 'ASC')
           .getMany();
@@ -1369,7 +1530,13 @@ export class CommentsService {
       disagree: Number(rawCounts.disagree) || 0,
     };
 
-    const reactionKeys: ReactionType[] = ['agree', 'love', 'applaud', 'insightful', 'disagree'];
+    const reactionKeys: ReactionType[] = [
+      'agree',
+      'love',
+      'applaud',
+      'insightful',
+      'disagree',
+    ];
     const topReactions = reactionKeys
       .filter((k) => (reactionsCount[k] || 0) > 0)
       .sort((a, b) => (reactionsCount[b] || 0) - (reactionsCount[a] || 0))
@@ -1397,7 +1564,8 @@ export class CommentsService {
       profileUrl: comment.user?.profileUrl || null,
       role: comment.user?.role || 'user',
       userType: comment.user?.userType || 'Reader',
-      isVerified: comment.user?.role === 'admin' || comment.user?.userType === 'Author',
+      isVerified:
+        comment.user?.role === 'admin' || comment.user?.userType === 'Author',
     };
 
     let formattedReplyToUser: FormattedCommentPublisher | null = null;
@@ -1408,7 +1576,9 @@ export class CommentsService {
         profileUrl: comment.replyToUser.profileUrl || null,
         role: comment.replyToUser.role || 'user',
         userType: comment.replyToUser.userType || 'Reader',
-        isVerified: comment.replyToUser.role === 'admin' || comment.replyToUser.userType === 'Author',
+        isVerified:
+          comment.replyToUser.role === 'admin' ||
+          comment.replyToUser.userType === 'Author',
       };
     }
 
@@ -1446,4 +1616,3 @@ export class CommentsService {
     };
   }
 }
-

@@ -54,7 +54,9 @@ describe('CommentsService', () => {
     };
 
     commentReactionsRepo = {
-      create: jest.fn().mockImplementation((dto) => ({ id: 'react-1', ...dto })),
+      create: jest
+        .fn()
+        .mockImplementation((dto) => ({ id: 'react-1', ...dto })),
       save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
       findOne: jest.fn(),
       find: jest.fn().mockResolvedValue([]),
@@ -72,7 +74,9 @@ describe('CommentsService', () => {
 
     commentReportsRepo = {
       findOne: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockImplementation((dto) => ({ id: 'report-1', ...dto })),
+      create: jest
+        .fn()
+        .mockImplementation((dto) => ({ id: 'report-1', ...dto })),
       save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
     };
 
@@ -87,7 +91,12 @@ describe('CommentsService', () => {
         const id = where?.id || 'user-1';
         return Promise.resolve({
           id,
-          name: id === 'author-comment-1' ? 'Author 1' : id === 'sara-ali' ? 'Sara Ali' : 'User ' + id,
+          name:
+            id === 'author-comment-1'
+              ? 'Author 1'
+              : id === 'sara-ali'
+                ? 'Sara Ali'
+                : 'User ' + id,
           profileUrl: 'https://cdn.hayahbook.com/avatars/' + id + '.jpg',
           role: 'user',
           userType: 'Reader',
@@ -101,7 +110,11 @@ describe('CommentsService', () => {
     };
 
     uploadService = {
-      uploadCommentImage: jest.fn().mockResolvedValue('https://cdn.hayahbook.com/comments/images/image.jpg'),
+      uploadCommentImage: jest
+        .fn()
+        .mockResolvedValue(
+          'https://cdn.hayahbook.com/comments/images/image.jpg',
+        ),
       deleteFileByUrl: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -114,12 +127,24 @@ describe('CommentsService', () => {
       providers: [
         CommentsService,
         { provide: getRepositoryToken(Comment), useValue: commentsRepo },
-        { provide: getRepositoryToken(CommentReaction), useValue: commentReactionsRepo },
-        { provide: getRepositoryToken(CommentMute), useValue: commentMutesRepo },
-        { provide: getRepositoryToken(CommentReport), useValue: commentReportsRepo },
+        {
+          provide: getRepositoryToken(CommentReaction),
+          useValue: commentReactionsRepo,
+        },
+        {
+          provide: getRepositoryToken(CommentMute),
+          useValue: commentMutesRepo,
+        },
+        {
+          provide: getRepositoryToken(CommentReport),
+          useValue: commentReportsRepo,
+        },
         { provide: getRepositoryToken(Post), useValue: postsRepo },
         { provide: getRepositoryToken(User), useValue: usersRepo },
-        { provide: getRepositoryToken(UserUserFollow), useValue: userFollowRepo },
+        {
+          provide: getRepositoryToken(UserUserFollow),
+          useValue: userFollowRepo,
+        },
         { provide: UploadService, useValue: uploadService },
         { provide: I18nService, useValue: i18nService },
       ],
@@ -139,7 +164,11 @@ describe('CommentsService', () => {
         content: 'تعليق باستخدام contentId',
       });
 
-      expect(postsRepo.increment).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 1);
+      expect(postsRepo.increment).toHaveBeenCalledWith(
+        { id: 'post-1' },
+        'commentsCount',
+        1,
+      );
       expect(res.data.content).toBe('تعليق باستخدام contentId');
     });
 
@@ -149,7 +178,11 @@ describe('CommentsService', () => {
         content: 'تعليق رائع ومميز',
       });
 
-      expect(postsRepo.increment).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 1);
+      expect(postsRepo.increment).toHaveBeenCalledWith(
+        { id: 'post-1' },
+        'commentsCount',
+        1,
+      );
       expect(res.data.content).toBe('تعليق رائع ومميز');
       expect(res.data.parentId).toBeNull();
       expect(res.data.publisher.id).toBe('user-1');
@@ -158,7 +191,11 @@ describe('CommentsService', () => {
     });
 
     it('uploads image when file is provided with the comment', async () => {
-      const mockFile: any = { buffer: Buffer.from('test'), mimetype: 'image/jpeg', size: 1024 };
+      const mockFile: any = {
+        buffer: Buffer.from('test'),
+        mimetype: 'image/jpeg',
+        size: 1024,
+      };
       const res = await service.createComment(
         'user-1',
         { postId: 'post-1', content: 'صورة رائعة' },
@@ -166,8 +203,13 @@ describe('CommentsService', () => {
         mockFile,
       );
 
-      expect(uploadService.uploadCommentImage).toHaveBeenCalledWith('user-1', mockFile);
-      expect(res.data.imageUrl).toBe('https://cdn.hayahbook.com/comments/images/image.jpg');
+      expect(uploadService.uploadCommentImage).toHaveBeenCalledWith(
+        'user-1',
+        mockFile,
+      );
+      expect(res.data.imageUrl).toBe(
+        'https://cdn.hayahbook.com/comments/images/image.jpg',
+      );
     });
 
     it('throws NotFoundException when post does not exist', async () => {
@@ -193,8 +235,16 @@ describe('CommentsService', () => {
         content: 'أتفق معك تماماً',
       });
 
-      expect(commentsRepo.increment).toHaveBeenCalledWith({ id: 'root-comment-1' }, 'repliesCount', 1);
-      expect(postsRepo.increment).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 1);
+      expect(commentsRepo.increment).toHaveBeenCalledWith(
+        { id: 'root-comment-1' },
+        'repliesCount',
+        1,
+      );
+      expect(postsRepo.increment).toHaveBeenCalledWith(
+        { id: 'post-1' },
+        'commentsCount',
+        1,
+      );
       expect(res.data.parentId).toBe('root-comment-1');
       expect(res.data.replyToUser?.id).toBe('author-comment-1');
     });
@@ -225,11 +275,22 @@ describe('CommentsService', () => {
       id: 'comment-1',
       postId: 'post-1',
       likesCount: 1,
-      reactionsCount: { total: 1, agree: 0, love: 1, applaud: 0, insightful: 0, disagree: 0 },
+      reactionsCount: {
+        total: 1,
+        agree: 0,
+        love: 1,
+        applaud: 0,
+        insightful: 0,
+        disagree: 0,
+      },
     };
 
     it('adds new reaction when user has not reacted yet', async () => {
-      commentsRepo.findOne.mockResolvedValueOnce({ ...mockComment, likesCount: 0, reactionsCount: { total: 0 } });
+      commentsRepo.findOne.mockResolvedValueOnce({
+        ...mockComment,
+        likesCount: 0,
+        reactionsCount: { total: 0 },
+      });
       commentReactionsRepo.findOne.mockResolvedValueOnce(null);
 
       const res = await service.reactToComment('user-1', 'comment-1', 'love');
@@ -241,20 +302,32 @@ describe('CommentsService', () => {
 
     it('toggles OFF reaction when same reaction is clicked again', async () => {
       commentsRepo.findOne.mockResolvedValueOnce({ ...mockComment });
-      commentReactionsRepo.findOne.mockResolvedValueOnce({ id: 'react-1', reactionType: 'love' });
+      commentReactionsRepo.findOne.mockResolvedValueOnce({
+        id: 'react-1',
+        reactionType: 'love',
+      });
 
       const res = await service.reactToComment('user-1', 'comment-1', 'love');
       expect(res.action).toBe('removed');
       expect(res.userReaction).toBeNull();
       expect(res.reactionsCount.love).toBe(0);
-      expect(commentReactionsRepo.delete).toHaveBeenCalledWith({ id: 'react-1' });
+      expect(commentReactionsRepo.delete).toHaveBeenCalledWith({
+        id: 'react-1',
+      });
     });
 
     it('switches reaction when different reaction is selected', async () => {
       commentsRepo.findOne.mockResolvedValueOnce({ ...mockComment });
-      commentReactionsRepo.findOne.mockResolvedValueOnce({ id: 'react-1', reactionType: 'love' });
+      commentReactionsRepo.findOne.mockResolvedValueOnce({
+        id: 'react-1',
+        reactionType: 'love',
+      });
 
-      const res = await service.reactToComment('user-1', 'comment-1', 'insightful');
+      const res = await service.reactToComment(
+        'user-1',
+        'comment-1',
+        'insightful',
+      );
       expect(res.action).toBe('updated');
       expect(res.userReaction).toBe('insightful');
       expect(res.reactionsCount.love).toBe(0);
@@ -280,7 +353,11 @@ describe('CommentsService', () => {
       };
       commentsRepo.findOne.mockResolvedValueOnce(comment);
 
-      const res = await service.updateComment('user-1', 'comment-1', 'المحتوى الجديد');
+      const res = await service.updateComment(
+        'user-1',
+        'comment-1',
+        'المحتوى الجديد',
+      );
       expect(res.data.content).toBe('المحتوى الجديد');
       expect(res.data.isEdited).toBe(true);
     });
@@ -308,7 +385,11 @@ describe('CommentsService', () => {
       commentsRepo.count.mockResolvedValueOnce(2); // Has 2 replies
 
       const res = await service.deleteComment('user-1', 'comment-1');
-      expect(postsRepo.decrement).toHaveBeenCalledWith({ id: 'post-1' }, 'commentsCount', 3);
+      expect(postsRepo.decrement).toHaveBeenCalledWith(
+        { id: 'post-1' },
+        'commentsCount',
+        3,
+      );
       expect(commentsRepo.delete).toHaveBeenCalledWith({ id: 'comment-1' });
       expect(res.message).toBe('comments.deleted');
     });
@@ -409,7 +490,11 @@ describe('CommentsService', () => {
   describe('reportComment', () => {
     it('creates comment report successfully', async () => {
       commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-1' });
-      const res = await service.reportComment('user-1', 'comment-1', 'محتوى مسيء');
+      const res = await service.reportComment(
+        'user-1',
+        'comment-1',
+        'محتوى مسيء',
+      );
       expect(commentReportsRepo.create).toHaveBeenCalledWith({
         commentId: 'comment-1',
         userId: 'user-1',
@@ -419,14 +504,20 @@ describe('CommentsService', () => {
     });
 
     it('rejects when author attempts to report their own comment', async () => {
-      commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-1', userId: 'user-1' });
+      commentsRepo.findOne.mockResolvedValueOnce({
+        id: 'comment-1',
+        userId: 'user-1',
+      });
       await expect(
         service.reportComment('user-1', 'comment-1', 'spam'),
       ).rejects.toThrow();
     });
 
     it('rejects when user already reported the same comment', async () => {
-      commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-1', userId: 'author-9' });
+      commentsRepo.findOne.mockResolvedValueOnce({
+        id: 'comment-1',
+        userId: 'author-9',
+      });
       commentReportsRepo.findOne.mockResolvedValueOnce({ id: 'report-prev' });
       await expect(
         service.reportComment('user-1', 'comment-1', 'spam'),
@@ -434,7 +525,10 @@ describe('CommentsService', () => {
     });
 
     it('handles something_else with notes correctly', async () => {
-      commentsRepo.findOne.mockResolvedValueOnce({ id: 'comment-2', userId: 'other-user' });
+      commentsRepo.findOne.mockResolvedValueOnce({
+        id: 'comment-2',
+        userId: 'other-user',
+      });
       const res = await service.reportComment(
         'user-1',
         'comment-2',
@@ -518,7 +612,11 @@ describe('CommentsService', () => {
       };
       commentsRepo.createQueryBuilder.mockReturnValue(mockQb);
 
-      const res = await service.getPostComments('post-1', { sort: 'most_relevant' }, 'user-1');
+      const res = await service.getPostComments(
+        'post-1',
+        { sort: 'most_relevant' },
+        'user-1',
+      );
       expect(res.sort).toBe('most_relevant');
       expect(userFollowRepo.find).toHaveBeenCalledWith({
         where: { followerId: 'user-1' },
@@ -542,10 +640,17 @@ describe('CommentsService', () => {
       };
       commentsRepo.createQueryBuilder.mockReturnValue(mockQb);
 
-      const res = await service.getPostComments('post-1', { sort: 'all_comments' }, 'user-1');
+      const res = await service.getPostComments(
+        'post-1',
+        { sort: 'all_comments' },
+        'user-1',
+      );
       expect(res.sort).toBe('all_comments');
       // When all_comments is selected, andWhere with is_hidden should NOT be called
-      expect(mockQb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('is_hidden'), expect.anything());
+      expect(mockQb.andWhere).not.toHaveBeenCalledWith(
+        expect.stringContaining('is_hidden'),
+        expect.anything(),
+      );
     });
   });
 
@@ -601,7 +706,11 @@ describe('CommentsService', () => {
 
       userFollowRepo.find.mockResolvedValue([{ followingId: 'reactor-1' }]);
 
-      const result = await service.getCommentReactions('comment-1', { page: 1, limit: 20 }, 'current-user');
+      const result = await service.getCommentReactions(
+        'comment-1',
+        { page: 1, limit: 20 },
+        'current-user',
+      );
 
       expect(result.counts.all).toBe(5);
       expect(result.counts.love).toBe(3);
@@ -612,5 +721,77 @@ describe('CommentsService', () => {
       expect(result.data[0].user.isFollowing).toBe(true);
       expect(result.total).toBe(1);
     });
+  });
+});
+
+describe('CommentsService hidden reply visibility', () => {
+  let service: CommentsService;
+  let commentsRepo: any;
+  const postOwnerId = 'post-owner';
+  beforeEach(async () => {
+    commentsRepo = {
+      findOne: jest
+        .fn()
+        .mockResolvedValue({ id: 'root', post: { userId: postOwnerId } }),
+      createQueryBuilder: jest.fn(),
+    };
+    const qb: any = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+    };
+    commentsRepo.createQueryBuilder.mockReturnValue(qb);
+    const module = await Test.createTestingModule({
+      providers: [
+        CommentsService,
+        { provide: getRepositoryToken(Comment), useValue: commentsRepo },
+        {
+          provide: getRepositoryToken(CommentReaction),
+          useValue: { find: jest.fn().mockResolvedValue([]) },
+        },
+        {
+          provide: getRepositoryToken(CommentMute),
+          useValue: { find: jest.fn().mockResolvedValue([]) },
+        },
+        { provide: getRepositoryToken(CommentReport), useValue: {} },
+        { provide: getRepositoryToken(Post), useValue: {} },
+        { provide: getRepositoryToken(User), useValue: {} },
+        { provide: getRepositoryToken(UserUserFollow), useValue: {} },
+        { provide: UploadService, useValue: {} },
+        { provide: I18nService, useValue: { t: (key: string) => key } },
+      ],
+    }).compile();
+    service = module.get(CommentsService);
+  });
+
+  it('hides replies from anonymous viewers by default', async () => {
+    await service.getCommentReplies('root', {}, undefined);
+    expect(commentsRepo.createQueryBuilder().andWhere).toHaveBeenCalledWith(
+      'reply.isHidden = false',
+    );
+  });
+
+  it('allows a reply author to see their own hidden reply', async () => {
+    await service.getCommentReplies('root', {}, 'reply-author');
+    expect(commentsRepo.createQueryBuilder().andWhere).toHaveBeenCalledWith(
+      '(reply.isHidden = false OR reply.userId = :currentUserId)',
+      { currentUserId: 'reply-author' },
+    );
+  });
+
+  it('allows the post owner and all_comments mode to see hidden replies', async () => {
+    await service.getCommentReplies('root', {}, postOwnerId);
+    expect(commentsRepo.createQueryBuilder().andWhere).not.toHaveBeenCalled();
+    commentsRepo.createQueryBuilder.mockClear();
+    await service.getCommentReplies(
+      'root',
+      { sort: 'all_comments' },
+      undefined,
+    );
+    expect(commentsRepo.createQueryBuilder().andWhere).not.toHaveBeenCalled();
   });
 });

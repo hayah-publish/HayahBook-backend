@@ -44,7 +44,11 @@ export class ContentCommentsController {
     @Query() query: CommentsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
-    return this.commentsService.getPostComments(postId, query, req?.user?.userId);
+    return this.commentsService.getPostComments(
+      postId,
+      query,
+      req?.user?.userId,
+    );
   }
 
   /**
@@ -54,7 +58,9 @@ export class ContentCommentsController {
    */
   @UseGuards(JwtAuthGuard)
   @Post(':postId/comments')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: 20 * 1024 * 1024 } }),
+  )
   async createContentComment(
     @Req() req: AuthenticatedRequest,
     @Param('postId', new ParseUUIDPipe()) postId: string,
@@ -69,4 +75,3 @@ export class ContentCommentsController {
     );
   }
 }
-
