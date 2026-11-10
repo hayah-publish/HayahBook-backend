@@ -28,6 +28,7 @@ describe('CommentsController', () => {
         { key: 'most_relevant' },
         { key: 'newest' },
         { key: 'all_comments' },
+        { key: 'oldest' },
       ]),
       getReportReasons: jest.fn().mockReturnValue([
         { key: 'spam', displayName: 'Spam', name_ar: 'محتوى غير مرغوب فيه', name_en: 'Spam' },
@@ -118,7 +119,7 @@ describe('CommentsController', () => {
   describe('getSortOptions', () => {
     it('returns available sorting options', () => {
       const res = controller.getSortOptions();
-      expect(res).toHaveLength(3);
+      expect(res).toHaveLength(4);
       expect(service.getSortOptions).toHaveBeenCalled();
     });
   });

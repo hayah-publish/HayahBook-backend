@@ -480,12 +480,13 @@ describe('CommentsService', () => {
   });
 
   describe('getSortOptions and normalizeSort', () => {
-    it('returns 3 standard sorting options matching the design sheet', () => {
+    it('returns 4 standard sorting options matching the design sheet', () => {
       const options = service.getSortOptions();
-      expect(options).toHaveLength(3);
+      expect(options).toHaveLength(4);
       expect(options[0].key).toBe('most_relevant');
       expect(options[1].key).toBe('newest');
       expect(options[2].key).toBe('all_comments');
+      expect(options[3].key).toBe('oldest');
     });
 
     it('normalizes various English and Arabic sort inputs correctly', () => {

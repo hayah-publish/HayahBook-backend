@@ -219,6 +219,14 @@ export class CommentsService {
         descriptionAr: 'عرض جميع التعليقات بما في ذلك التعليقات المحتمل أنها مسيئة.',
         isDefault: false,
       },
+      {
+        key: 'oldest',
+        titleEn: 'Oldest',
+        titleAr: 'الأقدم',
+        descriptionEn: 'See all comments, with the oldest comments first.',
+        descriptionAr: 'عرض جميع التعليقات مع ظهور أقدمها أولاً.',
+        isDefault: false,
+      },
     ];
   }
 
