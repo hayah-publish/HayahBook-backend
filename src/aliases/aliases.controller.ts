@@ -84,7 +84,6 @@ export class AliasesController {
     const alias = await this.aliasesService.getMyAlias(req.user!.userId);
     return {
       data: alias || null,
-      alias: alias || null,
     };
   }
 

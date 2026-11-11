@@ -3567,7 +3567,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDA0NDExLCJleHAiOjE3OTQ0MDUzMTF9.GkdcqJPVgg96yIetpHRnl-Uz__jwACsMPO2xljOqxIc"
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzFhMDEzNS1mYzUyLTQ0NGUtYjJhNi03MmI5NTBhYjhmY2EiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6NywidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM4Mzk2LCJleHAiOjE3OTcwMzAzOTZ9.8KShavGQPJMktU9ZY7eNw2zA6Ily57PXAOEauSIdUP0"
                       }
                     },
                     "securityScheme": {},
@@ -3596,8 +3596,7 @@
                     "responseExamples": [
                       {
                         "name": "OK",
-                        "data": "{\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":false,\"daysRemaining\":26,\"nextAllowedEditDate\":\"2026-12-07T00:00:00.000Z\",\"commentsCount\":3,\"bookRatingsCount\":2},\"alias\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":false,\"daysRemaining\":26,\"nextAllowedEditDate\":\"2026-12-07T00:00:00.000Z\",\"commentsCount\":3,\"bookRatingsCount\":2}}",
-                        "responseId": "47000060"
+                        "data": "{\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":false,\"daysRemaining\":26,\"nextAllowedEditDate\":\"2026-12-07T00:00:00.000Z\",\"commentsCount\":3,\"bookRatingsCount\":2}}"
                       }
                     ],
                     "requestBody": {

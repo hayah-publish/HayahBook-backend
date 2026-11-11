@@ -90,7 +90,7 @@ describe('AliasesController', () => {
     const mockAlias = { id: 'alias-1', nickname: 'reader_1', canEdit: true };
     mockAliasesService.getMyAlias.mockResolvedValueOnce(mockAlias);
     const res = await controller.getMyAlias(req);
-    expect(res).toEqual({ data: mockAlias, alias: mockAlias });
+    expect(res).toEqual({ data: mockAlias });
     expect(mockAliasesService.getMyAlias).toHaveBeenCalledWith('user-1');
   });
 
