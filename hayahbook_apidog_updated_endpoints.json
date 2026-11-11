@@ -1512,12 +1512,6 @@
                           "description": "بحث نصي في محتوى المنشورات"
                         },
                         {
-                          "name": "type",
-                          "type": "string",
-                          "required": false,
-                          "description": "نوع المحتوى: all, posts, articles, visuals"
-                        },
-                        {
                           "name": "category",
                           "type": "string",
                           "required": false,
@@ -1581,7 +1575,7 @@
                       "type": "none",
                       "parameters": []
                     },
-                    "description": "استرجاع قائمة المنشورات مع دعم كامل لفلترة الفيديو عن طريق containVideo=true/false والبحث والترقيم.",
+                    "description": "استرجاع قائمة المنشورات فقط (type=post) مع دعم فلترة الفيديو containVideo والبحث والترقيم. لتصفح التغذية المجمعة لكافة الأنواع (منشورات + مقالات + مرئيات) استخدم GET /v1/home.",
                     "tags": [],
                     "status": "developing",
                     "name": "get-posts - استرجاع وتصفح المنشورات (مع فلترة الفيديو containVideo والبحث)"
@@ -4206,7 +4200,7 @@
               "inheritPreProcessors": {},
               "items": [
                 {
-                  "name": "home-feed - استرجاع تغذية الصفحة الرئيسية",
+                  "name": "home-feed - استرجاع تغذية الصفحة الرئيسية المجمعة (دعم type و containVideo والبحث)",
                   "api": {
                     "id": "47000076",
                     "method": "get",
@@ -4227,7 +4221,7 @@
                           "id": "query_type_1",
                           "name": "type",
                           "required": false,
-                          "description": "نوع المحتوى: all, posts, articles, visuals",
+                          "description": "نوع المحتوى المجمّع: all (الكل - منشورات ومقالات ومرئيات)، posts (منشورات فقط)، articles (مقالات فقط)، visuals (مرئيات وفيديوهات)، snippets (مقتطفات واقتباسات)",
                           "type": "string",
                           "enable": true,
                           "example": "all"
@@ -4272,7 +4266,7 @@
                           "name": "containVideo",
                           "type": "boolean",
                           "required": false,
-                          "description": "فلترة المنشورات/المقالات حسب احتوائها على فيديو (true / false)"
+                          "description": "فلترة المحتوى المجمّع حسب احتوائه على فيديو (true / false) بفحص مفتاح containVideo"
                         }
                       ],
                       "header": [
@@ -4290,7 +4284,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDA0NDExLCJleHAiOjE3OTQ0MDUzMTF9.GkdcqJPVgg96yIetpHRnl-Uz__jwACsMPO2xljOqxIc"
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzFhMDEzNS1mYzUyLTQ0NGUtYjJhNi03MmI5NTBhYjhmY2EiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6NywidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM4Mzk2LCJleHAiOjE3OTcwMzAzOTZ9.8KShavGQPJMktU9ZY7eNw2zA6Ily57PXAOEauSIdUP0"
                       }
                     },
                     "securityScheme": {},
@@ -4331,7 +4325,7 @@
                       "examples": [],
                       "oasExtensions": ""
                     },
-                    "description": "",
+                    "description": "تغذية الصفحة الرئيسية المجمعة (Unified Feed): تجمع كافة أنواع المحتوى (المنشورات، المقالات، المرئيات، المقتطفات) مع دعم كامل للبحث النصي search، والفلترة بالنوع type (all/posts/articles/visuals/snippets)، وفلترة الفيديو containVideo، والتصنيف category، وحسابات المتابعين following، وإرجاع إحصائيات التبويبات الخمسة counts.",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -4356,7 +4350,7 @@
                     "postProcessors": [],
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
-                    "name": "home-feed - استرجاع تغذية الصفحة الرئيسية"
+                    "name": "home-feed - استرجاع تغذية الصفحة الرئيسية المجمعة (دعم type و containVideo والبحث)"
                   }
                 },
                 {

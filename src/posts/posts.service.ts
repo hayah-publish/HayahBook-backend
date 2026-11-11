@@ -1203,7 +1203,7 @@ export class PostsService {
       qb.andWhere("post.type = 'article'");
     } else if (tab === 'visuals') {
       qb.andWhere(
-        "(post.type = 'visual' OR (post.video_url IS NOT NULL AND post.video_url != '') OR post.category ILIKE '%مرئيات%' OR post.category ILIKE '%visual%')",
+        "(post.type = 'visual' OR post.contain_video = TRUE OR (post.video_url IS NOT NULL AND post.video_url != '') OR post.category ILIKE '%مرئيات%' OR post.category ILIKE '%visual%')",
       );
     } else if (tab === 'snippets') {
       qb.andWhere(
@@ -1234,7 +1234,7 @@ export class PostsService {
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post')`, 'posts')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'article')`, 'articles')
       .addSelect(
-        `COUNT(*) FILTER (WHERE post.type = 'visual' OR post.video_url IS NOT NULL OR LOWER(COALESCE(post.category, '')) LIKE '%مرئيات%' OR LOWER(COALESCE(post.category, '')) LIKE '%visual%')`,
+        `COUNT(*) FILTER (WHERE post.type = 'visual' OR post.contain_video = TRUE OR post.video_url IS NOT NULL OR LOWER(COALESCE(post.category, '')) LIKE '%مرئيات%' OR LOWER(COALESCE(post.category, '')) LIKE '%visual%')`,
         'visuals',
       )
       .addSelect(
