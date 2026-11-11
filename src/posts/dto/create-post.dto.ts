@@ -9,7 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Transform, Type, plainToInstance } from 'class-transformer';
-import { MaxWords } from '../validators/word-count.validator';
+import { MaxWords, MinWords } from '../validators/word-count.validator';
 
 export class PostLinkDto {
   @IsUrl({ require_protocol: true })
@@ -51,6 +51,7 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsString()
+  @MinWords(1, { message: 'posts.min_words_required' })
   @MaxWords(500, { message: 'posts.max_words_exceeded' })
   content?: string;
 

@@ -121,7 +121,29 @@ describe('Word Count Limits & Markdown Formatting (Articles 501-5000, Posts max 
       expect(contentError).toBeUndefined();
     });
 
-    it('allows post with 500 words or less', async () => {
+    it('allows post when content is empty string', async () => {
+      const dto = plainToInstance(CreatePostDto, { content: '' });
+      const errors = await validate(dto);
+      const contentError = errors.find((e) => e.property === 'content');
+      expect(contentError).toBeUndefined();
+    });
+
+    it('rejects post when content has text but 0 words (e.g. only symbols or punctuation)', async () => {
+      const dto = plainToInstance(CreatePostDto, { content: '... --- !!!' });
+      const errors = await validate(dto);
+      const contentError = errors.find((e) => e.property === 'content');
+      expect(contentError).toBeDefined();
+      expect(contentError?.constraints?.minWords).toBe('posts.min_words_required');
+    });
+
+    it('allows post with exactly 1 word', async () => {
+      const dto = plainToInstance(CreatePostDto, { content: 'كلمة' });
+      const errors = await validate(dto);
+      const contentError = errors.find((e) => e.property === 'content');
+      expect(contentError).toBeUndefined();
+    });
+
+    it('allows post with 500 words', async () => {
       const content = Array(500).fill('كلمة').join(' ');
       const dto = plainToInstance(CreatePostDto, { content });
       const errors = await validate(dto);
@@ -291,6 +313,13 @@ describe('Word Count Limits & Markdown Formatting (Articles 501-5000, Posts max 
         service.createPost('user-1', { content }),
       ).rejects.toThrow(BadRequestException);
       expect(mockI18nService.t).toHaveBeenCalledWith('posts.max_words_exceeded');
+    });
+
+    it('PostsService.createPost throws BadRequestException if post has text with 0 words', async () => {
+      await expect(
+        service.createPost('user-1', { content: '... --- !!!' }),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockI18nService.t).toHaveBeenCalledWith('posts.min_words_required');
     });
 
     it('PostsService.createArticle throws BadRequestException if article has 500 words', async () => {

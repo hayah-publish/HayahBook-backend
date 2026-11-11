@@ -176,6 +176,7 @@ export const ar = {
     'غير مصرح لك بتغيير إعدادات التعليقات لهذا المنشور',
   'posts.content_required': 'محتوى المنشور مطلوب',
   'posts.content_or_media_required': 'محتوى المنشور مطلوب',
+  'posts.min_words_required': 'يجب أن يحتوي المنشور على كلمة واحدة على الأقل في حال كتابة نص',
   'posts.max_words_exceeded': 'يجب ألا يتجاوز محتوى المنشور 500 كلمة',
   'posts.comments_disabled': 'التعليقات معطلة على هذا المنشور',
   'posts.comments_disabled_success': 'تم تعطيل التعليقات على هذا المنشور بنجاح',

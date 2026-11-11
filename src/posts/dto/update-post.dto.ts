@@ -7,7 +7,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { MaxWords } from '../validators/word-count.validator';
+import { MaxWords, MinWords } from '../validators/word-count.validator';
 
 export class UpdatePostDto {
   @IsOptional()
@@ -17,6 +17,7 @@ export class UpdatePostDto {
 
   @IsOptional()
   @IsString()
+  @MinWords(1, { message: 'posts.min_words_required' })
   @MaxWords(5000, { message: 'posts.max_words_exceeded' })
   content?: string;
 

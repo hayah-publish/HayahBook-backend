@@ -180,6 +180,8 @@ export const en = {
     'You are not authorized to change comments settings for this post',
   'posts.content_required': 'Post content is required',
   'posts.content_or_media_required': 'Post content is required',
+  'posts.min_words_required':
+    'Post content must contain at least 1 word if text is provided',
   'posts.max_words_exceeded': 'Post content must not exceed 500 words',
   'posts.comments_disabled': 'Comments are disabled on this post',
   'posts.comments_disabled_success':

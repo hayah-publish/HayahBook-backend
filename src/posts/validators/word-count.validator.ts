@@ -67,7 +67,13 @@ export function countWords(text?: string | null): number {
 @ValidatorConstraint({ name: 'maxWords', async: false })
 export class MaxWordsConstraint implements ValidatorConstraintInterface {
   validate(value: any, args: ValidationArguments): boolean {
-    if (value === undefined || value === null || value === '') return true;
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && value.trim() === '')
+    ) {
+      return true;
+    }
     if (typeof value !== 'string') return false;
     const max = args.constraints[0] as number;
     return countWords(value) <= max;
@@ -94,7 +100,13 @@ export function MaxWords(max: number, validationOptions?: ValidationOptions) {
 @ValidatorConstraint({ name: 'minWords', async: false })
 export class MinWordsConstraint implements ValidatorConstraintInterface {
   validate(value: any, args: ValidationArguments): boolean {
-    if (value === undefined || value === null || value === '') return true;
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && value.trim() === '')
+    ) {
+      return true;
+    }
     if (typeof value !== 'string') return false;
     const min = args.constraints[0] as number;
     return countWords(value) >= min;

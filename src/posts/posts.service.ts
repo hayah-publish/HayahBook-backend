@@ -781,6 +781,9 @@ export class PostsService {
 
     if (hasText) {
       const wordCount = countWords(trimmedContent);
+      if (wordCount < 1) {
+        throw new BadRequestException(this.i18n.t('posts.min_words_required'));
+      }
       if (wordCount > 500) {
         throw new BadRequestException(this.i18n.t('posts.max_words_exceeded'));
       }
@@ -2732,10 +2735,18 @@ export class PostsService {
           );
         }
         post.content = sanitizeMarkdown(trimmedContent);
-      } else if (wordCount > 500) {
-        throw new BadRequestException(this.i18n.t('posts.max_words_exceeded'));
-      } else {
+      } else if (trimmedContent.length > 0) {
+        if (wordCount < 1) {
+          throw new BadRequestException(
+            this.i18n.t('posts.min_words_required'),
+          );
+        }
+        if (wordCount > 500) {
+          throw new BadRequestException(this.i18n.t('posts.max_words_exceeded'));
+        }
         post.content = trimmedContent;
+      } else {
+        post.content = '';
       }
     }
     if (dto.bookId !== undefined) {
