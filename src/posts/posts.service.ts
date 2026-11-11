@@ -1516,7 +1516,7 @@ export class PostsService {
     let post: Post | null = null;
     try {
       post = await this.postsRepository.findOne({
-        where: [{ id: resolvedId }, { id }],
+        where: { id: resolvedId },
         relations: {
           user: true,
           book: true,
@@ -2982,7 +2982,7 @@ export class PostsService {
   }> {
     const resolvedId = this.decodePostId(postId);
     const post = await this.postsRepository.findOne({
-      where: [{ id: resolvedId }, { id: postId }],
+      where: { id: resolvedId },
     });
     if (!post) {
       throw new NotFoundException(this.i18n.t('posts.not_found'));

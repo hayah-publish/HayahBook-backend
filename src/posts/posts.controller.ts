@@ -135,6 +135,23 @@ export class PostsController {
   }
 
   /**
+   * GET /v1/posts/shared/:token
+   * Resolve and get post by encrypted share token
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('shared/:token')
+  async getSharedPost(
+    @Param('token') token: string,
+    @Req() req?: AuthenticatedRequest,
+  ) {
+    const post = await this.postsService.findOne(token, req?.user?.userId);
+    return {
+      data: post,
+      ...post,
+    };
+  }
+
+  /**
    * GET /v1/posts/:id
    * Get a single post by UUID
    */
