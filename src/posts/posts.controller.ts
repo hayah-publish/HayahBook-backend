@@ -147,7 +147,6 @@ export class PostsController {
     const post = await this.postsService.findOne(token, req?.user?.userId);
     return {
       data: post,
-      ...post,
     };
   }
 
@@ -164,7 +163,6 @@ export class PostsController {
     const post = await this.postsService.findOne(id, req?.user?.userId);
     return {
       data: post,
-      ...post,
     };
   }
 
