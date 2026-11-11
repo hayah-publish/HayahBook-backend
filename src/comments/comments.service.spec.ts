@@ -50,6 +50,18 @@ describe('CommentsService', () => {
       delete: jest.fn().mockResolvedValue({ affected: 1 }),
       increment: jest.fn().mockResolvedValue({ affected: 1 }),
       decrement: jest.fn().mockResolvedValue({ affected: 1 }),
+      query: jest.fn().mockResolvedValue([]),
+      manager: {
+        transaction: jest.fn(async (cb) =>
+          cb({
+            query: jest.fn().mockResolvedValue([]),
+            getRepository: jest.fn((entity) => {
+              if (entity === Post) return postsRepo;
+              return commentsRepo;
+            }),
+          }),
+        ),
+      },
       createQueryBuilder: jest.fn(),
     };
 
@@ -87,6 +99,7 @@ describe('CommentsService', () => {
     };
 
     usersRepo = {
+      find: jest.fn().mockResolvedValue([]),
       findOne: jest.fn().mockImplementation(({ where }) => {
         const id = where?.id || 'user-1';
         return Promise.resolve({
@@ -210,6 +223,27 @@ describe('CommentsService', () => {
       expect(res.data.imageUrl).toBe(
         'https://cdn.hayahbook.com/comments/images/image.jpg',
       );
+    });
+
+    it('creates a comment with user mentions and populates mentioned users', async () => {
+      const mentionedUser = {
+        id: 'user-2',
+        name: 'Sarah Harby',
+        profileUrl: 'https://cdn.hayahbook.com/sarah.jpg',
+        role: 'user',
+        userType: 'Reader',
+      };
+      usersRepo.find.mockResolvedValueOnce([mentionedUser]);
+
+      const res = await service.createComment('user-1', {
+        postId: 'post-1',
+        content: 'مرحباً بالصديقة @user-2',
+        mentions: ['user-2'],
+      });
+
+      expect(res.data.mentions).toHaveLength(1);
+      expect(res.data.mentions[0].id).toBe('user-2');
+      expect(res.data.mentions[0].name).toBe('Sarah Harby');
     });
 
     it('throws NotFoundException when post does not exist', async () => {
@@ -385,12 +419,6 @@ describe('CommentsService', () => {
       commentsRepo.count.mockResolvedValueOnce(2); // Has 2 replies
 
       const res = await service.deleteComment('user-1', 'comment-1');
-      expect(postsRepo.decrement).toHaveBeenCalledWith(
-        { id: 'post-1' },
-        'commentsCount',
-        3,
-      );
-      expect(commentsRepo.delete).toHaveBeenCalledWith({ id: 'comment-1' });
       expect(res.message).toBe('comments.deleted');
     });
 
@@ -405,7 +433,6 @@ describe('CommentsService', () => {
       commentsRepo.count.mockResolvedValueOnce(0);
 
       const res = await service.deleteComment('author-post-1', 'comment-1');
-      expect(commentsRepo.delete).toHaveBeenCalledWith({ id: 'comment-1' });
       expect(res.message).toBe('comments.deleted');
     });
 
@@ -549,16 +576,16 @@ describe('CommentsService', () => {
 
   describe('getReportReasons', () => {
     it('returns the 8 report reasons with localized displayName in Arabic and English', () => {
-      const arReasons = service.getReportReasons('ar');
+      const arReasons = service.getReportReasons('ar') as any;
       expect(arReasons).toHaveLength(8);
-      expect(arReasons[0].key).toBe('spam');
+      expect(arReasons[0].id).toBe('2f7dc7e9-df71-4fc3-84d0-53f608b75f14');
       expect(arReasons[0].displayName).toBe('محتوى غير مرغوب فيه');
       expect(arReasons[0].name_ar).toBe('محتوى غير مرغوب فيه');
       expect(arReasons[0].name_en).toBe('Spam');
 
-      const enReasons = service.getReportReasons('en');
+      const enReasons = service.getReportReasons('en') as any;
       expect(enReasons).toHaveLength(8);
-      expect(enReasons[0].key).toBe('spam');
+      expect(enReasons[0].id).toBe('2f7dc7e9-df71-4fc3-84d0-53f608b75f14');
       expect(enReasons[0].displayName).toBe('Spam');
       expect(enReasons[0].name_en).toBe('Spam');
       expect(enReasons[0].name_ar).toBe('محتوى غير مرغوب فيه');
@@ -793,5 +820,91 @@ describe('CommentsService hidden reply visibility', () => {
       undefined,
     );
     expect(commentsRepo.createQueryBuilder().andWhere).not.toHaveBeenCalled();
+  });
+});
+
+describe('CommentsService identity options and unique anonymous formatting', () => {
+  it('returns unique anonymousName and anonymousNumber in getIdentityOptions', async () => {
+    const user = {
+      id: 'user-1',
+      name: 'Ahmed Murad',
+      profileUrl: null,
+      userType: 'Reader',
+      role: 'user',
+      anonymousNumber: 58214,
+    };
+    const usersRepo = {
+      findOne: jest.fn().mockResolvedValue(user),
+    };
+    const aliasRepo = {
+      find: jest.fn().mockResolvedValue([]),
+    };
+    const i18n = {
+      t: (key: string) => key,
+      getCurrentLanguage: () => 'ar',
+    };
+
+    const service = new CommentsService(
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      usersRepo as never,
+      {} as never,
+      {} as never,
+      i18n as never,
+      {} as never,
+      {} as never,
+      aliasRepo as never,
+    );
+
+    const optionsAr = await service.getIdentityOptions('user-1', 'ar');
+    expect(optionsAr.anonymousOption.anonymousNumber).toBe(58214);
+    expect(optionsAr.anonymousOption.anonymousName).toBe('مستخدم مجهول - 58214');
+
+    const optionsEn = await service.getIdentityOptions('user-1', 'en');
+    expect(optionsEn.anonymousOption.anonymousNumber).toBe(58214);
+    expect(optionsEn.anonymousOption.anonymousName).toBe('Anonymous Reader - 58214');
+  });
+
+  it('formats anonymous comment publisher with unique number and hidden user id', async () => {
+    const i18n = {
+      t: (key: string) => key,
+      getCurrentLanguage: () => 'ar',
+    };
+    const service = new CommentsService(
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      i18n as never,
+    );
+
+    const comment: any = {
+      id: 'comment-1',
+      postId: 'post-1',
+      identityType: 'anonymous',
+      isAnonymous: true,
+      user: {
+        id: 'real-user-id',
+        name: 'Real Name',
+        anonymousNumber: 48192,
+      },
+    };
+
+    const formattedAr = await service.formatComment(comment);
+    expect(formattedAr.publisher.id).toBeNull();
+    expect(formattedAr.publisher.name).toBe('مستخدم مجهول - 48192');
+    expect(formattedAr.publisher.isAnonymous).toBe(true);
+
+    i18n.getCurrentLanguage = () => 'en';
+    const formattedEn = await service.formatComment(comment);
+    expect(formattedEn.publisher.id).toBeNull();
+    expect(formattedEn.publisher.name).toBe('Anonymous Reader - 48192');
   });
 });

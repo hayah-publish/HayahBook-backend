@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -24,7 +25,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('users')
 export class UsersController {
   constructor(
@@ -75,7 +75,7 @@ export class UsersController {
 
   /**
    * POST /v1/users/:id/follow
-   * Follows a single user.
+   * Toggles following a user on/off (or sets explicit state via body { follow: boolean }).
    */
   @UseGuards(JwtAuthGuard)
   @Post(':id/follow')
@@ -83,22 +83,26 @@ export class UsersController {
   async followUser(
     @Req() req: AuthenticatedRequest,
     @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body?: { follow?: boolean },
   ) {
-    const profile = await this.usersService.getUserPublicProfile(id, req.user!.userId);
-    if (profile.isFollowing) {
-      return {
-        isFollowing: true,
-        message: this.i18n.t('users.already_following'),
-        followersCount: profile.followersCount,
-      };
-    }
-    return this.usersService.toggleFollowUser(req.user!.userId, id);
+    const result = await this.usersService.toggleFollowUser(
+      req.user!.userId,
+      id,
+      body?.follow,
+    );
+    return {
+      message: result.message,
+      isFollowing: result.isFollowing,
+      followersCount: result.followersCount,
+      data: {
+        targetUserId: id,
+        isFollowing: result.isFollowing,
+        followersCount: result.followersCount,
+      },
+    };
   }
 
-  /**
-   * DELETE /v1/users/:id/follow
-   * Unfollows a user.
-   */
+  /** Unfollows a user; repeated requests keep the relation inactive. */
   @UseGuards(JwtAuthGuard)
   @Delete(':id/follow')
   @HttpCode(HttpStatus.OK)
@@ -106,15 +110,142 @@ export class UsersController {
     @Req() req: AuthenticatedRequest,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    const profile = await this.usersService.getUserPublicProfile(id, req.user!.userId);
-    if (!profile.isFollowing) {
-      return {
-        isFollowing: false,
-        message: this.i18n.t('users.already_not_following'),
-        followersCount: profile.followersCount,
-      };
-    }
-    return this.usersService.toggleFollowUser(req.user!.userId, id);
+    const result = await this.usersService.toggleFollowUser(
+      req.user!.userId,
+      id,
+      false,
+    );
+    return {
+      ...result,
+      data: {
+        targetUserId: id,
+        isFollowing: result.isFollowing,
+        followersCount: result.followersCount,
+      },
+    };
+  }
+
+  /**
+   * POST /v1/users/:id/block
+   * Blocks a user and removes mutual follows.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/block')
+  @HttpCode(HttpStatus.OK)
+  async blockUser(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    const result = await this.usersService.blockUser(req.user!.userId, id);
+    return {
+      message: result.message,
+      isBlocked: result.isBlocked,
+      blockedUser: result.blockedUser,
+      data: {
+        targetUserId: id,
+        isBlocked: result.isBlocked,
+        blockedUser: result.blockedUser,
+      },
+    };
+  }
+
+  /**
+   * DELETE /v1/users/:id/block
+   * Unblocks a user.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/block')
+  @HttpCode(HttpStatus.OK)
+  async unblockUser(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    const result = await this.usersService.unblockUser(req.user!.userId, id);
+    return {
+      message: result.message,
+      isBlocked: result.isBlocked,
+      data: {
+        targetUserId: id,
+        isBlocked: result.isBlocked,
+      },
+    };
+  }
+
+  /**
+   * GET /v1/users/me/blocks (or /v1/users/me/blocked)
+   * Returns list of users blocked by the authenticated user.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get(['me/blocks', 'me/blocked'])
+  async getMyBlocks(@Req() req: AuthenticatedRequest) {
+    const result = await this.usersService.getBlockedUsers(req.user!.userId);
+    return {
+      data: result,
+    };
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('me/followers/page')
+  async getMyFollowersPage(
+    @Req() req: AuthenticatedRequest,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.usersService.getFollowersPage(
+      req.user!.userId,
+      req.user!.userId,
+      Number(page),
+      Number(limit),
+    );
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('me/following/page')
+  async getMyFollowingPage(
+    @Req() req: AuthenticatedRequest,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.usersService.getFollowingPage(
+      req.user!.userId,
+      req.user!.userId,
+      search,
+      Number(page),
+      Number(limit),
+    );
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get(':id/followers/page')
+  async getUserFollowersPage(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.usersService.getFollowersPage(
+      id,
+      req.user?.userId,
+      Number(page),
+      Number(limit),
+    );
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get(':id/following/page')
+  async getUserFollowingPage(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.usersService.getFollowingPage(
+      id,
+      req.user?.userId,
+      search,
+      Number(page),
+      Number(limit),
+    );
   }
 
   /**
@@ -157,4 +288,3 @@ export class UsersController {
     return this.usersService.getUserPublicProfile(id, req.user?.userId);
   }
 }
-

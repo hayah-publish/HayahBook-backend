@@ -25,7 +25,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller(['bookmarks', 'saved'])
 @UseGuards(JwtAuthGuard)
 export class BookmarksController {
@@ -76,7 +75,17 @@ export class BookmarksController {
     @Req() req: AuthenticatedRequest,
     @Param('postId', new ParseUUIDPipe()) postId: string,
   ) {
-    return this.bookmarksService.toggleBookmark(req.user.userId, postId);
+    const result = await this.bookmarksService.toggleBookmark(req.user.userId, postId);
+    return {
+      message: result.message,
+      isSaved: result.isSaved,
+      bookmarksCount: result.bookmarksCount,
+      data: {
+        postId,
+        isSaved: result.isSaved,
+        bookmarksCount: result.bookmarksCount,
+      },
+    };
   }
 
   /**
@@ -89,7 +98,17 @@ export class BookmarksController {
     @Req() req: AuthenticatedRequest,
     @Body() body: BookmarkActionDto,
   ) {
-    return this.bookmarksService.toggleBookmark(req.user.userId, body.postId);
+    const result = await this.bookmarksService.toggleBookmark(req.user.userId, body.postId);
+    return {
+      message: result.message,
+      isSaved: result.isSaved,
+      bookmarksCount: result.bookmarksCount,
+      data: {
+        postId: body.postId,
+        isSaved: result.isSaved,
+        bookmarksCount: result.bookmarksCount,
+      },
+    };
   }
 
   /**
@@ -102,7 +121,17 @@ export class BookmarksController {
     @Req() req: AuthenticatedRequest,
     @Param('postId', new ParseUUIDPipe()) postId: string,
   ) {
-    return this.bookmarksService.removeBookmark(req.user.userId, postId);
+    const result = await this.bookmarksService.removeBookmark(req.user.userId, postId);
+    return {
+      message: result.message,
+      isSaved: result.isSaved,
+      bookmarksCount: result.bookmarksCount,
+      data: {
+        postId,
+        isSaved: result.isSaved,
+        bookmarksCount: result.bookmarksCount,
+      },
+    };
   }
 }
 

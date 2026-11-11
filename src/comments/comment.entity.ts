@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Post } from '../posts/post.entity';
 import { User } from '../users/user.entity';
+import { UserAlias } from '../aliases/user-alias.entity';
 import { CommentReaction } from './comment-reaction.entity';
 import type { PostReactionsCount } from '../posts/post-reaction.entity';
 
@@ -93,6 +94,20 @@ export class Comment {
 
   @Column({ name: 'is_edited', type: 'boolean', default: false })
   isEdited: boolean;
+
+  @Column({ name: 'identity_type', type: 'varchar', length: 20, default: 'primary' })
+  identityType: 'primary' | 'alias' | 'anonymous';
+
+  @Index()
+  @Column({ name: 'alias_id', type: 'uuid', nullable: true })
+  aliasId: string | null;
+
+  @ManyToOne(() => UserAlias, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'alias_id' })
+  alias: UserAlias | null;
+
+  @Column({ name: 'is_anonymous', type: 'boolean', default: false })
+  isAnonymous: boolean;
 
   @OneToMany(() => CommentReaction, (reaction) => reaction.comment)
   reactions: CommentReaction[];

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   OnModuleInit,
@@ -9,6 +10,7 @@ import { In, Repository } from 'typeorm';
 import { Creator } from './creator.entity';
 import { UserCreatorFollow } from './user-creator-follow.entity';
 import { User } from '../users/user.entity';
+import { UserBlock } from '../users/user-block.entity';
 import { Interest } from '../interests/interest.entity';
 import { I18nService } from '../i18n/i18n.service';
 import { SupportedLanguage } from '../i18n/i18n.types';
@@ -68,7 +70,8 @@ export class CreatorsService implements OnModuleInit {
       email: creator.showEmail ? creator.email : null,
       phone: creator.showPhone ? creator.phone : null,
       countryCode: creator.showPhone ? creator.countryCode : null,
-      country: this.i18n.formatCountry(creator.country) ?? creator.country ?? null,
+      country:
+        this.i18n.formatCountry(creator.country) ?? creator.country ?? null,
       birthday: creator.showBirthday ? creator.birthday : null,
       profileUrl: creator.profileUrl,
       aboutMe: creator.aboutMe,
@@ -90,14 +93,23 @@ export class CreatorsService implements OnModuleInit {
   ): Promise<CreatorResponse[]> {
     const currentLang = lang || this.i18n.getCurrentLanguage();
 
-    const safeLimit = Math.max(1, Math.min(100, Math.trunc(Number(limit) || 50)));
+    const safeLimit = Math.max(
+      1,
+      Math.min(100, Math.trunc(Number(limit) || 50)),
+    );
     const interestRows: Array<{ interest_id: string }> = userId
-      ? await this.creatorRepo.query('SELECT interest_id FROM user_interests WHERE user_id = $1', [userId])
+      ? await this.creatorRepo.query(
+          'SELECT interest_id FROM user_interests WHERE user_id = $1',
+          [userId],
+        )
       : [];
     const interestIds = interestRows.map((row) => row.interest_id);
-    const follows = userId ? await this.followRepo.find({ where: { userId } }) : [];
+    const follows = userId
+      ? await this.followRepo.find({ where: { userId } })
+      : [];
     const followedIds = new Set(follows.map((row) => row.creatorId));
-    const ranked: Array<{ id: string }> = await this.creatorRepo.query(`
+    const ranked: Array<{ id: string }> = await this.creatorRepo.query(
+      `
       SELECT c.id
       FROM creators c
       LEFT JOIN user_interests ui ON ui.user_id = c.id
@@ -105,28 +117,51 @@ export class CreatorsService implements OnModuleInit {
       ORDER BY COUNT(ui.interest_id) FILTER (WHERE ui.interest_id = ANY($1::uuid[])) DESC,
                c."followersCount" DESC NULLS LAST, c.id
       LIMIT $2
-    `, [interestIds, safeLimit]);
+    `,
+      [interestIds, safeLimit],
+    );
     if (!ranked.length) return [];
     const ids = ranked.map((row) => row.id);
     const creators = await this.creatorRepo.findBy({ id: In(ids) });
     const byId = new Map(creators.map((creator) => [creator.id, creator]));
-    const rows: Array<{ creatorId: string; interestId: string; name: string; name_ar: string; name_en: string }> =
-      await this.creatorRepo.query(`
+    const rows: Array<{
+      creatorId: string;
+      interestId: string;
+      name: string;
+      name_ar: string;
+      name_en: string;
+    }> = await this.creatorRepo.query(
+      `
         SELECT ui.user_id AS "creatorId", i.id AS "interestId", i.name, i.name_ar, i.name_en
         FROM user_interests ui JOIN interests i ON i.id = ui.interest_id
         WHERE ui.user_id = ANY($1::uuid[])
-      `, [ids]);
+      `,
+      [ids],
+    );
     const matching = new Map<string, string[]>();
     const selectedInterestIds = new Set(interestIds);
     for (const row of rows) {
       if (!selectedInterestIds.has(row.interestId)) continue;
       const list = matching.get(row.creatorId) ?? [];
-      list.push(currentLang === 'en' ? (row.name_en || row.name) : (row.name_ar || row.name));
+      list.push(
+        currentLang === 'en'
+          ? row.name_en || row.name
+          : row.name_ar || row.name,
+      );
       matching.set(row.creatorId, list);
     }
     return ids.flatMap((id) => {
       const creator = byId.get(id);
-      return creator ? [this.mapCreatorToResponse(creator, matching.get(id) ?? [], followedIds.has(id), currentLang)] : [];
+      return creator
+        ? [
+            this.mapCreatorToResponse(
+              creator,
+              matching.get(id) ?? [],
+              followedIds.has(id),
+              currentLang,
+            ),
+          ]
+        : [];
     });
   }
 
@@ -138,7 +173,8 @@ export class CreatorsService implements OnModuleInit {
     followingCount: number;
     creatorsSelected: boolean;
   }> {
-    const incomingCreatorIds = (dto.data && dto.data.length > 0) ? dto.data : dto.creatorIds;
+    const incomingCreatorIds =
+      dto.data && dto.data.length > 0 ? dto.data : dto.creatorIds;
     if (!incomingCreatorIds || incomingCreatorIds.length === 0) {
       throw new BadRequestException(
         this.i18n.getCurrentLanguage() === 'ar'
@@ -149,24 +185,41 @@ export class CreatorsService implements OnModuleInit {
 
     const distinctIds = Array.from(new Set(incomingCreatorIds));
     return this.userRepo.manager.transaction(async (manager) => {
-      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId]);
+      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [
+        userId,
+      ]);
       const userRepo = manager.getRepository(User);
       const creatorRepo = manager.getRepository(Creator);
       const followRepo = manager.getRepository(UserCreatorFollow);
       const user = await userRepo.findOne({ where: { id: userId } });
-      if (!user) throw new NotFoundException(this.i18n.t('auth.user_not_found'));
+      if (!user)
+        throw new NotFoundException(this.i18n.t('auth.user_not_found'));
       const creators = await creatorRepo.findBy({ id: In(distinctIds) });
       if (creators.length !== distinctIds.length) {
         throw new BadRequestException(this.i18n.t('creators.some_not_found'));
       }
+      const blocks = await manager.getRepository(UserBlock).find({
+        where: distinctIds.flatMap((id) => [
+          { blockerId: userId, blockedId: id },
+          { blockerId: id, blockedId: userId },
+        ]),
+      });
+      if (blocks.length)
+        throw new ForbiddenException(this.i18n.t('users.block_relationship'));
       const existing = await followRepo.find({ where: { userId } });
       const existingIds = new Set(existing.map((follow) => follow.creatorId));
-      const newCreators = creators.filter((creator) => !existingIds.has(creator.id));
+      const newCreators = creators.filter(
+        (creator) => !existingIds.has(creator.id),
+      );
       if (!user.creatorsSelected && existingIds.size + newCreators.length < 5) {
-        throw new BadRequestException(this.i18n.t('creators.select_at_least_5'));
+        throw new BadRequestException(
+          this.i18n.t('creators.select_at_least_5'),
+        );
       }
       for (const creator of newCreators) {
-        await followRepo.save(followRepo.create({ userId, creatorId: creator.id }));
+        await followRepo.save(
+          followRepo.create({ userId, creatorId: creator.id }),
+        );
         await creatorRepo.increment({ id: creator.id }, 'followersCount', 1);
         await userRepo.increment({ id: creator.id }, 'followersCount', 1);
       }
@@ -190,24 +243,47 @@ export class CreatorsService implements OnModuleInit {
     followersCount: number;
   }> {
     return this.userRepo.manager.transaction(async (manager) => {
-      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId]);
+      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [
+        userId,
+      ]);
       const creatorRepo = manager.getRepository(Creator);
       const userRepo = manager.getRepository(User);
       const followRepo = manager.getRepository(UserCreatorFollow);
       const creator = await creatorRepo.findOne({ where: { id: creatorId } });
-      if (!creator) throw new NotFoundException(this.i18n.t('creators.not_found'));
-      const existing = await followRepo.findOne({ where: { userId, creatorId } });
+      if (!creator)
+        throw new NotFoundException(this.i18n.t('creators.not_found'));
+      const block = await manager.getRepository(UserBlock).findOne({
+        where: [
+          { blockerId: userId, blockedId: creatorId },
+          { blockerId: creatorId, blockedId: userId },
+        ],
+      });
+      if (block)
+        throw new ForbiddenException(this.i18n.t('users.block_relationship'));
+      const existing = await followRepo.findOne({
+        where: { userId, creatorId },
+      });
       const nowFollowing = !existing;
       if (existing) {
         await followRepo.delete({ id: existing.id });
-        await manager.query('UPDATE creators SET "followersCount" = GREATEST(COALESCE("followersCount", 0) - 1, 0) WHERE id = $1', [creatorId]);
-        await manager.query('UPDATE users SET "followersCount" = GREATEST(COALESCE("followersCount", 0) - 1, 0) WHERE id = $1', [creatorId]);
+        await manager.query(
+          'UPDATE creators SET "followersCount" = GREATEST(COALESCE("followersCount", 0) - 1, 0) WHERE id = $1',
+          [creatorId],
+        );
+        await manager.query(
+          'UPDATE users SET "followersCount" = GREATEST(COALESCE("followersCount", 0) - 1, 0) WHERE id = $1',
+          [creatorId],
+        );
       } else {
         await followRepo.save(followRepo.create({ userId, creatorId }));
         await creatorRepo.increment({ id: creatorId }, 'followersCount', 1);
         await userRepo.increment({ id: creatorId }, 'followersCount', 1);
         const user = await userRepo.findOne({ where: { id: userId } });
-        if (user && !user.creatorsSelected && await followRepo.count({ where: { userId } }) >= 5) {
+        if (
+          user &&
+          !user.creatorsSelected &&
+          (await followRepo.count({ where: { userId } })) >= 5
+        ) {
           user.creatorsSelected = true;
           await userRepo.save(user);
         }
@@ -215,13 +291,20 @@ export class CreatorsService implements OnModuleInit {
       const updated = await creatorRepo.findOne({ where: { id: creatorId } });
       return {
         isFollowing: nowFollowing,
-        message: this.i18n.t(nowFollowing ? 'creators.followed_single_success' : 'creators.unfollowed_success'),
+        message: this.i18n.t(
+          nowFollowing
+            ? 'creators.followed_single_success'
+            : 'creators.unfollowed_success',
+        ),
         followersCount: Math.max(0, updated?.followersCount ?? 0),
       };
     });
   }
 
-  async getFollowed(userId: string, lang?: SupportedLanguage): Promise<CreatorResponse[]> {
+  async getFollowed(
+    userId: string,
+    lang?: SupportedLanguage,
+  ): Promise<CreatorResponse[]> {
     const currentLang = lang || this.i18n.getCurrentLanguage();
     const follows = await this.followRepo.find({
       where: { userId },
@@ -249,7 +332,11 @@ export class CreatorsService implements OnModuleInit {
     const interestsByCreatorId = new Map<string, string[]>();
     for (const row of creatorInterestsRows) {
       const list = interestsByCreatorId.get(row.creatorId) || [];
-      list.push(currentLang === 'en' ? (row.name_en || row.name) : (row.name_ar || row.name));
+      list.push(
+        currentLang === 'en'
+          ? row.name_en || row.name
+          : row.name_ar || row.name,
+      );
       interestsByCreatorId.set(row.creatorId, list);
     }
 
@@ -263,7 +350,11 @@ export class CreatorsService implements OnModuleInit {
     );
   }
 
-  async findById(id: string, userId?: string, lang?: SupportedLanguage): Promise<CreatorResponse> {
+  async findById(
+    id: string,
+    userId?: string,
+    lang?: SupportedLanguage,
+  ): Promise<CreatorResponse> {
     const currentLang = lang || this.i18n.getCurrentLanguage();
     const creator = await this.creatorRepo.findOne({
       where: { id },
@@ -297,18 +388,23 @@ export class CreatorsService implements OnModuleInit {
 
     let matchingInterests: string[] = [];
     if (userId) {
-      const userInterestsRows: Array<{ interest_id: string }> = await this.creatorRepo.query(
-        `SELECT interest_id FROM user_interests WHERE user_id = $1`,
-        [userId],
+      const userInterestsRows: Array<{ interest_id: string }> =
+        await this.creatorRepo.query(
+          `SELECT interest_id FROM user_interests WHERE user_id = $1`,
+          [userId],
+        );
+      const userInterestIds = new Set(
+        userInterestsRows.map((r) => r.interest_id),
       );
-      const userInterestIds = new Set(userInterestsRows.map((r) => r.interest_id));
-      const matched = creatorInterestsRows.filter((r) => userInterestIds.has(r.interestId));
+      const matched = creatorInterestsRows.filter((r) =>
+        userInterestIds.has(r.interestId),
+      );
       matchingInterests = matched.map((i) =>
-        currentLang === 'en' ? (i.name_en || i.name) : (i.name_ar || i.name),
+        currentLang === 'en' ? i.name_en || i.name : i.name_ar || i.name,
       );
     } else {
       matchingInterests = creatorInterestsRows.map((i) =>
-        currentLang === 'en' ? (i.name_en || i.name) : (i.name_ar || i.name),
+        currentLang === 'en' ? i.name_en || i.name : i.name_ar || i.name,
       );
     }
 

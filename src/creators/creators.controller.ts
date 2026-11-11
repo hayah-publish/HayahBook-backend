@@ -26,7 +26,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('creators')
 export class CreatorsController {
   constructor(

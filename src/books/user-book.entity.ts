@@ -11,6 +11,7 @@ import {
 import { User } from '../users/user.entity';
 import { Book } from './book.entity';
 import { Audiobook } from './audiobook.entity';
+import { UserAlias } from '../aliases/user-alias.entity';
 
 export type ReadingStatus = 'finished' | 'reading' | 'want_to_read';
 
@@ -60,6 +61,17 @@ export class UserBook {
 
   @Column({ name: 'finished_at', type: 'timestamptz', nullable: true })
   finishedAt: Date | null;
+
+  @Column({ name: 'identity_type', type: 'varchar', length: 20, default: 'primary' })
+  identityType: 'primary' | 'alias';
+
+  @Index()
+  @Column({ name: 'alias_id', type: 'uuid', nullable: true })
+  aliasId: string | null;
+
+  @ManyToOne(() => UserAlias, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'alias_id' })
+  alias: UserAlias | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

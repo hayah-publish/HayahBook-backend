@@ -16,6 +16,7 @@ import { PostsModule } from './posts/posts.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { HomeModule } from './home/home.module';
 import { CommentsModule } from './comments/comments.module';
+import { AliasesModule } from './aliases/aliases.module';
 import { I18nModule } from './i18n/i18n.module';
 import { I18nMiddleware } from './i18n/i18n.middleware';
 import { I18nValidationExceptionFilter } from './i18n/i18n-validation.filter';
@@ -26,6 +27,12 @@ import { CreateBookmarksTable1762400000000 } from './database/migrations/1762400
 import { ProfilePrivacyMailReadingIntegrity1762500000000 } from './database/migrations/1762500000000-profile-privacy-mail-reading-integrity';
 import { CreatePostReactionsTable1762600000000 } from './database/migrations/1762600000000-create-post-reactions-table';
 import { CreateCommentsAndRepliesTables1762700000000 } from './database/migrations/1762700000000-create-comments-and-replies-tables';
+import { CommentReportsIntegrity1762800000000 } from './database/migrations/1762800000000-comment-reports-integrity';
+import { PostActionsBlockReportsHidden1762900000000 } from './database/migrations/1762900000000-post-actions-block-reports-hidden';
+import { UserAliasesAndCommentIdentity1763000000000 } from './database/migrations/1763000000000-user-aliases-and-comment-identity';
+import { UserAnonymousNumber1763100000000 } from './database/migrations/1763100000000-user-anonymous-number';
+import { AddPostContentFormat1763200000000 } from './database/migrations/1763200000000-add-post-content-format';
+import { UniqueAliasNickname1763300000000 } from './database/migrations/1763300000000-unique-alias-nickname';
 
 @Module({
   imports: [
@@ -37,9 +44,13 @@ import { CreateCommentsAndRepliesTables1762700000000 } from './database/migratio
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const url = config.get<string>('DATABASE_URL');
+        const dbSsl = config.get<string>('DB_SSL');
         const enableSsl =
-          config.get<string>('DB_SSL') === 'true' ||
-          (url && !url.includes('localhost') && !url.includes('127.0.0.1'));
+          dbSsl !== undefined
+            ? dbSsl === 'true'
+            : Boolean(
+                url && !url.includes('localhost') && !url.includes('127.0.0.1'),
+              );
 
         const sslOption = enableSsl ? { rejectUnauthorized: true } : false;
         const isProd = config.get<string>('NODE_ENV') === 'production';
@@ -59,6 +70,12 @@ import { CreateCommentsAndRepliesTables1762700000000 } from './database/migratio
               ProfilePrivacyMailReadingIntegrity1762500000000,
               CreatePostReactionsTable1762600000000,
               CreateCommentsAndRepliesTables1762700000000,
+              CommentReportsIntegrity1762800000000,
+              PostActionsBlockReportsHidden1762900000000,
+              UserAliasesAndCommentIdentity1763000000000,
+              UserAnonymousNumber1763100000000,
+              AddPostContentFormat1763200000000,
+              UniqueAliasNickname1763300000000,
             ],
             migrationsRun: true,
           };
@@ -80,6 +97,12 @@ import { CreateCommentsAndRepliesTables1762700000000 } from './database/migratio
             ProfilePrivacyMailReadingIntegrity1762500000000,
             CreatePostReactionsTable1762600000000,
             CreateCommentsAndRepliesTables1762700000000,
+            CommentReportsIntegrity1762800000000,
+            PostActionsBlockReportsHidden1762900000000,
+            UserAliasesAndCommentIdentity1763000000000,
+            UserAnonymousNumber1763100000000,
+            AddPostContentFormat1763200000000,
+            UniqueAliasNickname1763300000000,
           ],
           migrationsRun: true,
         };
@@ -99,6 +122,7 @@ import { CreateCommentsAndRepliesTables1762700000000 } from './database/migratio
     BookmarksModule,
     HomeModule,
     CommentsModule,
+    AliasesModule,
   ],
   controllers: [AppController],
   providers: [

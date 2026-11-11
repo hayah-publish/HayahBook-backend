@@ -30,8 +30,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     role: string;
     tokenVersion: number;
     tokenType?: string;
+    purpose?: string;
   }) {
-    if (!payload.sub || payload.tokenType === 'refresh') {
+    if (
+      !payload.sub ||
+      payload.tokenType === 'refresh' ||
+      payload.tokenType === 'password_reset' ||
+      Boolean(payload.purpose)
+    ) {
       throw new UnauthorizedException(this.i18n.t('auth.invalid_token'));
     }
 

@@ -23,7 +23,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('upload')
 export class UploadController {
   constructor(

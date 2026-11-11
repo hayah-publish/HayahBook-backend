@@ -17,7 +17,8 @@ export const en = {
   'auth.login_success': 'Logged in successfully',
   'auth.google_login_success': 'Logged in with Google successfully',
   'auth.email_already_registered': 'Email already registered',
-  'auth.email_registered_oauth': 'An account with this email was created via Google or OTP. Please sign in using that method.',
+  'auth.email_registered_oauth':
+    'An account with this email was created via Google or OTP. Please sign in using that method.',
   'auth.invalid_credentials': 'Invalid email or password',
   'auth.account_disabled': 'Account is disabled',
   'auth.email_not_verified': 'Please verify your email first',
@@ -30,7 +31,11 @@ export const en = {
   'auth.password_changed': 'Password changed successfully',
   'auth.passwords_do_not_match': 'Passwords do not match',
   'auth.current_password_incorrect': 'Current password is incorrect',
-  'auth.password_reset_success': 'Password has been reset successfully. Please log in with your new password.',
+  'auth.invalid_current_password': 'Current password is incorrect',
+  'validation.birthday_invalid':
+    'Birthday must be a valid date format (e.g. YYYY-MM-DD or DD/MM/YYYY)',
+  'auth.password_reset_success':
+    'Password has been reset successfully. Please log in with your new password.',
   'auth.profile_completed': 'Profile completed successfully',
   'auth.profile_updated': 'Profile updated successfully',
   'auth.profile_url_required': 'Profile URL is required',
@@ -40,15 +45,20 @@ export const en = {
   'auth.email_same_as_current': 'New email is identical to current email',
   'auth.email_already_in_use': 'New email is already in use by another account',
   'auth.phone_updated': 'Phone number updated successfully',
-  'auth.no_phone_registered': 'No phone number registered for this account to confirm via SMS',
+  'auth.no_phone_registered':
+    'No phone number registered for this account to confirm via SMS',
   'auth.google_invalid_token': 'Invalid Google ID token',
   'auth.google_email_not_verified': 'Google account email is not verified',
-  'auth.e164_invalid': 'Total digits of country code and phone number must not exceed 15 digits according to E.164 standard',
-  'auth.e164_digits_only': 'Country code and phone number must contain digits only',
+  'auth.e164_invalid':
+    'Total digits of country code and phone number must not exceed 15 digits according to E.164 standard',
+  'auth.e164_digits_only':
+    'Country code and phone number must contain digits only',
 
   // OTP
+  'otp.signup_if_exists': 'If the email is eligible, a verification code will be sent',
   'otp.sent_email': 'Verification code sent to your email successfully',
-  'otp.sent_phone': 'Verification code has been sent to your phone number successfully',
+  'otp.sent_phone':
+    'Verification code has been sent to your phone number successfully',
   'otp.verified': 'Verification code verified successfully',
   'otp.code_valid': 'Verification code is valid',
   'otp.expired': 'Verification code has expired, please request a new code',
@@ -56,22 +66,28 @@ export const en = {
   'otp.invalid_or_expired': 'Invalid or expired verification code',
   'otp.too_many_attempts': 'Too many attempts for this verification code',
   'otp.wait_cooldown': 'Please wait one minute before requesting a new code',
-  'otp.delivery_failed': 'The verification code could not be delivered. Please try again later.',
-  'otp.reset_if_exists': 'If an account exists for this email, a password reset code will be sent.',
+  'otp.delivery_failed':
+    'The verification code could not be delivered. Please try again later.',
+  'otp.reset_if_exists':
+    'If an account exists for this email, a password reset code will be sent.',
   'otp.subject_signup': 'Verification code for account creation - HayahBook',
   'otp.subject_reset': 'Reset your password - HayahBook',
-  'otp.subject_change_password': 'Change password verification code - HayahBook',
+  'otp.subject_change_password':
+    'Change password verification code - HayahBook',
   'otp.subject_change_email': 'Change email verification code - HayahBook',
   'otp.subject_delete_account': 'Delete account verification code - HayahBook',
-  'otp.subject_update_phone': 'Update phone number verification code - HayahBook',
+  'otp.subject_update_phone':
+    'Update phone number verification code - HayahBook',
   'otp.subject_login': 'Login verification code - HayahBook',
 
   // Countries
-  'countries.not_found': 'Invalid or not found country ID, please select a valid country from the list',
+  'countries.not_found':
+    'Invalid or not found country ID, please select a valid country from the list',
 
   // Interests
   'interests.saved': 'Interests saved successfully',
-  'interests.empty_selection': 'You must send either interestIds or interestNames',
+  'interests.empty_selection':
+    'You must send either interestIds or interestNames',
   'interests.already_exists': 'Interest already exists',
   'interests.not_found': 'Interest not found',
   'interests.deleted': 'Interest deleted successfully',
@@ -118,20 +134,31 @@ export const en = {
   'creators.some_not_found': 'Some creator IDs were not found',
   'creators.user_type_creator': 'Content Creator',
 
-  // User Following
+  // User Following & Blocking
   'users.cannot_follow_self': 'You cannot follow yourself',
   'users.not_found': 'User not found',
   'users.followed_success': 'User followed successfully',
   'users.unfollowed_success': 'User unfollowed successfully',
   'users.already_following': 'You are already following this user',
   'users.already_not_following': 'You are not following this user',
+  'users.cannot_block_self': 'You cannot block yourself',
+  'users.blocked_success': 'User blocked successfully',
+  'users.unblocked_success': 'User unblocked successfully',
+  'users.already_blocked': 'User is already blocked',
+  'users.not_blocked': 'User is not blocked',
+  'users.block_relationship':
+    'You cannot interact with this user while a block is active',
+  'users.blocked_interaction':
+    'You cannot interact with this user while a block is active',
 
   // Upload
   'upload.avatar_success': 'Profile photo uploaded successfully',
   'upload.file_required': 'Please select an image',
-  'upload.invalid_file_type': 'Unsupported file type. Allowed types: JPG, PNG, WEBP, HEIC',
+  'upload.invalid_file_type':
+    'Unsupported file type. Allowed types: JPG, PNG, WEBP, HEIC',
   'upload.file_too_large': 'File size exceeds the maximum limit (10MB)',
-  'upload.file_too_large_general': 'File size exceeds the maximum allowed limit',
+  'upload.file_too_large_general':
+    'File size exceeds the maximum allowed limit',
   'upload.payload_too_large': 'Payload size exceeds the maximum allowed limit',
   'upload.post_images_success': 'Images uploaded successfully',
   'upload.post_video_success': 'Video uploaded successfully',
@@ -139,16 +166,33 @@ export const en = {
   'upload.image_size_exceeded': 'Image size exceeds maximum limit (20MB)',
   'upload.video_limit_exceeded': 'Only one video is allowed per post',
   'upload.video_size_exceeded': 'Video size exceeds maximum limit (500MB)',
-  'upload.invalid_video_type': 'Unsupported video format. Allowed: MP4, MOV, WEBM, MKV',
+  'upload.invalid_video_type':
+    'Unsupported video format. Allowed: MP4, MOV, WEBM, MKV',
 
   // Posts
   'posts.created': 'Post created successfully',
+  'posts.updated': 'Post updated successfully',
   'posts.deleted': 'Post deleted successfully',
   'posts.not_found': 'Post not found',
   'posts.unauthorized': 'You are not authorized to delete this post',
+  'posts.edit_unauthorized': 'You are not authorized to edit this post',
+  'posts.toggle_comments_unauthorized':
+    'You are not authorized to change comments settings for this post',
   'posts.content_required': 'Post content is required',
   'posts.content_or_media_required': 'Post content is required',
   'posts.max_words_exceeded': 'Post content must not exceed 500 words',
+  'posts.comments_disabled': 'Comments are disabled on this post',
+  'posts.comments_disabled_success':
+    'Comments disabled successfully for this post',
+  'posts.comments_enabled_success':
+    'Comments enabled successfully for this post',
+  'posts.hidden_success': 'Post hidden, you will see less of this content',
+  'posts.unhidden_success': 'Post unhidden successfully',
+  'posts.shared_success': 'Post shared successfully',
+  'posts.cannot_report_own': 'You cannot report your own post',
+  'posts.already_reported': 'You have already reported this post',
+  'posts.reported_success':
+    'Report submitted successfully and will be reviewed',
 
   // Articles
   'articles.created': 'Article published successfully',
@@ -157,12 +201,15 @@ export const en = {
   'articles.unauthorized': 'You are not authorized to delete this article',
   'articles.title_required': 'Article title is required',
   'articles.cover_required': 'Article cover image is required',
-  'articles.category_required': 'Article category is required, please select a valid category',
-  'articles.category_invalid': 'Invalid category. Please select from the approved article categories',
+  'articles.category_required':
+    'Article category is required, please select a valid category',
+  'articles.category_invalid':
+    'Invalid category. Please select from the approved article categories',
   'articles.content_required': 'Article content is required',
-  'articles.min_words_required': 'Article content must be at least 500 words',
+  'articles.min_words_required': 'Article content must be at least 501 words',
   'articles.max_words_exceeded': 'Article content must not exceed 5000 words',
-  'articles.terms_required': 'You must agree to the terms and privacy of Hayahbook community to publish the article',
+  'articles.terms_required':
+    'You must agree to the terms and privacy of Hayahbook community to publish the article',
 
   // Bookmarks / Saved
   'bookmarks.saved': 'Item saved successfully',
@@ -174,7 +221,8 @@ export const en = {
   'reactions.added': 'Reaction added successfully',
   'reactions.updated': 'Reaction updated successfully',
   'reactions.removed': 'Reaction removed successfully',
-  'reactions.invalid_type': 'Invalid reaction type. Available: agree, love, applaud, insightful, disagree',
+  'reactions.invalid_type':
+    'Invalid reaction type. Available: agree, love, applaud, insightful, disagree',
   'reactions.agree': 'Agree',
   'reactions.love': 'Love',
   'reactions.applaud': 'Bravo',
@@ -191,7 +239,8 @@ export const en = {
   'comments.post_required': 'Content ID is required',
   'comments.comment_required': 'Comment ID is required',
   'comments.unauthorized_edit': 'You are not authorized to edit this comment',
-  'comments.unauthorized_delete': 'You are not authorized to delete this comment',
+  'comments.unauthorized_delete':
+    'You are not authorized to delete this comment',
   'comments.unauthorized_pin': 'Only the post author can pin comments',
   'comments.pinned': 'Comment pinned to top successfully',
   'comments.unpinned': 'Comment unpinned',
@@ -200,17 +249,21 @@ export const en = {
   'comments.muted': 'Comment notifications muted',
   'comments.unmuted': 'Comment notifications unmuted',
   'comments.reported': 'Report submitted successfully and will be reviewed',
-  'comments.already_reported': 'You have already reported this comment and it is under review',
+  'comments.already_reported':
+    'You have already reported this comment and it is under review',
   'comments.cannot_report_own_comment': 'You cannot report your own comment',
   'comments.invalid_report_reason': 'Invalid report reason',
   'comments.report_title': 'Report comment',
-  'comments.report_subtitle': 'Why are you reporting this comment? Your report is anonymous.',
+  'comments.report_subtitle':
+    'Why are you reporting this comment? Your report is anonymous.',
 
   // Report Reasons
   'reports.title': 'Report comment',
-  'reports.subtitle': 'Why are you reporting this comment? Your report is anonymous.',
+  'reports.subtitle':
+    'Why are you reporting this comment? Your report is anonymous.',
   'reports.submitted': 'Report submitted successfully and will be reviewed',
-  'reports.already_reported': 'You have already reported this comment and it is under review',
+  'reports.already_reported':
+    'You have already reported this comment and it is under review',
   'reports.cannot_report_own_comment': 'You cannot report your own comment',
   'reports.invalid_reason': 'Invalid report reason',
   'reports.spam': 'Spam',
@@ -223,8 +276,20 @@ export const en = {
   'reports.something_else': 'Something else',
   'reports.details_too_long': 'Report details must not exceed 160 characters',
   'reports.details_title': 'Add more details',
-  'reports.details_subtitle': 'Optional. Context helps our team review this faster.',
+  'reports.details_subtitle':
+    'Optional. Context helps our team review this faster.',
   'reports.details_placeholder': "Tell us what's wrong with this comment...",
   'reports.submit_button': 'Submit',
-};
+  'reports.success_title': 'Thanks, we got your report',
+  'reports.success_subtitle':
+    "We'll review it and let you know the outcome in your notifications. You can also protect your space:",
+  'reports.block_subtitle': "They can't see or comment on your posts",
+  'reports.done_button': 'Done',
 
+  // Aliases
+  'aliases.nickname_already_taken': 'This nickname is already taken, please choose another one',
+  'aliases.nickname_available': 'Nickname is available',
+  'aliases.nickname_required': 'Nickname is required',
+  'aliases.not_found': 'Alias not found',
+  'aliases.max_limit_reached': 'You can create a maximum of 5 aliases',
+};

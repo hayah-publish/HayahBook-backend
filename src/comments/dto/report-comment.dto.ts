@@ -7,6 +7,10 @@ export class ReportCommentDto {
 
   @IsOptional()
   @IsString()
+  reasonId?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(160, { message: 'reports.details_too_long' })
   details?: string;
 

@@ -1,6 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { JwtStrategy } from './jwt.strategy';
 
 describe('AuthService session and privacy safeguards', () => {
   const user = {
@@ -132,5 +133,32 @@ describe('AuthService session and privacy safeguards', () => {
     expect(failures).toHaveLength(1);
     await expect(service.refreshTokens(initial.refreshToken)).rejects.toBeDefined();
     expect(sessionsRepository.save).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects password reset tokens in JwtStrategy.validate', async () => {
+    const { usersService } = createHarness();
+    const strategy = new JwtStrategy(
+      { get: () => 'test-secret' } as any,
+      usersService as any,
+      { t: (k: string) => k } as any,
+    );
+
+    await expect(
+      strategy.validate({
+        sub: user.id,
+        role: 'user',
+        tokenVersion: 0,
+        purpose: 'reset_password',
+        tokenType: 'password_reset',
+      }),
+    ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('normalizes DD/MM/YYYY birthdays and rejects impossible calendar dates', () => {
+    const { service } = createHarness();
+    expect((service as any).normalizeBirthday('15/05/1995')).toBe('1995-05-15');
+    expect(() => (service as any).normalizeBirthday('31/02/2000')).toThrow(
+      BadRequestException,
+    );
   });
 });

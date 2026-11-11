@@ -122,3 +122,11 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+---
+
+## Test and outbox configuration
+
+End-to-end tests require E2E_DATABASE_URL to point to a dedicated disposable PostgreSQL database whose name includes test or e2e. They refuse to start without it.
+
+In production, set MAIL_OUTBOX_ENCRYPTION_KEY to a base64-encoded random 32-byte key (generate one with openssl rand -base64 32). Keep the key stable. Before rotating it, ensure no outbox rows still contain encrypted payloads; sent messages clear their payload, while failed and pending rows retain it.

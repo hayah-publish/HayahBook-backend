@@ -38,7 +38,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
@@ -115,6 +114,23 @@ export class CommentsController {
       supportedLang,
       meta === 'true',
     );
+  }
+
+  /**
+   * GET /v1/comments/identity-options
+   * Returns identity options for Bottom Sheet modal (Image 1)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('identity-options')
+  async getIdentityOptions(
+    @Req() req: AuthenticatedRequest,
+    @Query('lang') lang?: string,
+  ) {
+    const options = await this.commentsService.getIdentityOptions(
+      req.user!.userId,
+      lang,
+    );
+    return { data: options };
   }
 
   /**
@@ -266,11 +282,12 @@ export class CommentsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ReportCommentDto,
   ) {
+    const reason = dto.reason || dto.reasonId;
     const details = dto.details !== undefined ? dto.details : dto.notes;
     return this.commentsService.reportComment(
       req.user!.userId,
       id,
-      dto.reason,
+      reason,
       ...(details !== undefined ? [details] : []),
     );
   }

@@ -17,12 +17,14 @@ export const ar = {
   'auth.login_success': 'تم تسجيل الدخول بنجاح',
   'auth.google_login_success': 'تم تسجيل الدخول بواسطة جوجل بنجاح',
   'auth.email_already_registered': 'البريد الإلكتروني مسجل بالفعل',
-  'auth.email_registered_oauth': 'تم إنشاء حساب بهذا البريد عبر جوجل أو رمز التحقق. يرجى تسجيل الدخول بتلك الطريقة.',
+  'auth.email_registered_oauth':
+    'تم إنشاء حساب بهذا البريد عبر جوجل أو رمز التحقق. يرجى تسجيل الدخول بتلك الطريقة.',
   'auth.invalid_credentials': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
   'auth.account_disabled': 'الحساب معطل',
   'auth.email_not_verified': 'يرجى تأكيد البريد الإلكتروني أولاً',
   'auth.user_not_found': 'الحساب غير موجود',
-  'auth.account_not_found_email': 'البريد الإلكتروني المُدخل غير مسجل، الحساب غير موجود',
+  'auth.account_not_found_email':
+    'البريد الإلكتروني المُدخل غير مسجل، الحساب غير موجود',
   'auth.session_revoked': 'تم إلغاء الجلسة. يرجى تسجيل الدخول مجدداً.',
   'auth.invalid_token': 'التوكن غير صالح أو منتهي الصلاحية',
   'auth.invalid_token_type': 'نوع التوكن غير صالح',
@@ -30,7 +32,11 @@ export const ar = {
   'auth.password_changed': 'تم تغيير كلمة المرور بنجاح',
   'auth.passwords_do_not_match': 'كلمة المرور وتأكيد كلمة المرور غير متطابقين',
   'auth.current_password_incorrect': 'كلمة المرور الحالية غير صحيحة',
-  'auth.password_reset_success': 'تم إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
+  'auth.invalid_current_password': 'كلمة المرور الحالية غير صحيحة',
+  'validation.birthday_invalid':
+    'تاريخ الميلاد يجب أن يكون بصيغة صالحة (مثال: YYYY-MM-DD)',
+  'auth.password_reset_success':
+    'تم إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
   'auth.profile_completed': 'تم إكمال الملف الشخصي بنجاح',
   'auth.profile_updated': 'تم تحديث الملف الشخصي بنجاح',
   'auth.profile_url_required': 'رابط الصورة الشخصية مطلوب',
@@ -40,13 +46,16 @@ export const ar = {
   'auth.email_same_as_current': 'البريد الجديد مطابق للبريد الحالي',
   'auth.email_already_in_use': 'البريد الإلكتروني الجديد مسجل بالفعل بحساب آخر',
   'auth.phone_updated': 'تم تعديل رقم الهاتف بنجاح',
-  'auth.no_phone_registered': 'لا يوجد رقم هاتف مسجل لهذا الحساب لتأكيد الحذف عبره',
+  'auth.no_phone_registered':
+    'لا يوجد رقم هاتف مسجل لهذا الحساب لتأكيد الحذف عبره',
   'auth.google_invalid_token': 'توكن جوجل غير صالح',
   'auth.google_email_not_verified': 'البريد الإلكتروني لحساب جوجل غير مؤكد',
-  'auth.e164_invalid': 'مجموع أرقام رمز الدولة ورقم الجوال يجب ألا يتجاوز 15 رقماً وفق معيار E.164',
+  'auth.e164_invalid':
+    'مجموع أرقام رمز الدولة ورقم الجوال يجب ألا يتجاوز 15 رقماً وفق معيار E.164',
   'auth.e164_digits_only': 'رمز الدولة ورقم الجوال يجب أن يحتويا على أرقام فقط',
 
   // OTP
+  'otp.signup_if_exists': 'إذا كان البريد مؤهلاً، فسيتم إرسال رمز التحقق إليه',
   'otp.sent_email': 'تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح',
   'otp.sent_phone': 'تم إرسال رمز التحقق إلى رقم هاتفك بنجاح',
   'otp.verified': 'تم التحقق من الرمز بنجاح',
@@ -57,7 +66,8 @@ export const ar = {
   'otp.too_many_attempts': 'تم تجاوز الحد الأقصى للمحاولات لهذا الرمز',
   'otp.wait_cooldown': 'يرجى الانتظار دقيقة واحدة قبل طلب رمز تحقق جديد',
   'otp.delivery_failed': 'تعذر إرسال رمز التحقق. حاول مرة أخرى لاحقاً.',
-  'otp.reset_if_exists': 'إذا كان هناك حساب مرتبط بهذا البريد، فسيتم إرسال رمز إعادة تعيين كلمة المرور.',
+  'otp.reset_if_exists':
+    'إذا كان هناك حساب مرتبط بهذا البريد، فسيتم إرسال رمز إعادة تعيين كلمة المرور.',
   'otp.subject_signup': 'رمز التحقق لإنشاء الحساب - HayahBook',
   'otp.subject_reset': 'إعادة تعيين كلمة المرور - HayahBook',
   'otp.subject_change_password': 'رمز التحقق لتغيير كلمة المرور - HayahBook',
@@ -67,7 +77,8 @@ export const ar = {
   'otp.subject_login': 'رمز تسجيل الدخول - HayahBook',
 
   // Countries
-  'countries.not_found': 'معرف الدولة غير صحيح أو غير موجود، يرجى اختيار دولة صالحة من القائمة',
+  'countries.not_found':
+    'معرف الدولة غير صحيح أو غير موجود، يرجى اختيار دولة صالحة من القائمة',
 
   // Interests
   'interests.saved': 'تم حفظ الاهتمامات بنجاح',
@@ -118,37 +129,63 @@ export const ar = {
   'creators.some_not_found': 'بعض معرّفات صناع المحتوى غير موجودة',
   'creators.user_type_creator': 'صانع محتوى',
 
-  // User Following
+  // User Following & Blocking
   'users.cannot_follow_self': 'لا يمكنك متابعة حسابك الشخصي',
   'users.not_found': 'المستخدم غير موجود',
   'users.followed_success': 'تمت متابعة المستخدم بنجاح',
   'users.unfollowed_success': 'تم إلغاء متابعة المستخدم بنجاح',
   'users.already_following': 'أنت تتابع هذا المستخدم بالفعل',
   'users.already_not_following': 'أنت لا تتابع هذا المستخدم بالفعل',
+  'users.cannot_block_self': 'لا يمكنك حظر نفسك',
+  'users.blocked_success': 'تم حظر المستخدم بنجاح',
+  'users.unblocked_success': 'تم إلغاء حظر المستخدم بنجاح',
+  'users.already_blocked': 'المستخدم محظور بالفعل',
+  'users.not_blocked': 'المستخدم غير محظور',
+  'users.block_relationship':
+    'لا يمكنك التفاعل مع هذا المستخدم أثناء وجود حظر نشط',
+  'users.blocked_interaction':
+    'لا يمكنك التفاعل مع هذا المستخدم أثناء وجود حظر نشط',
 
   // Upload
   'upload.avatar_success': 'تم رفع الصورة الشخصية بنجاح',
   'upload.file_required': 'يرجى اختيار صورة',
-  'upload.invalid_file_type': 'نوع الملف غير مدعوم. الأنواع المسموحة: JPG, PNG, WEBP, HEIC',
+  'upload.invalid_file_type':
+    'نوع الملف غير مدعوم. الأنواع المسموحة: JPG, PNG, WEBP, HEIC',
   'upload.file_too_large': 'حجم الملف يتجاوز الحد الأقصى (10 ميجابايت)',
   'upload.file_too_large_general': 'حجم الملف يتجاوز الحد الأقصى المسموح به',
   'upload.payload_too_large': 'حجم البيانات يتجاوز الحد الأقصى المسموح به',
   'upload.post_images_success': 'تم رفع الصور بنجاح',
   'upload.post_video_success': 'تم رفع الفيديو بنجاح',
-  'upload.images_limit_exceeded': 'الحد الأقصى المسموح به هو 10 صور فقط لكل منشور',
-  'upload.image_size_exceeded': 'حجم الصورة الواحدة يتجاوز الحد الأقصى (20 ميجابايت)',
+  'upload.images_limit_exceeded':
+    'الحد الأقصى المسموح به هو 10 صور فقط لكل منشور',
+  'upload.image_size_exceeded':
+    'حجم الصورة الواحدة يتجاوز الحد الأقصى (20 ميجابايت)',
   'upload.video_limit_exceeded': 'يسمح برفع فيديو واحد فقط لكل منشور',
   'upload.video_size_exceeded': 'حجم الفيديو يتجاوز الحد الأقصى (500 ميجابايت)',
-  'upload.invalid_video_type': 'نوع الفيديو غير مدعوم. الأنواع المسموحة: MP4, MOV, WEBM, MKV',
+  'upload.invalid_video_type':
+    'نوع الفيديو غير مدعوم. الأنواع المسموحة: MP4, MOV, WEBM, MKV',
 
   // Posts
   'posts.created': 'تم نشر المنشور بنجاح',
+  'posts.updated': 'تم تعديل المنشور بنجاح',
   'posts.deleted': 'تم حذف المنشور بنجاح',
   'posts.not_found': 'المنشور غير موجود',
   'posts.unauthorized': 'غير مصرح لك بحذف هذا المنشور',
+  'posts.edit_unauthorized': 'غير مصرح لك بتعديل هذا المنشور',
+  'posts.toggle_comments_unauthorized':
+    'غير مصرح لك بتغيير إعدادات التعليقات لهذا المنشور',
   'posts.content_required': 'محتوى المنشور مطلوب',
   'posts.content_or_media_required': 'محتوى المنشور مطلوب',
   'posts.max_words_exceeded': 'يجب ألا يتجاوز محتوى المنشور 500 كلمة',
+  'posts.comments_disabled': 'التعليقات معطلة على هذا المنشور',
+  'posts.comments_disabled_success': 'تم تعطيل التعليقات على هذا المنشور بنجاح',
+  'posts.comments_enabled_success': 'تم تفعيل التعليقات على هذا المنشور بنجاح',
+  'posts.hidden_success': 'تم إخفاء المنشور، ستشاهد محتوى أقل من هذا النوع',
+  'posts.unhidden_success': 'تمت استعادة المنشور بنجاح',
+  'posts.shared_success': 'تمت مشاركة المنشور بنجاح',
+  'posts.cannot_report_own': 'لا يمكنك الإبلاغ عن منشورك الخاص',
+  'posts.already_reported': 'لقد قمت بالإبلاغ عن هذا المنشور مسبقاً',
+  'posts.reported_success': 'تم تقديم البلاغ بنجاح وسيتم مراجعته',
 
   // Articles
   'articles.created': 'تم نشر المقال بنجاح',
@@ -157,12 +194,15 @@ export const ar = {
   'articles.unauthorized': 'غير مصرح لك بحذف هذا المقال',
   'articles.title_required': 'عنوان المقال مطلوب',
   'articles.cover_required': 'الصورة الرئيسية للمقال مطلوبة',
-  'articles.category_required': 'تصنيف المقال مطلوب، يرجى اختيار تصنيف من قائمة الفئات',
-  'articles.category_invalid': 'التصنيف المحدد غير صالح. يرجى اختيار تصنيف من فئات المقالات المعتمدة',
+  'articles.category_required':
+    'تصنيف المقال مطلوب، يرجى اختيار تصنيف من قائمة الفئات',
+  'articles.category_invalid':
+    'التصنيف المحدد غير صالح. يرجى اختيار تصنيف من فئات المقالات المعتمدة',
   'articles.content_required': 'نص المقال مطلوب',
-  'articles.min_words_required': 'يجب ألا يقل محتوى المقال عن 500 كلمة',
+  'articles.min_words_required': 'يجب ألا يقل محتوى المقال عن 501 كلمة',
   'articles.max_words_exceeded': 'يجب ألا يتجاوز محتوى المقال 5000 كلمة',
-  'articles.terms_required': 'يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook لنشر المقال',
+  'articles.terms_required':
+    'يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook لنشر المقال',
 
   // Bookmarks / Saved (المحفوظات)
   'bookmarks.saved': 'تمت إضافة العنصر إلى المحفوظات بنجاح',
@@ -174,7 +214,8 @@ export const ar = {
   'reactions.added': 'تم التفاعل بنجاح',
   'reactions.updated': 'تم تعديل التفاعل بنجاح',
   'reactions.removed': 'تمت إزالة التفاعل بنجاح',
-  'reactions.invalid_type': 'نوع التفاعل غير صالح. الأنواع المتاحة: اتفق، احببته، احسنت، يستحق التفكير، اعترض',
+  'reactions.invalid_type':
+    'نوع التفاعل غير صالح. الأنواع المتاحة: اتفق، احببته، احسنت، يستحق التفكير، اعترض',
   'reactions.agree': 'اتفق',
   'reactions.love': 'احببته',
   'reactions.applaud': 'احسنت',
@@ -200,17 +241,20 @@ export const ar = {
   'comments.muted': 'تم كتم إشعارات هذا التعليق',
   'comments.unmuted': 'تم تفعيل إشعارات هذا التعليق',
   'comments.reported': 'تم إرسال البلاغ بنجاح وسيتم مراجعته',
-  'comments.already_reported': 'لقد قمت بالإبلاغ عن هذا التعليق مسبقاً وسيتم مراجعته',
+  'comments.already_reported':
+    'لقد قمت بالإبلاغ عن هذا التعليق مسبقاً وسيتم مراجعته',
   'comments.cannot_report_own_comment': 'لا يمكنك الإبلاغ عن تعليقك الخاص',
   'comments.invalid_report_reason': 'سبب الإبلاغ غير صالح',
   'comments.report_title': 'الإبلاغ عن تعليق',
-  'comments.report_subtitle': 'لماذا تبلغ عن هذا التعليق؟ بلاغك سري ومجهول الهوية.',
+  'comments.report_subtitle':
+    'لماذا تبلغ عن هذا التعليق؟ بلاغك سري ومجهول الهوية.',
 
   // Report Reasons (أسباب الإبلاغ)
   'reports.title': 'الإبلاغ عن تعليق',
   'reports.subtitle': 'لماذا تبلغ عن هذا التعليق؟ بلاغك سري ومجهول الهوية.',
   'reports.submitted': 'تم إرسال البلاغ بنجاح وسيتم مراجعته',
-  'reports.already_reported': 'لقد قمت بالإبلاغ عن هذا التعليق مسبقاً وسيتم مراجعته',
+  'reports.already_reported':
+    'لقد قمت بالإبلاغ عن هذا التعليق مسبقاً وسيتم مراجعته',
   'reports.cannot_report_own_comment': 'لا يمكنك الإبلاغ عن تعليقك الخاص',
   'reports.invalid_reason': 'سبب الإبلاغ غير صالح',
   'reports.spam': 'محتوى غير مرغوب فيه',
@@ -223,8 +267,20 @@ export const ar = {
   'reports.something_else': 'سبب آخر',
   'reports.details_too_long': 'يجب ألا تتجاوز تفاصيل البلاغ 160 حرفاً',
   'reports.details_title': 'إضافة المزيد من التفاصيل',
-  'reports.details_subtitle': 'اختياري. يساعد السياق فريقنا على مراجعة هذا التعليق بشكل أسرع.',
+  'reports.details_subtitle':
+    'اختياري. يساعد السياق فريقنا على مراجعة هذا التعليق بشكل أسرع.',
   'reports.details_placeholder': 'أخبرنا ما المشكلة في هذا التعليق...',
   'reports.submit_button': 'إرسال',
-};
+  'reports.success_title': 'شكراً، لقد تلقينا بلاغك',
+  'reports.success_subtitle':
+    'سنقوم بمراجعته وإعلامك بالنتيجة في إشعاراتك. يمكنك أيضاً حماية مساحتك:',
+  'reports.block_subtitle': 'لن يتمكن من رؤية منشوراتك أو التعليق عليها',
+  'reports.done_button': 'تم',
 
+  // Aliases (الأسماء المستعارة)
+  'aliases.nickname_already_taken': 'هذا الاسم المستعار مستخدم بالفعل، يرجى اختيار اسم آخر',
+  'aliases.nickname_available': 'الاسم المستعار متاح',
+  'aliases.nickname_required': 'الاسم المستعار مطلوب',
+  'aliases.not_found': 'الاسم المستعار غير موجود',
+  'aliases.max_limit_reached': 'يمكنك إنشاء 5 أسماء مستعارة بحد أقصى',
+};

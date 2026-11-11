@@ -4,14 +4,20 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const expressApp = app.getHttpAdapter().getInstance();
+  const trustedProxyHops = process.env.TRUST_PROXY?.split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (trustedProxyHops?.length) {
+    expressApp.set('trust proxy', trustedProxyHops);
+  }
 
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: ['1', VERSION_NEUTRAL],
   });
 
-  const configuredOrigins = process.env.CORS_ORIGIN
-    ?.split(',')
+  const configuredOrigins = process.env.CORS_ORIGIN?.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
   const isProduction = process.env.NODE_ENV === 'production';
@@ -33,11 +39,7 @@ async function bootstrap() {
       'X-Platform',
       'X-App-Version',
     ],
-    exposedHeaders: [
-      'Accept-Language',
-      'X-Platform',
-      'X-App-Version',
-    ],
+    exposedHeaders: ['Accept-Language', 'X-Platform', 'X-App-Version'],
   });
 
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');

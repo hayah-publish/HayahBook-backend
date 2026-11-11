@@ -1,5 +1,4 @@
 import {
-  IsDateString,
   IsOptional,
   IsBoolean,
   IsString,
@@ -19,7 +18,14 @@ export class UpdateProfileDto {
   name?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: 'Birthday must be a valid date format (YYYY-MM-DD)' })
+  @IsString()
+  @Matches(
+    /^(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?Z?)?|\d{2}[/-]\d{2}[/-]\d{4})$/,
+    {
+      message:
+        'Birthday must be a valid date format (e.g. YYYY-MM-DD or DD/MM/YYYY)',
+    },
+  )
   birthday?: string;
 
   @IsOptional()

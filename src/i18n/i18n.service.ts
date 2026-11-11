@@ -136,12 +136,18 @@ export class I18nService {
     }
 
     if (acceptLanguageHeader) {
-      const lower = acceptLanguageHeader.toLowerCase();
-      if (lower.startsWith('en') || lower.includes('en-') || lower.includes('en,')) {
-        return 'en';
-      }
-      if (lower.startsWith('ar') || lower.includes('ar-') || lower.includes('ar,')) {
-        return 'ar';
+      const tags = acceptLanguageHeader
+        .toLowerCase()
+        .split(',')
+        .map((part) => part.split(';')[0].trim())
+        .filter(Boolean);
+      for (const tag of tags) {
+        if (tag === 'ar' || tag.startsWith('ar-')) {
+          return 'ar';
+        }
+        if (tag === 'en' || tag.startsWith('en-')) {
+          return 'en';
+        }
       }
     }
 
@@ -189,6 +195,10 @@ export class I18nService {
 
     if (VALIDATION_MESSAGES_AR[trimmed]) {
       return VALIDATION_MESSAGES_AR[trimmed];
+    }
+
+    if (/^Validation failed\s*\(uuid.*\)$/i.test(trimmed)) {
+      return 'المعرّف المرسل غير صالح (يجب أن يكون بصيغة UUID)';
     }
 
     const shouldNotExistMatch = trimmed.match(/^property\s+(\w+)\s+should not exist$/i);
@@ -479,6 +489,8 @@ const VALIDATION_MESSAGES_AR: Record<string, string> = {
   'too many fields': 'تجاوزت الحد الأقصى لعدد الحقول',
   'Unexpected field': 'حقل غير متوقع في رفع الملفات',
   'unexpected field': 'حقل غير متوقع في رفع الملفات',
+  'Validation failed (uuid is expected)':
+    'المعرّف المرسل غير صالح (يجب أن يكون بصيغة UUID)',
 };
 
 const PROPERTY_NAMES_AR: Record<string, string> = {
@@ -486,6 +498,7 @@ const PROPERTY_NAMES_AR: Record<string, string> = {
   Name: 'الاسم',
   email: 'البريد الإلكتروني',
   Email: 'البريد الإلكتروني',
+  newEmail: 'البريد الإلكتروني الجديد',
   phone: 'رقم الهاتف',
   Phone: 'رقم الهاتف',
   countryCode: 'كود الدولة',
@@ -516,6 +529,7 @@ const PROPERTY_NAMES_AR: Record<string, string> = {
   Channel: 'طريقة الإرسال',
   token: 'التوكن',
   refreshToken: 'رمز التحديث',
+  resetToken: 'رمز إعادة التعيين',
   idToken: 'معرف جوجل',
   title: 'العنوان',
   author: 'اسم المؤلف',

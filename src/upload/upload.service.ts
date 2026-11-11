@@ -6,7 +6,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { randomBytes } from 'crypto';
 import { User } from '../users/user.entity';
 import { Author } from '../authors/author.entity';
@@ -26,26 +30,48 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 function hasSignature(buffer: Buffer, mimeType: string): boolean {
   if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
-    return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    return (
+      buffer.length >= 3 &&
+      buffer[0] === 0xff &&
+      buffer[1] === 0xd8 &&
+      buffer[2] === 0xff
+    );
   }
   if (mimeType === 'image/png') {
-    return buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    return buffer
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
   }
   if (mimeType === 'image/webp') {
-    return buffer.length >= 12 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP';
+    return (
+      buffer.length >= 12 &&
+      buffer.toString('ascii', 0, 4) === 'RIFF' &&
+      buffer.toString('ascii', 8, 12) === 'WEBP'
+    );
   }
   if (mimeType === 'image/heic' || mimeType === 'image/heif') {
-    return buffer.length >= 12 && buffer.toString('ascii', 4, 8) === 'ftyp' &&
-      /^(heic|heix|hevc|hevx|mif1|msf1|heif)$/.test(buffer.toString('ascii', 8, 12));
+    return (
+      buffer.length >= 12 &&
+      buffer.toString('ascii', 4, 8) === 'ftyp' &&
+      /^(heic|heix|hevc|hevx|mif1|msf1|heif)$/.test(
+        buffer.toString('ascii', 8, 12),
+      )
+    );
   }
   if (mimeType === 'video/mp4' || mimeType === 'video/quicktime') {
-    return buffer.length >= 12 && buffer.toString('ascii', 4, 8) === 'ftyp' &&
+    return (
+      buffer.length >= 12 &&
+      buffer.toString('ascii', 4, 8) === 'ftyp' &&
       (mimeType === 'video/mp4'
         ? buffer.toString('ascii', 8, 12) !== 'qt  '
-        : buffer.toString('ascii', 8, 12) === 'qt  ');
+        : buffer.toString('ascii', 8, 12) === 'qt  ')
+    );
   }
   if (mimeType === 'video/webm' || mimeType === 'video/x-matroska') {
-    return buffer.length >= 4 && buffer.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]));
+    return (
+      buffer.length >= 4 &&
+      buffer.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]))
+    );
   }
   return false;
 }
@@ -71,8 +97,22 @@ export class UploadService {
       process.env.R2_S3_ENDPOINT ||
       `https://${accountId}.r2.cloudflarestorage.com`;
 
+    if (
+      process.env.NODE_ENV === 'production' &&
+      (!(process.env.R2_ACCOUNT_ID || process.env.R2_S3_ENDPOINT) ||
+        !process.env.R2_BUCKET_NAME ||
+        !process.env.R2_ACCESS_KEY_ID ||
+        !process.env.R2_SECRET_ACCESS_KEY)
+    ) {
+      throw new Error(
+        'R2 endpoint, bucket, access key, and secret key are required in production',
+      );
+    }
+
     this.bucketName = process.env.R2_BUCKET_NAME || 'hayahbook-uploads';
-    this.publicUrl = (process.env.R2_PUBLIC_URL || 'https://cdn.hayahbook.com').replace(/\/$/, '');
+    this.publicUrl = (
+      process.env.R2_PUBLIC_URL || 'https://cdn.hayahbook.com'
+    ).replace(/\/$/, '');
 
     this.s3Client = new S3Client({
       region: 'auto',
@@ -104,6 +144,36 @@ export class UploadService {
     return `${this.publicUrl}/${cleanKey}`;
   }
 
+  /** Upload a validated alias avatar to the public bucket. */
+  async uploadAliasAvatar(userId: string, file?: UploadFile): Promise<string> {
+    if (!file?.buffer)
+      throw new BadRequestException(this.i18n.t('upload.file_required'));
+    if (
+      !ALLOWED_MIME_TYPES.includes(file.mimetype) ||
+      !hasSignature(file.buffer, file.mimetype)
+    ) {
+      throw new BadRequestException(this.i18n.t('upload.invalid_file_type'));
+    }
+    if (file.size > MAX_FILE_SIZE)
+      throw new BadRequestException(this.i18n.t('upload.file_too_large'));
+    const extensionByMime: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/heic': 'heic',
+      'image/heif': 'heif',
+    };
+    const key =
+      'aliases/' +
+      userId +
+      '/' +
+      randomBytes(16).toString('hex') +
+      '.' +
+      extensionByMime[file.mimetype];
+    return this.uploadFile(file.buffer, key, file.mimetype);
+  }
+
   /**
    * Delete an object from Cloudflare R2
    */
@@ -124,11 +194,14 @@ export class UploadService {
   /**
    * Delete an object from Cloudflare R2 given its public URL
    */
-  async deleteFileByUrl(url?: string | null): Promise<void> {
+  async deleteFileByUrl(
+    url?: string | null,
+    expectedPrefix?: string,
+  ): Promise<void> {
     const key = this.extractKeyFromUrl(url);
-    if (key) {
-      await this.deleteFile(key);
-    }
+    if (!key) return;
+    if (expectedPrefix && !key.startsWith(expectedPrefix)) return;
+    await this.deleteFile(key);
   }
 
   /**
@@ -149,8 +222,16 @@ export class UploadService {
         : parsed.pathname.replace(/^\/+/, '');
       if (!objectPath) return null;
       const key = decodeURIComponent(objectPath);
-      if (!/^(avatars|posts\/images|posts\/videos|articles\/covers)\//.test(key) ||
-          key.split('/').some((segment) => segment === '.' || segment === '..' || segment === '')) {
+      if (
+        !/^(avatars|aliases|posts\/images|posts\/videos|articles\/covers|comments\/images)\//.test(
+          key,
+        ) ||
+        key
+          .split('/')
+          .some(
+            (segment) => segment === '.' || segment === '..' || segment === '',
+          )
+      ) {
         return null;
       }
       return key;
@@ -194,30 +275,44 @@ export class UploadService {
     let ext = 'jpg';
     if (file.mimetype === 'image/png') ext = 'png';
     else if (file.mimetype === 'image/webp') ext = 'webp';
-    else if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') ext = 'heic';
+    else if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif')
+      ext = 'heic';
 
     // Key format: avatars/{userId}_{timestamp}_{randomHex}.{ext}
     const randomHex = randomBytes(4).toString('hex');
     const newKey = `avatars/${userId}_${Date.now()}_${randomHex}.${ext}`;
 
-    const previousKey = this.extractKeyFromUrl(user.profileUrl);
-    const uploadedUrl = await this.uploadFile(file.buffer, newKey, file.mimetype);
-
+    let previousUrl = user.profileUrl;
+    const uploadedUrl = await this.uploadFile(
+      file.buffer,
+      newKey,
+      file.mimetype,
+    );
     try {
-      user.profileUrl = uploadedUrl;
-      await this.usersRepository.save(user);
-
-      // Keep authors and creators tables synchronized if user is an author or creator
-      await this.authorsRepository.update({ id: userId }, { profileUrl: uploadedUrl });
-      await this.creatorsRepository.update({ id: userId }, { profileUrl: uploadedUrl });
+      await this.usersRepository.manager.transaction(async (manager) => {
+        const users = manager.getRepository(User);
+        const current = await users.findOne({
+          where: { id: userId },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!current)
+          throw new NotFoundException(this.i18n.t('auth.user_not_found'));
+        previousUrl = current.profileUrl;
+        await users.update({ id: userId }, { profileUrl: uploadedUrl });
+        await manager
+          .getRepository(Author)
+          .update({ id: userId }, { profileUrl: uploadedUrl });
+        await manager
+          .getRepository(Creator)
+          .update({ id: userId }, { profileUrl: uploadedUrl });
+      });
     } catch (error) {
-      await this.deleteFile(newKey);
+      const key = this.extractKeyFromUrl(uploadedUrl);
+      if (key) await this.deleteFile(key);
       throw error;
     }
-
-    if (previousKey && previousKey !== newKey) {
-      await this.deleteFile(previousKey);
-    }
+    if (previousUrl && previousUrl !== uploadedUrl)
+      await this.deleteFileByUrl(previousUrl, `avatars/${userId}_`);
 
     return {
       message: this.i18n.t('upload.avatar_success'),
@@ -236,7 +331,10 @@ export class UploadService {
       throw new BadRequestException(this.i18n.t('articles.cover_required'));
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.mimetype) || !hasSignature(file.buffer, file.mimetype)) {
+    if (
+      !ALLOWED_MIME_TYPES.includes(file.mimetype) ||
+      !hasSignature(file.buffer, file.mimetype)
+    ) {
       throw new BadRequestException(this.i18n.t('upload.invalid_file_type'));
     }
 
@@ -248,7 +346,8 @@ export class UploadService {
     let ext = 'jpg';
     if (file.mimetype === 'image/png') ext = 'png';
     else if (file.mimetype === 'image/webp') ext = 'webp';
-    else if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') ext = 'heic';
+    else if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif')
+      ext = 'heic';
 
     const randomHex = randomBytes(4).toString('hex');
     const newKey = `articles/covers/${userId}_${Date.now()}_${randomHex}.${ext}`;
@@ -272,34 +371,54 @@ export class UploadService {
     }
 
     if (files.length > 10) {
-      throw new BadRequestException(this.i18n.t('upload.images_limit_exceeded'));
+      throw new BadRequestException(
+        this.i18n.t('upload.images_limit_exceeded'),
+      );
     }
 
     const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20 MB
+    for (const file of files) {
+      if (!file || !file.buffer) {
+        throw new BadRequestException(this.i18n.t('upload.file_required'));
+      }
+      if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+        throw new BadRequestException(
+          this.i18n.t('upload.invalid_file_type'),
+        );
+      }
+      if (!hasSignature(file.buffer, file.mimetype)) {
+        throw new BadRequestException(
+          this.i18n.t('upload.invalid_file_type'),
+        );
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        throw new BadRequestException(
+          this.i18n.t('upload.image_size_exceeded'),
+        );
+      }
+    }
+
     const urls: string[] = [];
 
     try {
       for (const file of files) {
-        if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-          throw new BadRequestException(this.i18n.t('upload.invalid_file_type'));
-        }
-        if (!hasSignature(file.buffer, file.mimetype)) {
-          throw new BadRequestException(this.i18n.t('upload.invalid_file_type'));
-        }
-
-        if (file.size > MAX_IMAGE_SIZE) {
-          throw new BadRequestException(this.i18n.t('upload.image_size_exceeded'));
-        }
-
         let ext = 'jpg';
         if (file.mimetype === 'image/png') ext = 'png';
         else if (file.mimetype === 'image/webp') ext = 'webp';
-        else if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') ext = 'heic';
+        else if (
+          file.mimetype === 'image/heic' ||
+          file.mimetype === 'image/heif'
+        )
+          ext = 'heic';
 
         const randomHex = randomBytes(4).toString('hex');
         const newKey = `posts/images/${userId}_${Date.now()}_${randomHex}.${ext}`;
 
-        const uploadedUrl = await this.uploadFile(file.buffer, newKey, file.mimetype);
+        const uploadedUrl = await this.uploadFile(
+          file.buffer,
+          newKey,
+          file.mimetype,
+        );
         urls.push(uploadedUrl);
       }
     } catch (error) {
@@ -351,7 +470,11 @@ export class UploadService {
     const randomHex = randomBytes(4).toString('hex');
     const newKey = `posts/videos/${userId}_${Date.now()}_${randomHex}.${ext}`;
 
-    const uploadedUrl = await this.uploadFile(file.buffer, newKey, file.mimetype);
+    const uploadedUrl = await this.uploadFile(
+      file.buffer,
+      newKey,
+      file.mimetype,
+    );
 
     return {
       message: this.i18n.t('upload.post_video_success'),

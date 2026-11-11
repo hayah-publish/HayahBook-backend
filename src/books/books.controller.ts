@@ -33,7 +33,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('books')
 export class BooksController {
   constructor(
@@ -60,7 +59,6 @@ export class BooksController {
   ): Promise<PaginatedResult<Book>> {
     return this.booksService.findAll(1, query.limit);
   }
-
   @UseGuards(JwtAuthGuard)
   @Get('my-books')
   getMyBooks(
@@ -69,7 +67,6 @@ export class BooksController {
   ) {
     return this.booksService.getMyBooks(req.user.userId, query);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post(':id/reading-status')
   @HttpCode(HttpStatus.OK)
@@ -80,7 +77,6 @@ export class BooksController {
   ) {
     return this.booksService.updateReadingStatus(req.user.userId, id, dto);
   }
-
   @UseGuards(JwtAuthGuard)
   @Delete(':id/reading-status')
   removeReadingStatus(
@@ -89,13 +85,11 @@ export class BooksController {
   ) {
     return this.booksService.removeReadingStatus(req.user.userId, id);
   }
-
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   create(@Body() createBookDto: CreateBookDto): Promise<Book> {
     return this.booksService.create(createBookDto);
   }
-
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id')
   update(
@@ -104,7 +98,6 @@ export class BooksController {
   ): Promise<Book> {
     return this.booksService.update(id, updateBookDto);
   }
-
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
   async remove(

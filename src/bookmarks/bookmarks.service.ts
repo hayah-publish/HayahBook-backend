@@ -141,7 +141,13 @@ export class BookmarksService {
 
     const data: FormattedPost[] = await Promise.all(
       items.map(async (item) => {
-        const formatted = await this.postsService.formatPost(item.post);
+        const formatted = await this.postsService.formatPost(
+          item.post,
+          userId,
+          undefined,
+          undefined,
+          true,
+        );
         return {
           ...formatted,
           isSaved: true,
@@ -169,9 +175,9 @@ export class BookmarksService {
       .innerJoin('bookmark.post', 'post')
       .where('bookmark.userId = :userId', { userId })
       .select('COUNT(*)', 'all')
-      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post' AND post.video_url IS NULL AND LOWER(COALESCE(post.category, '')) NOT IN ('المقتطفات', 'snippets', 'المرئيات', 'visuals'))`, 'posts')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'post' AND (post.video_url IS NULL OR post.video_url = '') AND LOWER(COALESCE(post.category, '')) NOT IN ('المقتطفات', 'snippets', 'المرئيات', 'visuals'))`, 'posts')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'article')`, 'articles')
-      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR post.video_url IS NOT NULL OR LOWER(COALESCE(post.category, '')) IN ('المرئيات', 'visuals'))`, 'visuals')
+      .addSelect(`COUNT(*) FILTER (WHERE post.type = 'visual' OR (post.video_url IS NOT NULL AND post.video_url != '') OR LOWER(COALESCE(post.category, '')) IN ('المرئيات', 'visuals'))`, 'visuals')
       .addSelect(`COUNT(*) FILTER (WHERE post.type = 'snippet' OR LOWER(COALESCE(post.category, '')) IN ('المقتطفات', 'snippets'))`, 'snippets')
       .getRawOne();
 

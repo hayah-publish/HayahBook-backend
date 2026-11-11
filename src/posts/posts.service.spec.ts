@@ -50,7 +50,8 @@ describe('PostsService public post formatting', () => {
       const post = {
         id: 'post-2',
         type: 'post',
-        content: 'مرحباً بكم، يمكنكم زيارة [موقعنا الرسمي](https://hayahbook.com) لمزيد من التفاصيل.',
+        content:
+          'مرحباً بكم، يمكنكم زيارة [موقعنا الرسمي](https://hayahbook.com) لمزيد من التفاصيل.',
         images: [],
         videoUrl: null,
         linkUrl: null,
@@ -221,7 +222,9 @@ describe('PostsService public post formatting', () => {
         { url: 'https://hayahbook.com', title: 'حياة بوك' },
       ]);
 
-      expect(formatted).toBe('زوروا موقعنا [حياة بوك](https://hayahbook.com) لمزيد من الكتب');
+      expect(formatted).toBe(
+        'زوروا موقعنا [حياة بوك](https://hayahbook.com) لمزيد من الكتب',
+      );
     });
 
     it('auto-formats standalone title in content with URL from link DTO', () => {
@@ -270,9 +273,7 @@ describe('PostsService public post formatting', () => {
     it('successfully validates direct JS array links (application/json)', async () => {
       const payload = {
         content: 'منشور تجريبي مع روابط',
-        links: [
-          { url: 'https://hayahbook.com', title: 'موقعنا' },
-        ],
+        links: [{ url: 'https://hayahbook.com', title: 'موقعنا' }],
       };
 
       const dto = plainToInstance(CreatePostDto, payload);
@@ -302,10 +303,22 @@ describe('PostsService public post formatting', () => {
       let savedPostData: any = null;
 
       const mockPostsRepo: any = {
-        create: jest.fn().mockImplementation((data) => ({ ...data, id: 'post-uuid-1', createdAt: new Date(), updatedAt: new Date() })),
+        create: jest
+          .fn()
+          .mockImplementation((data) => ({
+            ...data,
+            id: 'post-uuid-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })),
         save: jest.fn().mockImplementation(async (entity) => {
           savedPostData = entity;
-          return { ...entity, id: 'post-uuid-1', createdAt: new Date(), updatedAt: new Date() };
+          return {
+            ...entity,
+            id: 'post-uuid-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
         }),
       };
 
@@ -524,7 +537,10 @@ describe('PostsService public post formatting', () => {
       const mockUsersRepo: any = { findOne: jest.fn(), find: jest.fn() };
       const mockBooksRepo: any = { findOne: jest.fn() };
       const mockAudiobooksRepo: any = { findOne: jest.fn() };
-      const mockUploadService: any = { uploadPostImages: jest.fn(), uploadPostVideo: jest.fn() };
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn(),
+        uploadPostVideo: jest.fn(),
+      };
       const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
 
       const postService = new PostsService(
@@ -537,9 +553,9 @@ describe('PostsService public post formatting', () => {
       );
 
       // Empty object
-      await expect(
-        postService.createPost('user-1', {} as any),
-      ).rejects.toThrow(BadRequestException);
+      await expect(postService.createPost('user-1', {} as any)).rejects.toThrow(
+        BadRequestException,
+      );
 
       // Whitespace only
       await expect(
@@ -569,7 +585,9 @@ describe('PostsService public post formatting', () => {
         find: jest.fn().mockResolvedValue([]),
       };
       const mockBooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
-      const mockAudiobooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
+      const mockAudiobooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue(null),
+      };
       const mockUploadService: any = {
         uploadPostImages: jest.fn().mockResolvedValue({
           urls: ['https://cdn.example.com/img1.jpg'],
@@ -596,11 +614,9 @@ describe('PostsService public post formatting', () => {
         size: 1024,
       } as any;
 
-      const result = await postService.createPost(
-        'user-1',
-        {},
-        [fakeImageFile],
-      );
+      const result = await postService.createPost('user-1', {}, [
+        fakeImageFile,
+      ]);
 
       expect(result.data.images).toContain('https://cdn.example.com/img1.jpg');
       expect(result.data.content).toBe('');
@@ -629,7 +645,9 @@ describe('PostsService public post formatting', () => {
         find: jest.fn().mockResolvedValue([]),
       };
       const mockBooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
-      const mockAudiobooksRepo: any = { findOne: jest.fn().mockResolvedValue(null) };
+      const mockAudiobooksRepo: any = {
+        findOne: jest.fn().mockResolvedValue(null),
+      };
       const mockUploadService: any = {
         uploadPostImages: jest.fn(),
         uploadPostVideo: jest.fn().mockResolvedValue({
@@ -672,7 +690,10 @@ describe('PostsService public post formatting', () => {
       const mockUsersRepo: any = { findOne: jest.fn(), find: jest.fn() };
       const mockBooksRepo: any = { findOne: jest.fn() };
       const mockAudiobooksRepo: any = { findOne: jest.fn() };
-      const mockUploadService: any = { uploadPostImages: jest.fn(), uploadPostVideo: jest.fn() };
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn(),
+        uploadPostVideo: jest.fn(),
+      };
       const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
 
       const postService = new PostsService(
@@ -705,7 +726,10 @@ describe('PostsService public post formatting', () => {
       const mockUsersRepo: any = { findOne: jest.fn(), find: jest.fn() };
       const mockBooksRepo: any = { findOne: jest.fn() };
       const mockAudiobooksRepo: any = { findOne: jest.fn() };
-      const mockUploadService: any = { uploadPostImages: jest.fn(), uploadPostVideo: jest.fn() };
+      const mockUploadService: any = {
+        uploadPostImages: jest.fn(),
+        uploadPostVideo: jest.fn(),
+      };
       const mockI18n: any = { t: jest.fn().mockImplementation((k) => k) };
 
       const postService = new PostsService(
@@ -777,9 +801,19 @@ describe('PostsService public post formatting', () => {
       const qb: any = {
         select: jest.fn().mockReturnThis(),
         addSelect: jest.fn().mockReturnThis(),
-        getRawOne: jest.fn().mockResolvedValue({ all: '4', posts: '1', articles: '1', visuals: '1', snippets: '1' }),
+        getRawOne: jest
+          .fn()
+          .mockResolvedValue({
+            all: '4',
+            posts: '1',
+            articles: '1',
+            visuals: '1',
+            snippets: '1',
+          }),
       };
-      const mockPostsRepo: any = { createQueryBuilder: jest.fn().mockReturnValue(qb) };
+      const mockPostsRepo: any = {
+        createQueryBuilder: jest.fn().mockReturnValue(qb),
+      };
       const mockUsersRepo: any = {};
       const mockBooksRepo: any = {};
       const mockAudiobooksRepo: any = {};
@@ -843,7 +877,10 @@ describe('PostsService public post formatting', () => {
           mockDataSource,
         );
 
-        const res = await postService.getHomeFeed({ following: true }, 'user-empty');
+        const res = await postService.getHomeFeed(
+          { following: true },
+          'user-empty',
+        );
         expect(res.data).toEqual([]);
         expect(res.total).toBe(0);
         expect(res.counts.all).toBe(0);
@@ -855,10 +892,12 @@ describe('PostsService public post formatting', () => {
 
       it('filters following feed and tab counts by followed user IDs across the 4 types', async () => {
         const mockFollowRepo: any = {
-          find: jest.fn().mockResolvedValue([
-            { followingId: 'followed-user-1' },
-            { followingId: 'followed-user-2' },
-          ]),
+          find: jest
+            .fn()
+            .mockResolvedValue([
+              { followingId: 'followed-user-1' },
+              { followingId: 'followed-user-2' },
+            ]),
         };
         const mockDataSource: any = {
           query: jest.fn().mockResolvedValue([]),
@@ -874,7 +913,15 @@ describe('PostsService public post formatting', () => {
           getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
           select: jest.fn().mockReturnThis(),
           addSelect: jest.fn().mockReturnThis(),
-          getRawOne: jest.fn().mockResolvedValue({ all: '4', posts: '1', articles: '1', visuals: '1', snippets: '1' }),
+          getRawOne: jest
+            .fn()
+            .mockResolvedValue({
+              all: '4',
+              posts: '1',
+              articles: '1',
+              visuals: '1',
+              snippets: '1',
+            }),
         };
 
         const mockPostsRepo: any = {
@@ -905,7 +952,10 @@ describe('PostsService public post formatting', () => {
         expect(qb.andWhere).toHaveBeenCalledWith(
           'post.user_id IN (:...followingUserIds)',
           expect.objectContaining({
-            followingUserIds: expect.arrayContaining(['followed-user-1', 'followed-user-2']),
+            followingUserIds: expect.arrayContaining([
+              'followed-user-1',
+              'followed-user-2',
+            ]),
           }),
         );
         expect(qb.andWhere).toHaveBeenCalledWith("post.type = 'article'");
@@ -918,18 +968,26 @@ describe('PostsService public post formatting', () => {
 
       it('applies smart personalized ranking to followed accounts feed when user has interests', async () => {
         const mockFollowRepo: any = {
-          find: jest.fn().mockResolvedValue([
-            { followingId: 'followed-user-1' },
-          ]),
+          find: jest
+            .fn()
+            .mockResolvedValue([{ followingId: 'followed-user-1' }]),
         };
         const mockDataSource: any = {
           query: jest.fn().mockImplementation((sql: string) => {
-            if (sql.includes('user_author_follows') || sql.includes('user_creator_follows')) {
+            if (
+              sql.includes('user_author_follows') ||
+              sql.includes('user_creator_follows')
+            ) {
               return Promise.resolve([]);
             }
             if (sql.includes('user_interests')) {
               return Promise.resolve([
-                { name: 'روايات', name_ar: 'روايات', category: 'الكتب', category_ar: 'الكتب' },
+                {
+                  name: 'روايات',
+                  name_ar: 'روايات',
+                  category: 'الكتب',
+                  category_ar: 'الكتب',
+                },
               ]);
             }
             return Promise.resolve([]);
@@ -949,7 +1007,15 @@ describe('PostsService public post formatting', () => {
           addSelect: jest.fn().mockReturnThis(),
           setParameters: jest.fn().mockReturnThis(),
           getParameters: jest.fn().mockReturnValue({}),
-          getRawOne: jest.fn().mockResolvedValue({ all: '1', posts: '1', articles: '0', visuals: '0', snippets: '0' }),
+          getRawOne: jest
+            .fn()
+            .mockResolvedValue({
+              all: '1',
+              posts: '1',
+              articles: '0',
+              visuals: '0',
+              snippets: '0',
+            }),
         };
 
         const mockPostsRepo: any = {
@@ -989,6 +1055,301 @@ describe('PostsService public post formatting', () => {
         expect(qb.addOrderBy).toHaveBeenCalledWith('post.createdAt', 'DESC');
         expect(res.counts.all).toBe(1);
       });
+    });
+  });
+
+  describe('3-Dots Post Options Menu & Actions (Matching Design)', () => {
+    let mockPostsRepo: any;
+    let mockUsersRepo: any;
+    let mockFollowRepo: any;
+    let mockBookmarkRepo: any;
+    let mockHiddenRepo: any;
+    let mockReportsRepo: any;
+    let serviceWithActions: PostsService;
+
+    beforeEach(() => {
+      mockPostsRepo = {
+        findOne: jest.fn(),
+        save: jest.fn((p) => Promise.resolve(p)),
+        increment: jest.fn().mockResolvedValue(undefined),
+      };
+      mockUsersRepo = {
+        findOne: jest.fn(),
+        find: jest.fn().mockResolvedValue([]),
+      };
+      mockFollowRepo = {
+        findOne: jest.fn(),
+        find: jest.fn().mockResolvedValue([]),
+      };
+      mockBookmarkRepo = {
+        count: jest.fn().mockResolvedValue(0),
+        find: jest.fn().mockResolvedValue([]),
+      };
+      const insertBuilder = {
+        insert: jest.fn().mockReturnThis(),
+        into: jest.fn().mockReturnThis(),
+        values: jest.fn().mockReturnThis(),
+        orIgnore: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({}),
+      };
+      mockHiddenRepo = {
+        findOne: jest.fn().mockResolvedValue(null),
+        createQueryBuilder: jest.fn().mockReturnValue(insertBuilder),
+        delete: jest.fn().mockResolvedValue(undefined),
+      };
+      mockReportsRepo = {
+        findOne: jest.fn().mockResolvedValue(null),
+        save: jest.fn((d) =>
+          Promise.resolve({ id: 'rep-1', ...d, createdAt: new Date() }),
+        ),
+        create: jest.fn((d) => d),
+      };
+
+      serviceWithActions = new PostsService(
+        mockPostsRepo,
+        mockUsersRepo,
+        {} as any,
+        {} as any,
+        {
+          uploadPostImages: jest
+            .fn()
+            .mockResolvedValue({ urls: ['https://cdn/new.jpg'] }),
+          uploadPostVideo: jest
+            .fn()
+            .mockResolvedValue({ videoUrl: 'https://cdn/new.mp4' }),
+        } as any,
+        {
+          t: jest.fn().mockImplementation((k) => k),
+          getCurrentLanguage: jest.fn().mockReturnValue('ar'),
+        } as any,
+        undefined,
+        mockFollowRepo,
+        undefined,
+        undefined,
+        mockReportsRepo,
+        mockHiddenRepo,
+        undefined,
+        mockBookmarkRepo,
+        { get: jest.fn().mockReturnValue('https://hayahbook.com') } as any,
+      );
+    });
+
+    it('offers no authenticated menu actions to anonymous viewers', async () => {
+      mockPostsRepo.findOne.mockResolvedValue({
+        id: 'post-public',
+        userId: 'author-id',
+        user: { id: 'author-id', name: 'Author' },
+      });
+      const menu = await serviceWithActions.getPostMenu('post-public');
+      expect(menu.actions.map((action) => action.key)).toEqual(['copy_link']);
+      expect(menu.actions[0].actionType).toBe('client_clipboard');
+    });
+
+    it('returns Window 3 (Owner Menu) with 4 items: edit, share, disable_comments, delete', async () => {
+      const post = {
+        id: 'post-1',
+        userId: 'owner-id',
+        content: 'My own post',
+        commentsDisabled: false,
+        user: { id: 'owner-id', name: 'Author Name' },
+      };
+      mockPostsRepo.findOne.mockResolvedValue(post);
+
+      const menu = await serviceWithActions.getPostMenu(
+        'post-1',
+        'owner-id',
+        'en',
+      );
+
+      expect(menu.menuType).toBe('owner');
+      expect(menu.isOwner).toBe(true);
+      expect(menu.actions.map((a) => a.key)).toEqual([
+        'edit',
+        'share',
+        'disable_comments',
+        'delete',
+      ]);
+      expect(menu.actions.find((a) => a.key === 'delete')?.isDestructive).toBe(
+        true,
+      );
+    });
+
+    it('returns Window 2 (Non-owner following author) with 7 items starting with unfollow', async () => {
+      const post = {
+        id: 'post-2',
+        userId: 'author-id',
+        content: 'Post by Ahmed Murad',
+        commentsDisabled: false,
+        user: { id: 'author-id', name: 'Ahmed Murad' },
+      };
+      mockPostsRepo.findOne.mockResolvedValue(post);
+      mockFollowRepo.findOne.mockResolvedValue({ id: 'follow-1' }); // following
+
+      const menu = await serviceWithActions.getPostMenu(
+        'post-2',
+        'viewer-id',
+        'en',
+      );
+
+      expect(menu.menuType).toBe('non_owner_following');
+      expect(menu.isOwner).toBe(false);
+      expect(menu.isFollowingAuthor).toBe(true);
+      expect(menu.actions.map((a) => a.key)).toEqual([
+        'unfollow',
+        'copy_link',
+        'save',
+        'share',
+        'view_less',
+        'block',
+        'report',
+      ]);
+      expect(menu.actions[0].title).toBe('UnFollow Ahmed Murad');
+    });
+
+    it('returns Window 1 (Non-owner not following author) with 7 items starting with follow', async () => {
+      const post = {
+        id: 'post-3',
+        userId: 'author-id',
+        content: 'Post by Ahmed Murad',
+        commentsDisabled: false,
+        user: { id: 'author-id', name: 'Ahmed Murad' },
+      };
+      mockPostsRepo.findOne.mockResolvedValue(post);
+      mockFollowRepo.findOne.mockResolvedValue(null); // not following
+
+      const menu = await serviceWithActions.getPostMenu(
+        'post-3',
+        'viewer-id',
+        'en',
+      );
+
+      expect(menu.menuType).toBe('non_owner_not_following');
+      expect(menu.isOwner).toBe(false);
+      expect(menu.isFollowingAuthor).toBe(false);
+      expect(menu.actions.map((a) => a.key)).toEqual([
+        'follow',
+        'copy_link',
+        'save',
+        'share',
+        'view_less',
+        'block',
+        'report',
+      ]);
+      expect(menu.actions[0].title).toBe('Follow Ahmed Murad');
+    });
+
+    it('rejects malformed mentions JSON without saving changes', async () => {
+      mockPostsRepo.findOne.mockResolvedValue({
+        id: 'post-edit',
+        userId: 'owner-id',
+        images: [],
+      });
+      await expect(
+        serviceWithActions.updatePost('post-edit', 'owner-id', {
+          mentions: '{',
+        } as any),
+      ).rejects.toThrow();
+      expect(mockPostsRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('allows owner to toggle comments status', async () => {
+      const post = {
+        id: 'post-4',
+        userId: 'owner-id',
+        commentsDisabled: false,
+      };
+      mockPostsRepo.findOne.mockResolvedValue(post);
+
+      const res = await serviceWithActions.toggleComments('post-4', 'owner-id');
+      expect(res.commentsDisabled).toBe(true);
+      expect(post.commentsDisabled).toBe(true);
+    });
+
+    it('blocks non-owner from toggling comments', async () => {
+      const post = {
+        id: 'post-4',
+        userId: 'owner-id',
+        commentsDisabled: false,
+      };
+      mockPostsRepo.findOne.mockResolvedValue(post);
+
+      await expect(
+        serviceWithActions.toggleComments('post-4', 'intruder-id'),
+      ).rejects.toThrow();
+    });
+
+    it('allows user to mark post as view-less (toggle on/off) and share post', async () => {
+      const post = { id: 'post-5', userId: 'author-id', sharesCount: 3 };
+      mockPostsRepo.findOne.mockResolvedValue(post);
+
+      const viewLessRes = await serviceWithActions.viewLessPost(
+        'post-5',
+        'user-1',
+      );
+      expect(viewLessRes.isHidden).toBe(true);
+
+      mockHiddenRepo.findOne.mockResolvedValueOnce({
+        id: 'h-1',
+        postId: 'post-5',
+        userId: 'user-1',
+      });
+      const toggleOffRes = await serviceWithActions.viewLessPost(
+        'post-5',
+        'user-1',
+      );
+      expect(toggleOffRes.isHidden).toBe(false);
+
+      const shareRes = await serviceWithActions.sharePost('post-5');
+      expect(shareRes.sharesCount).toBe(4);
+      expect(shareRes.shareUrl).toContain('/posts/post-5');
+    });
+
+    it('encodes UUID into encrypted token and restores original UUID cleanly', () => {
+      const uuid = '2587eb2e-a4c9-4368-90ad-af47d439b0b9';
+      const token = serviceWithActions.encodePostId(uuid);
+      expect(token).toBe('JYfrLqTJQ2iQra9H1DmwuQ');
+      expect(serviceWithActions.decodePostId(token)).toBe(uuid);
+      expect(serviceWithActions.getShareUrl(uuid)).toBe(
+        'https://hayahbook.com/posts/JYfrLqTJQ2iQra9H1DmwuQ',
+      );
+    });
+
+    it('converts a concurrent duplicate report insert into a conflict', async () => {
+      mockPostsRepo.findOne.mockResolvedValue({
+        id: 'post-race',
+        userId: 'author',
+      });
+      mockReportsRepo.save.mockRejectedValue({ code: '23505' });
+      await expect(
+        serviceWithActions.reportPost('post-race', 'reporter', {
+          reason: 'spam',
+        } as any),
+      ).rejects.toThrow();
+    });
+
+    it('allows reporting post with standardized 8 UUID reasons', async () => {
+      const reasons = serviceWithActions.getReportReasons('ar');
+      expect(reasons).toHaveLength(8);
+      expect(reasons.find((r: any) => r.displayName === 'سبب آخر')?.id).toBe(
+        '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
+      );
+
+      const post = { id: 'post-6', userId: 'author-id' };
+      mockPostsRepo.findOne.mockResolvedValue(post);
+
+      const reportRes = await serviceWithActions.reportPost(
+        'post-6',
+        'reporter-id',
+        {
+          reasonId: '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
+          details: 'Spammy content',
+        },
+      );
+
+      expect(reportRes.statusCode).toBe(201);
+      expect(reportRes.report.reasonId).toBe(
+        '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
+      );
     });
   });
 });

@@ -21,7 +21,7 @@ export class CreateArticleDto {
 
   @IsNotEmpty({ message: 'articles.content_required' })
   @IsString()
-  @MinWords(500, { message: 'articles.min_words_required' })
+  @MinWords(501, { message: 'articles.min_words_required' })
   @MaxWords(5000, { message: 'articles.max_words_exceeded' })
   content: string;
 

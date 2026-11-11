@@ -88,4 +88,23 @@ describe('AuthRateLimitMiddleware', () => {
     expect(consume).toHaveBeenCalledWith('login-ip', '192.0.2.12', 10, 900_000);
     expect(next).toHaveBeenCalledTimes(1);
   });
+
+  it('normalizes mixed-case and trailing-slash auth paths and stops after 429 on post share', async () => {
+    const consume = jest.fn().mockResolvedValue(false);
+    const middleware = new AuthRateLimitMiddleware({ consume } as any);
+    const shareReq = {
+      method: 'POST',
+      path: '/v1/Posts/123e4567-e89b-12d3-a456-426614174000/Share/',
+      ip: '192.0.2.13',
+      socket: { remoteAddress: '192.0.2.13' },
+      header: () => undefined,
+    } as any;
+    const shareRes = { status: jest.fn().mockReturnThis(), json: jest.fn() } as any;
+    const shareNext = jest.fn();
+
+    await middleware.use(shareReq, shareRes, shareNext);
+
+    expect(shareRes.status).toHaveBeenCalledWith(429);
+    expect(shareNext).not.toHaveBeenCalled();
+  });
 });

@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsNumber, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 import type { ReadingStatus } from '../user-book.entity';
 
 export class UpdateReadingStatusDto {
@@ -22,5 +22,13 @@ export class UpdateReadingStatusDto {
   @IsOptional()
   @IsString({ message: 'Notes must be a string' })
   notes?: string;
+
+  @IsOptional()
+  @IsIn(['primary', 'alias'], { message: 'Invalid identityType' })
+  identityType?: 'primary' | 'alias';
+
+  @IsOptional()
+  @IsUUID('4', { message: 'aliasId must be a valid UUID' })
+  aliasId?: string;
 }
 

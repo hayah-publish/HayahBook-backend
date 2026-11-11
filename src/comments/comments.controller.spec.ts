@@ -31,7 +31,7 @@ describe('CommentsController', () => {
         { key: 'oldest' },
       ]),
       getReportReasons: jest.fn().mockReturnValue([
-        { key: 'spam', displayName: 'Spam', name_ar: 'محتوى غير مرغوب فيه', name_en: 'Spam' },
+        { id: 'spam', displayName: 'Spam', name_ar: 'محتوى غير مرغوب فيه', name_en: 'Spam' },
       ]),
       getPostComments: jest.fn().mockResolvedValue({
         data: [],

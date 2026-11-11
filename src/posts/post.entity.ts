@@ -42,6 +42,9 @@ export class Post {
   @Column({ type: 'text' })
   content: string;
 
+  @Column({ name: 'content_format', type: 'varchar', length: 20, default: 'markdown', nullable: true })
+  contentFormat: string | null;
+
   @Column({ type: 'jsonb', default: () => "'[]'" })
   images: string[];
 
@@ -90,6 +93,9 @@ export class Post {
 
   @Column({ name: 'comments_count', type: 'integer', default: 0 })
   commentsCount: number;
+
+  @Column({ name: 'comments_disabled', type: 'boolean', default: false })
+  commentsDisabled: boolean;
 
   @OneToMany('Comment', 'post')
   comments?: Comment[];

@@ -19,7 +19,6 @@ import { ReactPostDto } from './dto/react-post.dto';
 import { ReactionsQueryDto } from './dto/reactions-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
-
 interface AuthenticatedRequest extends Request {
   user?: {
     userId: string;
@@ -27,7 +26,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller(['reactions', 'react'])
 export class ReactionsController {
   constructor(private readonly postsService: PostsService) {}

@@ -16,75 +16,390 @@ import { SupportedLanguage } from '../i18n/i18n.types';
 
 export const SEED_INTERESTS = [
   // 1. الكتب (Books) - 34 اهتمام
-  { name_ar: 'روايات', name_en: 'Novels', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'روايات مترجمة', name_en: 'Translated Novels', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'القصص القصيرة', name_en: 'Short Stories', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'المسرح', name_en: 'Theater', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الشعر', name_en: 'Poetry', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'كتب الأدب', name_en: 'Literature Books', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الكتب الدينية', name_en: 'Religious Books', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'اللغات', name_en: 'Languages', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الفن والإبداع', name_en: 'Art & Creativity', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الماورائيات', name_en: 'Paranormal', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'علم النفس', name_en: 'Psychology', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'علم الاجتماع', name_en: 'Sociology', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'أسلوب الحياة', name_en: 'Lifestyle', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'السفر والرحلات', name_en: 'Travel & Journeys', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الجغرافيا', name_en: 'Geography', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'السياسة', name_en: 'Politics', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الاقتصاد', name_en: 'Economics', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'التاريخ', name_en: 'History', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الصحافة والإعلام', name_en: 'Journalism & Media', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'القانون', name_en: 'Law', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الزراعة', name_en: 'Agriculture', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الصناعة', name_en: 'Industry', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'العلوم التطبيقية', name_en: 'Applied Sciences', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'التنمية البشرية', name_en: 'Human Development', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'المرأة والأسرة', name_en: 'Women & Family', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الأطفال والنشأة', name_en: 'Children & Parenting', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الهندسة', name_en: 'Engineering', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'التراجم وسير الأعلام', name_en: 'Biographies & Memoirs', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'علوم الطبيعة', name_en: 'Natural Sciences', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الفلسفة', name_en: 'Philosophy', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الموسوعات', name_en: 'Encyclopedias', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'التراث والنوادر', name_en: 'Heritage & Rarities', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'الطب والصحة', name_en: 'Medicine & Health', category_ar: 'الكتب', category_en: 'Books' },
-  { name_ar: 'ريادة الأعمال والابتكار', name_en: 'Entrepreneurship & Innovation', category_ar: 'الكتب', category_en: 'Books' },
+  {
+    name_ar: 'روايات',
+    name_en: 'Novels',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'روايات مترجمة',
+    name_en: 'Translated Novels',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'القصص القصيرة',
+    name_en: 'Short Stories',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'المسرح',
+    name_en: 'Theater',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الشعر',
+    name_en: 'Poetry',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'كتب الأدب',
+    name_en: 'Literature Books',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الكتب الدينية',
+    name_en: 'Religious Books',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'اللغات',
+    name_en: 'Languages',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الفن والإبداع',
+    name_en: 'Art & Creativity',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الماورائيات',
+    name_en: 'Paranormal',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'علم النفس',
+    name_en: 'Psychology',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'علم الاجتماع',
+    name_en: 'Sociology',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'أسلوب الحياة',
+    name_en: 'Lifestyle',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'السفر والرحلات',
+    name_en: 'Travel & Journeys',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الجغرافيا',
+    name_en: 'Geography',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'السياسة',
+    name_en: 'Politics',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الاقتصاد',
+    name_en: 'Economics',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'التاريخ',
+    name_en: 'History',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الصحافة والإعلام',
+    name_en: 'Journalism & Media',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'القانون',
+    name_en: 'Law',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الزراعة',
+    name_en: 'Agriculture',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الصناعة',
+    name_en: 'Industry',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'العلوم التطبيقية',
+    name_en: 'Applied Sciences',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'التنمية البشرية',
+    name_en: 'Human Development',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'المرأة والأسرة',
+    name_en: 'Women & Family',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الأطفال والنشأة',
+    name_en: 'Children & Parenting',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الهندسة',
+    name_en: 'Engineering',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'التراجم وسير الأعلام',
+    name_en: 'Biographies & Memoirs',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'علوم الطبيعة',
+    name_en: 'Natural Sciences',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الفلسفة',
+    name_en: 'Philosophy',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الموسوعات',
+    name_en: 'Encyclopedias',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'التراث والنوادر',
+    name_en: 'Heritage & Rarities',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'الطب والصحة',
+    name_en: 'Medicine & Health',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
+  {
+    name_ar: 'ريادة الأعمال والابتكار',
+    name_en: 'Entrepreneurship & Innovation',
+    category_ar: 'الكتب',
+    category_en: 'Books',
+  },
 
   // 2. المرئيات (Visuals) - 9 اهتمامات
-  { name_ar: 'السياسة والاقتصاد', name_en: 'Politics & Economics', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'العلوم والتكنولوجيا', name_en: 'Science & Technology', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'الفن والإعلام', name_en: 'Art & Media', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'أسلوب الحياة', name_en: 'Lifestyle', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'الترفيه', name_en: 'Entertainment', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'المحتوى الصوتي والمرئي', name_en: 'Audio & Visual Content', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'الدين', name_en: 'Religion', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'التاريخ والوثائقيات', name_en: 'History & Documentaries', category_ar: 'المرئيات', category_en: 'Visuals' },
-  { name_ar: 'الفكر والعلوم الإنسانية', name_en: 'Thought & Humanities', category_ar: 'المرئيات', category_en: 'Visuals' },
+  {
+    name_ar: 'السياسة والاقتصاد',
+    name_en: 'Politics & Economics',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'العلوم والتكنولوجيا',
+    name_en: 'Science & Technology',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'الفن والإعلام',
+    name_en: 'Art & Media',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'أسلوب الحياة',
+    name_en: 'Lifestyle',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'الترفيه',
+    name_en: 'Entertainment',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'المحتوى الصوتي والمرئي',
+    name_en: 'Audio & Visual Content',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'الدين',
+    name_en: 'Religion',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'التاريخ والوثائقيات',
+    name_en: 'History & Documentaries',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
+  {
+    name_ar: 'الفكر والعلوم الإنسانية',
+    name_en: 'Thought & Humanities',
+    category_ar: 'المرئيات',
+    category_en: 'Visuals',
+  },
 
   // 3. المقالات (Articles) - 9 اهتمامات
-  { name_ar: 'احداث حالية', name_en: 'Current events', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'تاريخ وتراث', name_en: 'History and heritage', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'ثقافة وفنون', name_en: 'Culture and arts', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'معرفة وتعليم', name_en: 'Knowledge and education', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'أعمال ومهارات', name_en: 'Business and skills', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'تطوير الذات', name_en: 'Self development', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'مجتمع وحياة', name_en: 'Society and life', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'مقالات حرة', name_en: 'Free articles', category_ar: 'المقالات', category_en: 'Articles' },
-  { name_ar: 'سفر وأماكن', name_en: 'Travel and places', category_ar: 'المقالات', category_en: 'Articles' },
+  {
+    name_ar: 'احداث حالية',
+    name_en: 'Current events',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'تاريخ وتراث',
+    name_en: 'History and heritage',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'ثقافة وفنون',
+    name_en: 'Culture and arts',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'معرفة وتعليم',
+    name_en: 'Knowledge and education',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'أعمال ومهارات',
+    name_en: 'Business and skills',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'تطوير الذات',
+    name_en: 'Self development',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'مجتمع وحياة',
+    name_en: 'Society and life',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'مقالات حرة',
+    name_en: 'Free articles',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
+  {
+    name_ar: 'سفر وأماكن',
+    name_en: 'Travel and places',
+    category_ar: 'المقالات',
+    category_en: 'Articles',
+  },
 
   // 4. المقتطفات (Snippets) - 11 اهتمام
-  { name_ar: 'رومانسي', name_en: 'Romance', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'نفسي', name_en: 'Psychological', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'تحفيز', name_en: 'Motivation', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'حزن وفراق', name_en: 'Sadness & Separation', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'حكمة', name_en: 'Wisdom', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'حياة', name_en: 'Life', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'اقتباسات قصيرة', name_en: 'Short Quotes', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'اقتباسات طويلة', name_en: 'Long Quotes', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'صداقة', name_en: 'Friendship', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'تأمل', name_en: 'Contemplation', category_ar: 'المقتطفات', category_en: 'Snippets' },
-  { name_ar: 'روحاني', name_en: 'Spiritual', category_ar: 'المقتطفات', category_en: 'Snippets' },
+  {
+    name_ar: 'رومانسي',
+    name_en: 'Romance',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'نفسي',
+    name_en: 'Psychological',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'تحفيز',
+    name_en: 'Motivation',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'حزن وفراق',
+    name_en: 'Sadness & Separation',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'حكمة',
+    name_en: 'Wisdom',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'حياة',
+    name_en: 'Life',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'اقتباسات قصيرة',
+    name_en: 'Short Quotes',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'اقتباسات طويلة',
+    name_en: 'Long Quotes',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'صداقة',
+    name_en: 'Friendship',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'تأمل',
+    name_en: 'Contemplation',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
+  {
+    name_ar: 'روحاني',
+    name_en: 'Spiritual',
+    category_ar: 'المقتطفات',
+    category_en: 'Snippets',
+  },
 ];
 
 export interface FormattedInterest {
@@ -105,7 +420,7 @@ export class InterestsService implements OnModuleInit {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   async onModuleInit() {
     for (const item of SEED_INTERESTS) {
@@ -135,48 +450,36 @@ export class InterestsService implements OnModuleInit {
           category_en: item.category_en,
         });
         await this.interestRepository.save(interest);
-      } else {
-        let changed = false;
-        if (existing.name_en !== item.name_en) {
-          existing.name_en = item.name_en;
-          changed = true;
-        }
-        if (existing.name_ar !== item.name_ar) {
-          existing.name_ar = item.name_ar;
-          existing.name = item.name_ar;
-          changed = true;
-        }
-        if (existing.category_en !== item.category_en) {
-          existing.category_en = item.category_en;
-          changed = true;
-        }
-        if (changed) {
-          await this.interestRepository.save(existing);
-        }
       }
     }
   }
 
-  formatInterest(interest: Interest, lang?: SupportedLanguage): FormattedInterest {
+  formatInterest(
+    interest: Interest,
+    lang?: SupportedLanguage,
+  ): FormattedInterest {
     const currentLang = lang || this.i18n.getCurrentLanguage();
     return {
       id: interest.id,
       displayName:
         currentLang === 'en'
-          ? (interest.name_en || interest.name)
-          : (interest.name_ar || interest.name),
+          ? interest.name_en || interest.name
+          : interest.name_ar || interest.name,
       name_ar: interest.name_ar || interest.name,
       name_en: interest.name_en || interest.name,
       category:
         currentLang === 'en'
-          ? (interest.category_en || interest.category)
-          : (interest.category_ar || interest.category),
+          ? interest.category_en || interest.category
+          : interest.category_ar || interest.category,
       category_ar: interest.category_ar || interest.category,
       category_en: interest.category_en || 'Books',
     };
   }
 
-  resolveInterest(input: string, allInterests: Interest[]): Interest | undefined {
+  resolveInterest(
+    input: string,
+    allInterests: Interest[],
+  ): Interest | undefined {
     if (!input || !input.trim()) return undefined;
     const q = input.trim().toLowerCase();
     const normalizeAr = (s: string) =>
@@ -292,7 +595,9 @@ export class InterestsService implements OnModuleInit {
     return data.map((interest) => this.formatInterest(interest, currentLang));
   }
 
-  async getArticleCategories(lang?: SupportedLanguage): Promise<FormattedInterest[]> {
+  async getArticleCategories(
+    lang?: SupportedLanguage,
+  ): Promise<FormattedInterest[]> {
     const list = await this.findAll({ category: 'articles', lang });
     const order = [
       'احداث حالية',
@@ -359,7 +664,10 @@ export class InterestsService implements OnModuleInit {
         this.i18n.t('categories.not_found') || 'الفئة المحددة غير موجودة',
       );
     }
-    const user = await this.userRepository.findOne({ where: { id: userId }, select: { id: true } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: { id: true },
+    });
     if (!user) throw new NotFoundException(this.i18n.t('auth.user_not_found'));
     await this.userRepository.manager.query(
       'INSERT INTO user_interests (user_id, interest_id) VALUES ($1, $2) ON CONFLICT (user_id, interest_id) DO NOTHING',
@@ -368,13 +676,15 @@ export class InterestsService implements OnModuleInit {
     const formatted = this.formatInterest(matched);
     return {
       success: true,
-      message:
-        this.i18n.t('categories.saved') || 'تم حفظ الفئة بنجاح',
+      message: this.i18n.t('categories.saved') || 'تم حفظ الفئة بنجاح',
       data: formatted,
     };
   }
 
-  async getUserInterests(userId: string, lang?: SupportedLanguage): Promise<FormattedInterest[]> {
+  async getUserInterests(
+    userId: string,
+    lang?: SupportedLanguage,
+  ): Promise<FormattedInterest[]> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: { interests: true },
@@ -385,7 +695,9 @@ export class InterestsService implements OnModuleInit {
     }
 
     const currentLang = lang || this.i18n.getCurrentLanguage();
-    return (user.interests ?? []).map((interest) => this.formatInterest(interest, currentLang));
+    return (user.interests ?? []).map((interest) =>
+      this.formatInterest(interest, currentLang),
+    );
   }
 
   async saveUserInterests(
@@ -412,11 +724,12 @@ export class InterestsService implements OnModuleInit {
     }
 
     const currentLang = this.i18n.getCurrentLanguage();
-    const rawInputs = (dto.data && dto.data.length > 0)
-      ? dto.data
-      : (dto.interestIds && dto.interestIds.length > 0)
-        ? dto.interestIds
-        : dto.interestNames;
+    const rawInputs =
+      dto.data && dto.data.length > 0
+        ? dto.data
+        : dto.interestIds && dto.interestIds.length > 0
+          ? dto.interestIds
+          : dto.interestNames;
 
     if (!rawInputs || rawInputs.length === 0) {
       throw new BadRequestException(this.i18n.t('interests.empty_selection'));
@@ -455,16 +768,24 @@ export class InterestsService implements OnModuleInit {
       finalInterests = targetInterests;
 
       const books = finalInterests.filter(
-        (i) => (i.category_ar || i.category) === 'الكتب' || (i.category_en || '').toLowerCase() === 'books',
+        (i) =>
+          (i.category_ar || i.category) === 'الكتب' ||
+          (i.category_en || '').toLowerCase() === 'books',
       );
       const visuals = finalInterests.filter(
-        (i) => (i.category_ar || i.category) === 'المرئيات' || (i.category_en || '').toLowerCase() === 'visuals',
+        (i) =>
+          (i.category_ar || i.category) === 'المرئيات' ||
+          (i.category_en || '').toLowerCase() === 'visuals',
       );
       const articles = finalInterests.filter(
-        (i) => (i.category_ar || i.category) === 'المقالات' || (i.category_en || '').toLowerCase() === 'articles',
+        (i) =>
+          (i.category_ar || i.category) === 'المقالات' ||
+          (i.category_en || '').toLowerCase() === 'articles',
       );
       const snippets = finalInterests.filter(
-        (i) => (i.category_ar || i.category) === 'المقتطفات' || (i.category_en || '').toLowerCase() === 'snippets',
+        (i) =>
+          (i.category_ar || i.category) === 'المقتطفات' ||
+          (i.category_en || '').toLowerCase() === 'snippets',
       );
 
       if (books.length < 3) {
@@ -526,16 +847,24 @@ export class InterestsService implements OnModuleInit {
     await this.userRepository.save(user);
 
     const books = finalInterests.filter(
-      (i) => (i.category_ar || i.category) === 'الكتب' || (i.category_en || '').toLowerCase() === 'books',
+      (i) =>
+        (i.category_ar || i.category) === 'الكتب' ||
+        (i.category_en || '').toLowerCase() === 'books',
     );
     const visuals = finalInterests.filter(
-      (i) => (i.category_ar || i.category) === 'المرئيات' || (i.category_en || '').toLowerCase() === 'visuals',
+      (i) =>
+        (i.category_ar || i.category) === 'المرئيات' ||
+        (i.category_en || '').toLowerCase() === 'visuals',
     );
     const articles = finalInterests.filter(
-      (i) => (i.category_ar || i.category) === 'المقالات' || (i.category_en || '').toLowerCase() === 'articles',
+      (i) =>
+        (i.category_ar || i.category) === 'المقالات' ||
+        (i.category_en || '').toLowerCase() === 'articles',
     );
     const snippets = finalInterests.filter(
-      (i) => (i.category_ar || i.category) === 'المقتطفات' || (i.category_en || '').toLowerCase() === 'snippets',
+      (i) =>
+        (i.category_ar || i.category) === 'المقتطفات' ||
+        (i.category_en || '').toLowerCase() === 'snippets',
     );
 
     return {
@@ -547,11 +876,16 @@ export class InterestsService implements OnModuleInit {
         articles: articles.length,
         snippets: snippets.length,
       },
-      interests: (user.interests ?? []).map((i) => this.formatInterest(i, currentLang)),
+      interests: (user.interests ?? []).map((i) =>
+        this.formatInterest(i, currentLang),
+      ),
     };
   }
 
-  async removeUserInterest(userId: string, interestIdOrName: string): Promise<{
+  async removeUserInterest(
+    userId: string,
+    interestIdOrName: string,
+  ): Promise<{
     message: string;
     interestsCount: number;
     interests: FormattedInterest[];
@@ -575,16 +909,23 @@ export class InterestsService implements OnModuleInit {
     const currentLang = this.i18n.getCurrentLanguage();
     const isArabic = currentLang === 'ar';
     return {
-      message: isArabic ? 'تم حذف الاهتمام بنجاح' : 'Interest removed successfully',
+      message: isArabic
+        ? 'تم حذف الاهتمام بنجاح'
+        : 'Interest removed successfully',
       interestsCount: user.interests.length,
-      interests: (user.interests || []).map((i) => this.formatInterest(i, currentLang)),
+      interests: (user.interests || []).map((i) =>
+        this.formatInterest(i, currentLang),
+      ),
     };
   }
 
   async create(dto: CreateInterestDto): Promise<Interest> {
     const normalizedName = dto.name.trim();
     const existing = await this.interestRepository.findOne({
-      where: { name: normalizedName, category: dto.category?.trim() || 'الكتب' },
+      where: {
+        name: normalizedName,
+        category: dto.category?.trim() || 'الكتب',
+      },
     });
 
     if (existing) {

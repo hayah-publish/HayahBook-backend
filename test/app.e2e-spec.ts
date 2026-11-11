@@ -1,20 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, VersioningType, VERSION_NEUTRAL } from '@nestjs/common';
+import {
+  INestApplication,
+  VersioningType,
+  VERSION_NEUTRAL,
+} from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
 import { UsersService } from './../src/users/users.service';
 import { User } from './../src/users/user.entity';
 import { UserBook } from './../src/books/user-book.entity';
 import { Book } from './../src/books/book.entity';
 import { EmailOtp } from './../src/auth/otp.entity';
+import { AppModule } from './../src/app.module';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
+  const createdTestUserIds = new Set<string>();
 
   beforeAll(async () => {
+    const e2eDatabaseUrl = process.env.E2E_DATABASE_URL;
+    const e2eDatabaseName = e2eDatabaseUrl
+      ? new URL(e2eDatabaseUrl).pathname.toLowerCase()
+      : '';
+    if (!e2eDatabaseUrl || !/(test|e2e)/.test(e2eDatabaseName)) {
+      throw new Error(
+        'E2E_DATABASE_URL must point to a dedicated disposable database whose name includes test or e2e',
+      );
+    }
+    process.env.NODE_ENV = 'test';
+    process.env.DATABASE_URL = e2eDatabaseUrl;
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -25,18 +42,33 @@ describe('AppController (e2e)', () => {
       defaultVersion: ['1', VERSION_NEUTRAL],
     });
     await app.init();
+
+    const usersService = app.get(UsersService);
+    for (const methodName of [
+      'createUser',
+      'createUserWithPassword',
+    ] as const) {
+      const original = usersService[methodName].bind(usersService);
+      (usersService as any)[methodName] = async (...args: any[]) => {
+        const user = await (original as (...a: any[]) => Promise<User>)(
+          ...args,
+        );
+        createdTestUserIds.add(user.id);
+        return user;
+      };
+    }
   });
 
   afterAll(async () => {
+    if (!app) return;
     try {
-      const userRepo = app.get(getRepositoryToken(User));
-      await userRepo
-        .createQueryBuilder()
-        .delete()
-        .where('email LIKE :pat', { pat: '%@example.com' })
-        .execute();
-    } catch {}
-    await app.close();
+      if (createdTestUserIds.size > 0) {
+        const userRepo = app.get(getRepositoryToken(User));
+        await userRepo.delete([...createdTestUserIds]);
+      }
+    } finally {
+      await app.close();
+    }
   });
 
   it('/ (GET) returns Hello World with version and platform headers', async () => {
@@ -95,7 +127,9 @@ describe('AppController (e2e)', () => {
         })
         .expect(400);
 
-      expect(res.body.message).toEqual(['الاسم يجب أن يحتوي على أحرف فقط (بدون أرقام أو رموز)']);
+      expect(res.body.message).toEqual([
+        'الاسم يجب أن يحتوي على أحرف فقط (بدون أرقام أو رموز)',
+      ]);
     });
 
     it('Step 1d (Name letters only): name with symbols returns letters-only error', async () => {
@@ -112,7 +146,9 @@ describe('AppController (e2e)', () => {
         })
         .expect(400);
 
-      expect(res.body.message).toEqual(['الاسم يجب أن يحتوي على أحرف فقط (بدون أرقام أو رموز)']);
+      expect(res.body.message).toEqual([
+        'الاسم يجب أن يحتوي على أحرف فقط (بدون أرقام أو رموز)',
+      ]);
     });
 
     it('Step 2 (Email): name provided returns ONLY email required', async () => {
@@ -142,7 +178,9 @@ describe('AppController (e2e)', () => {
         .send({ name: 'محمد خالد', email: 'a@b.c' })
         .expect(400);
 
-      expect(res.body.message).toEqual(['البريد الإلكتروني يجب ألا يقل عن 6 أحرف']);
+      expect(res.body.message).toEqual([
+        'البريد الإلكتروني يجب ألا يقل عن 6 أحرف',
+      ]);
     });
 
     it('Step 2d (Email 6 chars): 6-char email passes and moves to next step', async () => {
@@ -258,7 +296,9 @@ describe('AppController (e2e)', () => {
         })
         .expect(400);
 
-      expect(res.body.message).toEqual(['يجب الموافقة على شروط الاستخدام وسياسة الخصوصية']);
+      expect(res.body.message).toEqual([
+        'يجب الموافقة على شروط الاستخدام وسياسة الخصوصية',
+      ]);
     });
 
     it('English locale: empty body returns ONLY "Name is required"', async () => {
@@ -288,7 +328,8 @@ describe('AppController (e2e)', () => {
         await usersService.markEmailVerified(existingVerified.id);
       }
 
-      const existingUnverified = await usersService.findByEmail(unverifiedEmail);
+      const existingUnverified =
+        await usersService.findByEmail(unverifiedEmail);
       if (!existingUnverified) {
         await usersService.createUser(unverifiedEmail);
       }
@@ -576,7 +617,8 @@ describe('AppController (e2e)', () => {
       // Seed an OTP record for reset_password
       const { ConfigService } = await import('@nestjs/config');
       const configService = app.get(ConfigService);
-      const pepper = configService.get<string>('JWT_SECRET') ?? 'hayahbook_otp_pepper';
+      const pepper =
+        configService.get<string>('JWT_SECRET') ?? 'hayahbook_otp_pepper';
       const { createHash } = await import('crypto');
       resetCode = '123456';
       const codeHash = createHash('sha256')
@@ -631,7 +673,9 @@ describe('AppController (e2e)', () => {
         })
         .expect(400);
 
-      expect(res.body.message).toBe('كلمة المرور وتأكيد كلمة المرور غير متطابقين');
+      expect(res.body.message).toBe(
+        'كلمة المرور وتأكيد كلمة المرور غير متطابقين',
+      );
     });
 
     it('Step 2 (Screen 2): reset password with resetToken succeeds and updates password', async () => {
@@ -802,48 +846,88 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /v1/interests/me fails if < 3 selected from Books section', async () => {
-      const books = allInterests.filter((i) => i.category_ar === 'الكتب').slice(0, 2);
-      const visuals = allInterests.filter((i) => i.category_ar === 'المرئيات').slice(0, 3);
-      const articles = allInterests.filter((i) => i.category_ar === 'المقالات').slice(0, 3);
-      const snippets = allInterests.filter((i) => i.category_ar === 'المقتطفات').slice(0, 3);
+      const books = allInterests
+        .filter((i) => i.category_ar === 'الكتب')
+        .slice(0, 2);
+      const visuals = allInterests
+        .filter((i) => i.category_ar === 'المرئيات')
+        .slice(0, 3);
+      const articles = allInterests
+        .filter((i) => i.category_ar === 'المقالات')
+        .slice(0, 3);
+      const snippets = allInterests
+        .filter((i) => i.category_ar === 'المقتطفات')
+        .slice(0, 3);
 
       const res = await request(app.getHttpServer())
         .post('/v1/interests/me')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
-        .send({ interestIds: [...books, ...visuals, ...articles, ...snippets].map((i) => i.id) })
+        .send({
+          interestIds: [...books, ...visuals, ...articles, ...snippets].map(
+            (i) => i.id,
+          ),
+        })
         .expect(400);
 
-      expect(res.body.message).toBe('يجب اختيار 3 اهتمامات على الأقل من قسم الكتب');
+      expect(res.body.message).toBe(
+        'يجب اختيار 3 اهتمامات على الأقل من قسم الكتب',
+      );
     });
 
     it('POST /v1/interests/me fails if < 3 selected from Visuals section (en)', async () => {
-      const books = allInterests.filter((i) => i.category_ar === 'الكتب').slice(0, 3);
-      const visuals = allInterests.filter((i) => i.category_ar === 'المرئيات').slice(0, 2);
-      const articles = allInterests.filter((i) => i.category_ar === 'المقالات').slice(0, 3);
-      const snippets = allInterests.filter((i) => i.category_ar === 'المقتطفات').slice(0, 3);
+      const books = allInterests
+        .filter((i) => i.category_ar === 'الكتب')
+        .slice(0, 3);
+      const visuals = allInterests
+        .filter((i) => i.category_ar === 'المرئيات')
+        .slice(0, 2);
+      const articles = allInterests
+        .filter((i) => i.category_ar === 'المقالات')
+        .slice(0, 3);
+      const snippets = allInterests
+        .filter((i) => i.category_ar === 'المقتطفات')
+        .slice(0, 3);
 
       const res = await request(app.getHttpServer())
         .post('/v1/interests/me')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'en')
-        .send({ interestIds: [...books, ...visuals, ...articles, ...snippets].map((i) => i.id) })
+        .send({
+          interestIds: [...books, ...visuals, ...articles, ...snippets].map(
+            (i) => i.id,
+          ),
+        })
         .expect(400);
 
-      expect(res.body.message).toBe('You must select at least 3 interests from Visuals section');
+      expect(res.body.message).toBe(
+        'You must select at least 3 interests from Visuals section',
+      );
     });
 
     it('POST /v1/interests/me succeeds when 3 or more selected from each of the 4 sections', async () => {
-      const books = allInterests.filter((i) => i.category_ar === 'الكتب').slice(0, 3);
-      const visuals = allInterests.filter((i) => i.category_ar === 'المرئيات').slice(0, 3);
-      const articles = allInterests.filter((i) => i.category_ar === 'المقالات').slice(0, 3);
-      const snippets = allInterests.filter((i) => i.category_ar === 'المقتطفات').slice(0, 3);
+      const books = allInterests
+        .filter((i) => i.category_ar === 'الكتب')
+        .slice(0, 3);
+      const visuals = allInterests
+        .filter((i) => i.category_ar === 'المرئيات')
+        .slice(0, 3);
+      const articles = allInterests
+        .filter((i) => i.category_ar === 'المقالات')
+        .slice(0, 3);
+      const snippets = allInterests
+        .filter((i) => i.category_ar === 'المقتطفات')
+        .slice(0, 3);
 
       const res = await request(app.getHttpServer())
         .post('/v1/interests/me')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
-        .send({ interestIds: [...books, ...visuals, ...articles, ...snippets].map((i) => i.id) })
+        .send({
+          interestIds: [...books, ...visuals, ...articles, ...snippets].map(
+            (i) => i.id,
+          ),
+        })
         .expect(200);
 
       expect(res.body.interestsCount).toBe(12);
@@ -857,7 +941,9 @@ describe('AppController (e2e)', () => {
 
     it('POST /v1/interests/me allows adding 1 or 2 interests later once user already selected interests before', async () => {
       // Pick a 4th book interest that was not in the initial 12
-      const fourthBook = allInterests.filter((i) => i.category_ar === 'الكتب')[3];
+      const fourthBook = allInterests.filter(
+        (i) => i.category_ar === 'الكتب',
+      )[3];
 
       const res = await request(app.getHttpServer())
         .post('/v1/interests/me')
@@ -872,7 +958,9 @@ describe('AppController (e2e)', () => {
     });
 
     it('DELETE /v1/interests/me/:interestId removes an interest from user interests', async () => {
-      const fourthBook = allInterests.filter((i) => i.category_ar === 'الكتب')[3];
+      const fourthBook = allInterests.filter(
+        (i) => i.category_ar === 'الكتب',
+      )[3];
 
       const res = await request(app.getHttpServer())
         .delete(`/v1/interests/me/${fourthBook.id}`)
@@ -894,7 +982,9 @@ describe('AppController (e2e)', () => {
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(245);
 
-      const egypt = res.body.find((c: { name_en: string }) => c.name_en === 'Egypt');
+      const egypt = res.body.find(
+        (c: { name_en: string }) => c.name_en === 'Egypt',
+      );
       expect(egypt).toBeDefined();
       expect(egypt.id).toBeDefined();
       expect(egypt.displayName).toBe('مصر');
@@ -912,7 +1002,9 @@ describe('AppController (e2e)', () => {
         .set('Accept-Language', 'en')
         .expect(200);
 
-      const egypt = res.body.find((c: { name_en: string }) => c.name_en === 'Egypt');
+      const egypt = res.body.find(
+        (c: { name_en: string }) => c.name_en === 'Egypt',
+      );
       expect(egypt.displayName).toBe('Egypt');
     });
 
@@ -1004,7 +1096,14 @@ describe('AppController (e2e)', () => {
         .post('/v1/authors/follow/batch')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
-        .send({ authorIds: [seededAuthors[0].id, seededAuthors[1].id, seededAuthors[2].id, seededAuthors[3].id] })
+        .send({
+          authorIds: [
+            seededAuthors[0].id,
+            seededAuthors[1].id,
+            seededAuthors[2].id,
+            seededAuthors[3].id,
+          ],
+        })
         .expect(400);
 
       expect(res.body.message).toBe('اختر (5) على الأقل للمتابعة');
@@ -1018,7 +1117,9 @@ describe('AppController (e2e)', () => {
         .send({ authorIds: [seededAuthors[0].id] })
         .expect(400);
 
-      expect(res.body.message).toBe('Please select at least 5 authors to follow');
+      expect(res.body.message).toBe(
+        'Please select at least 5 authors to follow',
+      );
     });
 
     it('POST /v1/authors/follow/batch succeeds when selecting 5 authors and sets authorsSelected = true', async () => {
@@ -1125,7 +1226,9 @@ describe('AppController (e2e)', () => {
         if (currentMatch !== nextMatch) {
           expect(currentMatch).toBeGreaterThan(nextMatch);
         } else {
-          expect(current.followersCount).toBeGreaterThanOrEqual(next.followersCount);
+          expect(current.followersCount).toBeGreaterThanOrEqual(
+            next.followersCount,
+          );
         }
       }
     });
@@ -1201,7 +1304,14 @@ describe('AppController (e2e)', () => {
         .post('/v1/creators/follow/batch')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
-        .send({ creatorIds: [seededCreators[0].id, seededCreators[1].id, seededCreators[2].id, seededCreators[3].id] })
+        .send({
+          creatorIds: [
+            seededCreators[0].id,
+            seededCreators[1].id,
+            seededCreators[2].id,
+            seededCreators[3].id,
+          ],
+        })
         .expect(400);
 
       expect(res.body.message).toBe('اختر (5) على الأقل للمتابعة');
@@ -1215,7 +1325,9 @@ describe('AppController (e2e)', () => {
         .send({ creatorIds: [seededCreators[0].id] })
         .expect(400);
 
-      expect(res.body.message).toBe('Please select at least 5 creators to follow');
+      expect(res.body.message).toBe(
+        'Please select at least 5 creators to follow',
+      );
     });
 
     it('POST /v1/creators/follow/batch succeeds when selecting 5 creators and sets creatorsSelected = true', async () => {
@@ -1318,7 +1430,9 @@ describe('AppController (e2e)', () => {
         if (currentMatch !== nextMatch) {
           expect(currentMatch).toBeGreaterThan(nextMatch);
         } else {
-          expect(current.followersCount).toBeGreaterThanOrEqual(next.followersCount);
+          expect(current.followersCount).toBeGreaterThanOrEqual(
+            next.followersCount,
+          );
         }
       }
     });
@@ -1482,9 +1596,7 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /v1/upload/avatar fails with 401 when unauthenticated', async () => {
-      await request(app.getHttpServer())
-        .post('/v1/upload/avatar')
-        .expect(401);
+      await request(app.getHttpServer()).post('/v1/upload/avatar').expect(401);
     });
 
     it('POST /v1/upload/avatar fails with 400 when no file is uploaded (ar)', async () => {
@@ -1508,7 +1620,9 @@ describe('AppController (e2e)', () => {
         })
         .expect(400);
 
-      expect(res.body.message).toBe('Unsupported file type. Allowed types: JPG, PNG, WEBP, HEIC');
+      expect(res.body.message).toBe(
+        'Unsupported file type. Allowed types: JPG, PNG, WEBP, HEIC',
+      );
     });
 
     it('POST /v1/upload/avatar rejects animated GIF and non-mobile image formats (ar)', async () => {
@@ -1524,7 +1638,9 @@ describe('AppController (e2e)', () => {
         })
         .expect(400);
 
-      expect(res.body.message).toBe('نوع الملف غير مدعوم. الأنواع المسموحة: JPG, PNG, WEBP, HEIC');
+      expect(res.body.message).toBe(
+        'نوع الملف غير مدعوم. الأنواع المسموحة: JPG, PNG, WEBP, HEIC',
+      );
     });
 
     it('POST /v1/upload/avatar returns 413 with localized Arabic message when file exceeds Multer limit (ar)', async () => {
@@ -1565,7 +1681,9 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /v1/upload/avatar successfully uploads JPG image to Cloudflare R2', async () => {
-      const fakeJpegBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
+      const fakeJpegBuffer = Buffer.from([
+        0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46,
+      ]);
 
       const res = await request(app.getHttpServer())
         .post('/v1/upload/avatar')
@@ -1578,12 +1696,16 @@ describe('AppController (e2e)', () => {
         .expect(200);
 
       expect(res.body.message).toBe('تم رفع الصورة الشخصية بنجاح');
-      expect(res.body.profileUrl).toContain('https://cdn.hayahbook.com/avatars/');
+      expect(res.body.profileUrl).toContain(
+        'https://cdn.hayahbook.com/avatars/',
+      );
       expect(res.body.profileUrl).toContain('.jpg');
     });
 
     it('POST /v1/auth/avatar alias endpoint also uploads and updates profile successfully', async () => {
-      const fakePngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+      const fakePngBuffer = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ]);
 
       const res = await request(app.getHttpServer())
         .post('/v1/auth/avatar')
@@ -1596,7 +1718,9 @@ describe('AppController (e2e)', () => {
         .expect(200);
 
       expect(res.body.message).toBe('Profile photo uploaded successfully');
-      expect(res.body.profileUrl).toContain('https://cdn.hayahbook.com/avatars/');
+      expect(res.body.profileUrl).toContain(
+        'https://cdn.hayahbook.com/avatars/',
+      );
       expect(res.body.profileUrl).toContain('.png');
     });
   });
@@ -1608,16 +1732,25 @@ describe('AppController (e2e)', () => {
     beforeAll(async () => {
       const jwtService = app.get(JwtService);
       const usersService = app.get(UsersService);
-      const user = await usersService.findByEmail('hussein.mohamed.software@gmail.com');
-      authToken = jwtService.sign({ sub: user!.id, role: user!.role, tokenVersion: user!.tokenVersion });
+      const user = await usersService.findByEmail(
+        'hussein.mohamed.software@gmail.com',
+      );
+      authToken = jwtService.sign({
+        sub: user!.id,
+        role: user!.role,
+        tokenVersion: user!.tokenVersion,
+      });
 
       const userBookRepo = app.get(getRepositoryToken(UserBook));
       const bookRepo = app.get(getRepositoryToken(Book));
-      const existingCount = await userBookRepo.count({ where: { userId: user!.id } });
+      const existingCount = await userBookRepo.count({
+        where: { userId: user!.id },
+      });
       if (existingCount < 3) {
         const books = await bookRepo.find({ take: 5 });
         for (let i = 0; i < books.length; i++) {
-          const status = i === 0 ? 'reading' : i === 1 ? 'finished' : 'want_to_read';
+          const status =
+            i === 0 ? 'reading' : i === 1 ? 'finished' : 'want_to_read';
           await userBookRepo.save({
             userId: user!.id,
             bookId: books[i].id,
@@ -1630,9 +1763,7 @@ describe('AppController (e2e)', () => {
     });
 
     it('GET /v1/books/my-books fails with 401 when unauthenticated', async () => {
-      await request(app.getHttpServer())
-        .get('/v1/books/my-books')
-        .expect(401);
+      await request(app.getHttpServer()).get('/v1/books/my-books').expect(401);
     });
 
     it('GET /v1/books/my-books returns authenticated user reading list with type and format flags', async () => {
@@ -1677,7 +1808,9 @@ describe('AppController (e2e)', () => {
       if (bothItem) {
         expect(bothItem.hasEbook).toBe(true);
         expect(bothItem.hasAudio).toBe(true);
-        expect(bothItem.availableFormats).toEqual(expect.arrayContaining(['ebook', 'audiobook']));
+        expect(bothItem.availableFormats).toEqual(
+          expect.arrayContaining(['ebook', 'audiobook']),
+        );
       }
     });
 
@@ -1748,7 +1881,9 @@ describe('AppController (e2e)', () => {
         .set('Accept-Language', 'en')
         .expect(200);
 
-      expect(res.body.message).toBe('Book removed from reading list successfully');
+      expect(res.body.message).toBe(
+        'Book removed from reading list successfully',
+      );
     });
   });
 
@@ -1761,11 +1896,19 @@ describe('AppController (e2e)', () => {
     beforeAll(async () => {
       const jwtService = app.get(JwtService);
       const usersService = app.get(UsersService);
-      const user = await usersService.findByEmail('hussein.mohamed.software@gmail.com');
+      const user = await usersService.findByEmail(
+        'hussein.mohamed.software@gmail.com',
+      );
       userId = user!.id;
-      authToken = jwtService.sign({ sub: user!.id, role: user!.role, tokenVersion: user!.tokenVersion });
+      authToken = jwtService.sign({
+        sub: user!.id,
+        role: user!.role,
+        tokenVersion: user!.tokenVersion,
+      });
 
-      const booksRes = await request(app.getHttpServer()).get('/v1/books?limit=1');
+      const booksRes = await request(app.getHttpServer()).get(
+        '/v1/books?limit=1',
+      );
       testBookId = booksRes.body.data[0]?.id;
     });
 
@@ -1795,7 +1938,9 @@ describe('AppController (e2e)', () => {
       expect(res.body.message).toBe('تم نشر المنشور بنجاح');
       expect(res.body.data.content).toBe('منشور مع فيديو مرفوع مباشرة إلى R2');
       expect(res.body.data.videoUrl).toBeDefined();
-      expect(res.body.data.videoUrl).toContain('https://cdn.hayahbook.com/posts/videos/');
+      expect(res.body.data.videoUrl).toContain(
+        'https://cdn.hayahbook.com/posts/videos/',
+      );
       expect(res.body.data.videoUrl).toContain('.mp4');
 
       // Cleanup post and its video from R2
@@ -1822,7 +1967,9 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /v1/posts creates a post and uploads image directly to R2 in a single atomic request', async () => {
-      const fakeJpegBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
+      const fakeJpegBuffer = Buffer.from([
+        0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46,
+      ]);
       const res = await request(app.getHttpServer())
         .post('/v1/posts')
         .set('Authorization', `Bearer ${authToken}`)
@@ -1838,7 +1985,9 @@ describe('AppController (e2e)', () => {
       expect(res.body.data.content).toBe('منشور مع صورة مرفوعة مباشرة إلى R2');
       expect(Array.isArray(res.body.data.images)).toBe(true);
       expect(res.body.data.images.length).toBe(1);
-      expect(res.body.data.images[0]).toContain('https://cdn.hayahbook.com/posts/images/');
+      expect(res.body.data.images[0]).toContain(
+        'https://cdn.hayahbook.com/posts/images/',
+      );
 
       // Cleanup
       await request(app.getHttpServer())
@@ -1869,7 +2018,9 @@ describe('AppController (e2e)', () => {
         .expect(201);
 
       expect(res.body.message).toBe('تم نشر المنشور بنجاح');
-      expect(res.body.data.content).toBe('منشور بسيط بنص فقط بدون أي وسائط أو مرفقات');
+      expect(res.body.data.content).toBe(
+        'منشور بسيط بنص فقط بدون أي وسائط أو مرفقات',
+      );
       expect(res.body.data.images).toEqual([]);
       expect(res.body.data.videoUrl).toBeNull();
       expect(res.body.data.link).toBeNull();
@@ -1889,12 +2040,15 @@ describe('AppController (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
         .send({
-          content: 'أهلاً بكم في حياة بوك، يمكنكم زيارة موقعنا https://hayahbook.com ومتابعتنا!',
+          content:
+            'أهلاً بكم في حياة بوك، يمكنكم زيارة موقعنا https://hayahbook.com ومتابعتنا!',
         })
         .expect(201);
 
       expect(res.body.message).toBe('تم نشر المنشور بنجاح');
-      expect(res.body.data.content).toBe('أهلاً بكم في حياة بوك، يمكنكم زيارة موقعنا https://hayahbook.com ومتابعتنا!');
+      expect(res.body.data.content).toBe(
+        'أهلاً بكم في حياة بوك، يمكنكم زيارة موقعنا https://hayahbook.com ومتابعتنا!',
+      );
       expect(res.body.data.link).toEqual({
         url: 'https://hayahbook.com',
         title: 'hayahbook.com',
@@ -1913,7 +2067,8 @@ describe('AppController (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .set('Accept-Language', 'ar')
         .send({
-          content: 'يمكنك القراءة مجاناً عبر [موقع حياة بوك](https://hayahbook.com/read)',
+          content:
+            'يمكنك القراءة مجاناً عبر [موقع حياة بوك](https://hayahbook.com/read)',
         })
         .expect(201);
 
@@ -1951,8 +2106,12 @@ describe('AppController (e2e)', () => {
       expect(res.body.message).toBe('تم نشر المنشور بنجاح');
       expect(res.body.data).toHaveProperty('id');
       createdPostId = res.body.data.id;
-      expect(res.body.data.content).toBe('تجربة منشور جديد مع كتاب ورابط وصورة');
-      expect(res.body.data.images).toEqual(['https://cdn.hayahbook.com/posts/images/sample.jpg']);
+      expect(res.body.data.content).toBe(
+        'تجربة منشور جديد مع كتاب ورابط وصورة',
+      );
+      expect(res.body.data.images).toEqual([
+        'https://cdn.hayahbook.com/posts/images/sample.jpg',
+      ]);
       expect(res.body.data.link.url).toBe('https://hayahbook.com');
       expect(res.body.data.book).not.toBeNull();
       expect(res.body.data.book.id).toBe(testBookId);
@@ -1999,8 +2158,14 @@ describe('AppController (e2e)', () => {
     beforeAll(async () => {
       const jwtService = app.get(JwtService);
       const usersService = app.get(UsersService);
-      const user = await usersService.findByEmail('hussein.mohamed.software@gmail.com');
-      authToken = jwtService.sign({ sub: user!.id, role: user!.role, tokenVersion: user!.tokenVersion });
+      const user = await usersService.findByEmail(
+        'hussein.mohamed.software@gmail.com',
+      );
+      authToken = jwtService.sign({
+        sub: user!.id,
+        role: user!.role,
+        tokenVersion: user!.tokenVersion,
+      });
     });
 
     it('POST /v1/articles creates article when all mandatory fields are provided', async () => {
@@ -2011,7 +2176,8 @@ describe('AppController (e2e)', () => {
         .send({
           agreeToTerms: true,
           title: 'قوة العادات وكيف تغير حياتك',
-          content: 'هذا مقال شامل يشرح بناء العادات اليومية وأثرها على الإنتاجية الشخصية.',
+          content:
+            'هذا مقال شامل يشرح بناء العادات اليومية وأثرها على الإنتاجية الشخصية.',
           category: 'تطوير الذات',
           coverImageUrl: 'https://cdn.hayahbook.com/articles/covers/sample.jpg',
         })
@@ -2021,7 +2187,9 @@ describe('AppController (e2e)', () => {
       expect(res.body.data).toBeDefined();
       expect(res.body.data.type).toBe('article');
       expect(res.body.data.title).toBe('قوة العادات وكيف تغير حياتك');
-      expect(res.body.data.coverImageUrl).toBe('https://cdn.hayahbook.com/articles/covers/sample.jpg');
+      expect(res.body.data.coverImageUrl).toBe(
+        'https://cdn.hayahbook.com/articles/covers/sample.jpg',
+      );
       expect(res.body.data.category).toBe('تطوير الذات');
       expect(res.body.data.content).toContain('هذا مقال شامل');
       createdArticleId = res.body.data.id;
@@ -2041,7 +2209,9 @@ describe('AppController (e2e)', () => {
         })
         .expect(400);
 
-      expect(res.body.message).toContain('يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook');
+      expect(res.body.message).toContain(
+        'يجب الموافقة على الشروط والخصوصية لمجتمع Hayahbook',
+      );
     });
 
     it('POST /v1/articles fails with 400 when title is missing', async () => {

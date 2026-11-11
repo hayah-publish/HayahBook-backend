@@ -18,7 +18,6 @@ import { UpdateAudiobookDto } from './dto/update-audiobook.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
 import { I18nService } from '../i18n/i18n.service';
-
 @Controller('audiobooks')
 export class AudiobooksController {
   constructor(
@@ -85,13 +84,11 @@ export class AudiobooksController {
   ): Promise<Audiobook> {
     return this.booksService.findOneAudiobook(id);
   }
-
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   create(@Body() dto: CreateAudiobookDto): Promise<Audiobook> {
     return this.booksService.createAudiobook(dto);
   }
-
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id')
   update(
@@ -100,7 +97,6 @@ export class AudiobooksController {
   ): Promise<Audiobook> {
     return this.booksService.updateAudiobook(id, dto);
   }
-
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
   async remove(

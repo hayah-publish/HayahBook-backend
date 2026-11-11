@@ -59,6 +59,9 @@ export class User {
   @Column({ name: 'tokenversion', type: 'integer', default: 1 })
   tokenVersion: number;
 
+  @Column({ name: 'anonymous_number', type: 'integer', unique: true, nullable: true })
+  anonymousNumber: number | null;
+
   @Column({ type: 'varchar', length: 255, nullable: true, select: false })
   password: string | null;
 

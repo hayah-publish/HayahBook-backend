@@ -26,7 +26,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('authors')
 export class AuthorsController {
   constructor(
@@ -98,7 +97,7 @@ export class AuthorsController {
 
   /**
    * POST /v1/authors/:id/follow
-   * Follows a single author.
+   * Toggles following a single author on/off.
    */
   @UseGuards(JwtAuthGuard)
   @Post(':id/follow')
@@ -106,16 +105,34 @@ export class AuthorsController {
   async followAuthor(
     @Req() req: AuthenticatedRequest,
     @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body?: { follow?: boolean },
   ) {
-    const existing = await this.authorsService.findById(id, req.user!.userId);
-    if (existing.isFollowing) {
-      return {
-        isFollowing: true,
-        message: this.i18n.t('authors.already_followed'),
-        followersCount: existing.followersCount,
-      };
+    if (body?.follow !== undefined) {
+      const existing = await this.authorsService.findById(id, req.user!.userId);
+      if (existing.isFollowing === body.follow) {
+        return {
+          isFollowing: existing.isFollowing,
+          message: body.follow
+            ? this.i18n.t('authors.already_followed')
+            : this.i18n.t('authors.already_not_following'),
+          followersCount: existing.followersCount,
+          data: {
+            targetUserId: id,
+            isFollowing: existing.isFollowing,
+            followersCount: existing.followersCount,
+          },
+        };
+      }
     }
-    return this.authorsService.toggleFollow(req.user!.userId, id);
+    const result = await this.authorsService.toggleFollow(req.user!.userId, id);
+    return {
+      ...result,
+      data: {
+        targetUserId: id,
+        isFollowing: result.isFollowing,
+        followersCount: result.followersCount,
+      },
+    };
   }
 
   /**

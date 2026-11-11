@@ -18,8 +18,13 @@ describe('UploadService failure handling', () => {
   });
 
   it('keeps the current avatar if uploading the replacement fails', async () => {
-    usersRepository.findOne.mockResolvedValue({ id: 'user-1', profileUrl: null });
-    jest.spyOn(service, 'uploadFile').mockRejectedValue(new Error('R2 unavailable'));
+    usersRepository.findOne.mockResolvedValue({
+      id: 'user-1',
+      profileUrl: null,
+    });
+    jest
+      .spyOn(service, 'uploadFile')
+      .mockRejectedValue(new Error('R2 unavailable'));
     const deleteSpy = jest.spyOn(service, 'deleteFile');
     const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
@@ -40,7 +45,9 @@ describe('UploadService failure handling', () => {
       .spyOn(service, 'uploadFile')
       .mockResolvedValueOnce('https://cdn.hayahbook.com/posts/images/one.png')
       .mockRejectedValueOnce(new Error('R2 unavailable'));
-    const deleteSpy = jest.spyOn(service, 'deleteFileByUrl').mockResolvedValue();
+    const deleteSpy = jest
+      .spyOn(service, 'deleteFileByUrl')
+      .mockResolvedValue();
     const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     const files = [1, 2].map(() => ({
       mimetype: 'image/png',
@@ -72,9 +79,68 @@ describe('UploadService failure handling', () => {
 
   it('only extracts keys from the configured R2 public origin and app paths', () => {
     const extract = (url: string) => (service as any).extractKeyFromUrl(url);
-    expect(extract('https://evil-r2.example/posts/images/victim.png')).toBeNull();
-    expect(extract('https://cdn.hayahbook.com.evil.test/posts/images/victim.png')).toBeNull();
-    expect(extract('https://cdn.hayahbook.com/unrelated/victim.png')).toBeNull();
-    expect(extract('https://cdn.hayahbook.com/posts/images/victim.png')).toBe('posts/images/victim.png');
+    expect(
+      extract('https://evil-r2.example/posts/images/victim.png'),
+    ).toBeNull();
+    expect(
+      extract('https://cdn.hayahbook.com.evil.test/posts/images/victim.png'),
+    ).toBeNull();
+    expect(
+      extract('https://cdn.hayahbook.com/unrelated/victim.png'),
+    ).toBeNull();
+    expect(extract('https://cdn.hayahbook.com/posts/images/victim.png')).toBe(
+      'posts/images/victim.png',
+    );
+  });
+});
+
+describe('UploadService comment image URL deletion', () => {
+  it('recognizes comment image keys on the configured public origin', async () => {
+    const service = new UploadService(
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+    );
+    const remove = jest
+      .spyOn(service, 'deleteFile')
+      .mockResolvedValue(undefined);
+    await service.deleteFileByUrl(
+      'https://cdn.hayahbook.com/comments/images/user_image.jpg',
+    );
+    expect(remove).toHaveBeenCalledWith('comments/images/user_image.jpg');
+  });
+
+  it('does not delete external URLs', async () => {
+    const service = new UploadService(
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+    );
+    const remove = jest
+      .spyOn(service, 'deleteFile')
+      .mockResolvedValue(undefined);
+    await service.deleteFileByUrl(
+      'https://example.org/comments/images/user_image.jpg',
+    );
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('does not delete an object when expectedPrefix does not match', async () => {
+    const service = new UploadService(
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+    );
+    const remove = jest
+      .spyOn(service, 'deleteFile')
+      .mockResolvedValue(undefined);
+    await service.deleteFileByUrl(
+      'https://cdn.hayahbook.com/avatars/victim_123.jpg',
+      'avatars/attacker_',
+    );
+    expect(remove).not.toHaveBeenCalled();
   });
 });

@@ -28,7 +28,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller(['home', 'feed'])
 @UseGuards(JwtAuthGuard)
 export class HomeController {

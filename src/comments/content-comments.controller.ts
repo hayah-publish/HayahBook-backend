@@ -27,7 +27,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller(['content', 'posts', 'articles'])
 export class ContentCommentsController {
   constructor(private readonly commentsService: CommentsService) {}

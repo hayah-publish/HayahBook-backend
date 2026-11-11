@@ -18,7 +18,6 @@ import { SelectInterestsDto } from './dto/select-interests.dto';
 import { CreateInterestDto } from './dto/create-interest.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
-
 interface AuthenticatedRequest extends Request {
   user: {
     userId: string;
@@ -26,7 +25,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('interests')
 export class InterestsController {
   constructor(private readonly interestsService: InterestsService) {}
@@ -50,13 +48,11 @@ export class InterestsController {
   async getByCategory(@Param('category') category: string) {
     return this.interestsService.findAll({ category });
   }
-
   @UseGuards(JwtAuthGuard)
   @Get(['my-interests', 'me'])
   async getMyInterests(@Req() req: AuthenticatedRequest) {
     return this.interestsService.getUserInterests(req.user.userId);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post(['my-interests', 'me'])
   @HttpCode(HttpStatus.OK)
@@ -66,7 +62,6 @@ export class InterestsController {
   ) {
     return this.interestsService.saveUserInterests(req.user.userId, dto);
   }
-
   @UseGuards(JwtAuthGuard)
   @Delete(['my-interests/:interestId', 'me/:interestId'])
   @HttpCode(HttpStatus.OK)

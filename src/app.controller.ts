@@ -9,7 +9,6 @@ import { OptionalJwtAuthGuard } from './auth/optional-jwt-auth.guard';
 interface OptionalAuthenticatedRequest extends Request {
   user?: any;
 }
-
 @Controller()
 export class AppController {
   constructor(

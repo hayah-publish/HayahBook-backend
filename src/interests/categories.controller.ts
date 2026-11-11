@@ -13,7 +13,6 @@ import {
 import { Request } from 'express';
 import { InterestsService } from './interests.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-
 interface AuthenticatedRequest extends Request {
   user: {
     userId: string;
@@ -21,7 +20,6 @@ interface AuthenticatedRequest extends Request {
     role: string;
   };
 }
-
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly interestsService: InterestsService) {}

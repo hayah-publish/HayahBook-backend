@@ -55,7 +55,6 @@ interface AuthenticatedRequest extends Request {
 interface OptionalAuthenticatedRequest extends Request {
   user?: any;
 }
-
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -94,7 +93,6 @@ export class AuthController {
   async refresh(@Body() body: RefreshTokenDto) {
     return this.authService.refreshTokens(body.refreshToken);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post('otp/delete-account')
   @HttpCode(HttpStatus.OK)
@@ -104,7 +102,6 @@ export class AuthController {
   ) {
     return this.authService.requestDeleteAccountOtp(req.user.userId, body.channel);
   }
-
   @UseGuards(JwtAuthGuard)
   @Delete('account')
   @HttpCode(HttpStatus.OK)
@@ -114,14 +111,12 @@ export class AuthController {
   ) {
     return this.authService.deleteAccount(req.user.userId, body.code);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post('otp/change-password')
   @HttpCode(HttpStatus.OK)
   async requestChangePasswordOtp(@Req() req: AuthenticatedRequest) {
     return this.authService.requestChangePasswordOtp(req.user.userId);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
@@ -131,7 +126,6 @@ export class AuthController {
   ) {
     return this.authService.changePassword(req.user.userId, body);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post('otp/change-email')
   @HttpCode(HttpStatus.OK)
@@ -141,7 +135,6 @@ export class AuthController {
   ) {
     return this.authService.requestChangeEmailOtp(req.user.userId, body.newEmail);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post('change-email')
   @HttpCode(HttpStatus.OK)
@@ -151,7 +144,6 @@ export class AuthController {
   ) {
     return this.authService.changeEmail(req.user.userId, body);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post('otp/update-phone')
   @HttpCode(HttpStatus.OK)
@@ -159,7 +151,9 @@ export class AuthController {
     @Req() req: AuthenticatedRequest,
     @Body() body: RequestUpdatePhoneOtpDto,
   ) {
-    const countryCode = (body.countryCode ?? body.country_code)!;
+    const countryCode = (
+      body.countryCode?.trim() || body.country_code?.trim()
+    )!;
     return this.authService.requestUpdatePhoneOtp(
       req.user.userId,
       countryCode,
@@ -167,7 +161,6 @@ export class AuthController {
       body.channel,
     );
   }
-
   @UseGuards(JwtAuthGuard)
   @Patch('phone')
   @HttpCode(HttpStatus.OK)
@@ -177,7 +170,6 @@ export class AuthController {
   ) {
     return this.authService.updatePhone(req.user.userId, body);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post(['avatar', 'upload-avatar'])
   @HttpCode(HttpStatus.OK)
@@ -199,7 +191,6 @@ export class AuthController {
     }
     return this.uploadService.uploadAvatar(req.user.userId, file);
   }
-
   @UseGuards(JwtAuthGuard)
   @Patch('complete-profile')
   @HttpCode(HttpStatus.OK)
@@ -209,7 +200,6 @@ export class AuthController {
   ) {
     return this.authService.completeProfile(req.user.userId, body);
   }
-
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   @HttpCode(HttpStatus.OK)
@@ -235,13 +225,11 @@ export class AuthController {
   async verifyOtp(@Body() body: VerifyOtpDto) {
     return this.authService.verifyOtp(body.email, body.code);
   }
-
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@Req() req: AuthenticatedRequest) {
     return this.authService.getMe(req.user.userId);
   }
-
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
@@ -312,7 +300,6 @@ export class AuthController {
   async setLanguage(@Req() req: OptionalAuthenticatedRequest, @Body() body: SetLanguageDto) {
     return this.authService.setLanguage(req.user?.userId, body.language);
   }
-
   @UseGuards(JwtAuthGuard)
   @Patch('language')
   @HttpCode(HttpStatus.OK)

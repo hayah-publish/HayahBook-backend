@@ -92,7 +92,61 @@ export class AuthService {
     return timingSafeEqual(bufA, bufB);
   }
 
-  private validateE164Phone(countryCode?: string | null, phone?: string | null) {
+  private normalizeBirthday(raw?: string | null): string | null | undefined {
+    if (raw === undefined) return undefined;
+    if (raw === null) return null;
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+
+    let year: number;
+    let month: number;
+    let day: number;
+
+    const isoMatch = trimmed.match(
+      /^(\d{4})-(\d{2})-(\d{2})(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?)?$/,
+    );
+    const dmyMatch = trimmed.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+
+    if (isoMatch) {
+      year = Number(isoMatch[1]);
+      month = Number(isoMatch[2]);
+      day = Number(isoMatch[3]);
+    } else if (dmyMatch) {
+      day = Number(dmyMatch[1]);
+      month = Number(dmyMatch[2]);
+      year = Number(dmyMatch[3]);
+    } else {
+      throw new BadRequestException(this.i18n.t('validation.birthday_invalid'));
+    }
+
+    const currentYear = new Date().getUTCFullYear();
+    if (
+      year < 1900 ||
+      year > currentYear ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31
+    ) {
+      throw new BadRequestException(this.i18n.t('validation.birthday_invalid'));
+    }
+
+    const parsed = new Date(Date.UTC(year, month - 1, day));
+    if (
+      parsed.getUTCFullYear() !== year ||
+      parsed.getUTCMonth() !== month - 1 ||
+      parsed.getUTCDate() !== day
+    ) {
+      throw new BadRequestException(this.i18n.t('validation.birthday_invalid'));
+    }
+
+    return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  private validateE164Phone(
+    countryCode?: string | null,
+    phone?: string | null,
+  ) {
     if (!countryCode || !phone) return;
     const cleanCountry = countryCode.trim().replace('+', '');
     const cleanPhone = phone.trim();
@@ -133,13 +187,19 @@ export class AuthService {
       followingCount: user.followingCount ?? 0,
       acceptTerms: Boolean(user.acceptTerms),
       language: (user.language as SupportedLanguage) ?? 'ar',
-      readingLanguage: this.i18n.formatReadingLanguage(user.readingLanguage) ?? null,
+      readingLanguage:
+        this.i18n.formatReadingLanguage(user.readingLanguage) ?? null,
       userType: user.userType ?? 'Reader',
+      anonymousNumber: user.anonymousNumber ?? null,
       createdAt: user.createdAt,
     };
   }
 
-  private async generateTokens(user: { id: string; role: string; tokenVersion: number }, sessionId: string, refreshId: string): Promise<{
+  private async generateTokens(
+    user: { id: string; role: string; tokenVersion: number },
+    sessionId: string,
+    refreshId: string,
+  ): Promise<{
     accessToken: string;
     refreshToken: string;
   }> {
@@ -157,9 +217,12 @@ export class AuthService {
       this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d';
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        expiresIn: accessTokenExpiresIn as any,
-      }),
+      this.jwtService.signAsync(
+        { ...payload, tokenType: 'access' },
+        {
+          expiresIn: accessTokenExpiresIn as any,
+        },
+      ),
       this.jwtService.signAsync(
         { ...payload, tokenType: 'refresh', sid: sessionId, jti: refreshId },
         {
@@ -175,29 +238,39 @@ export class AuthService {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  private async issueSession(user: { id: string; role: string; tokenVersion: number }) {
+  private async issueSession(user: {
+    id: string;
+    role: string;
+    tokenVersion: number;
+  }) {
     if (randomInt(100) === 0) {
       await this.sessionsRepository
         .createQueryBuilder()
         .delete()
-        .where('expires_at <= now() OR consumed_at IS NOT NULL OR revoked_at IS NOT NULL')
+        .where(
+          'expires_at <= now() OR consumed_at IS NOT NULL OR revoked_at IS NOT NULL',
+        )
         .execute();
     }
     const sessionId = randomUUID();
     const refreshId = randomUUID();
     const tokens = await this.generateTokens(user, sessionId, refreshId);
-    const decoded = this.jwtService.decode(tokens.refreshToken) as { exp?: number } | null;
+    const decoded = this.jwtService.decode(tokens.refreshToken) as {
+      exp?: number;
+    } | null;
     if (!decoded?.exp) throw new Error('Refresh token expiration is missing');
-    await this.sessionsRepository.save(this.sessionsRepository.create({
-      id: sessionId,
-      userId: user.id,
-      purpose: 'refresh',
-      tokenHash: this.hashToken(tokens.refreshToken),
-      tokenVersion: user.tokenVersion,
-      expiresAt: new Date(decoded.exp * 1000),
-      revokedAt: null,
-      consumedAt: null,
-    }));
+    await this.sessionsRepository.save(
+      this.sessionsRepository.create({
+        id: sessionId,
+        userId: user.id,
+        purpose: 'refresh',
+        tokenHash: this.hashToken(tokens.refreshToken),
+        tokenVersion: user.tokenVersion,
+        expiresAt: new Date(decoded.exp * 1000),
+        revokedAt: null,
+        consumedAt: null,
+      }),
+    );
     return tokens;
   }
 
@@ -216,10 +289,13 @@ export class AuthService {
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
-    const normalizedEmail = params.email ? params.email.toLowerCase().trim() : null;
+    const normalizedEmail = params.email
+      ? params.email.toLowerCase().trim()
+      : null;
     const target = normalizedEmail || params.phone || '';
 
-    const queryBuilder = this.otpRepository.createQueryBuilder('otp')
+    const queryBuilder = this.otpRepository
+      .createQueryBuilder('otp')
       .where('otp.purpose = :purpose', { purpose: params.purpose })
       .orderBy('otp.createdAt', 'DESC');
 
@@ -270,7 +346,9 @@ export class AuthService {
     if (params.channel === 'email' && normalizedEmail) {
       const from = this.configService.get<string>('RESEND_FROM_EMAIL');
       if (!from) {
-        throw new Error('RESEND_FROM_EMAIL is missing from environment variables');
+        throw new Error(
+          'RESEND_FROM_EMAIL is missing from environment variables',
+        );
       }
 
       const isEn = this.i18n.getCurrentLanguage() === 'en';
@@ -297,9 +375,22 @@ export class AuthService {
         `;
 
       try {
-        const error = params.delivery === 'outbox'
-          ? (await this.emailOutbox.enqueue({ to: normalizedEmail, subject: params.subject, html: emailHtml }), null)
-          : (await this.resend.emails.send({ from, to: normalizedEmail, subject: params.subject, html: emailHtml })).error;
+        const error =
+          params.delivery === 'outbox'
+            ? (await this.emailOutbox.enqueue({
+                to: normalizedEmail,
+                subject: params.subject,
+                html: emailHtml,
+              }),
+              null)
+            : (
+                await this.resend.emails.send({
+                  from,
+                  to: normalizedEmail,
+                  subject: params.subject,
+                  html: emailHtml,
+                })
+              ).error;
 
         if (error) {
           otp.used = true;
@@ -327,45 +418,90 @@ export class AuthService {
     purpose: string;
     code: string;
   }): Promise<EmailOtp> {
-    const normalizedEmail = params.email ? params.email.toLowerCase().trim() : null;
-    const target = normalizedEmail || params.phone || '';
-    const result = await this.otpRepository.manager.transaction(async (manager) => {
-      const repo = manager.getRepository(EmailOtp);
-      const queryBuilder = repo.createQueryBuilder('otp')
-        .setLock('pessimistic_write')
-        .where('otp.purpose = :purpose', { purpose: params.purpose })
-        .andWhere('otp.used = :used', { used: false })
-        .orderBy('otp.createdAt', 'DESC');
-      if (normalizedEmail) queryBuilder.andWhere('otp.email = :email', { email: normalizedEmail });
-      else if (params.phone) queryBuilder.andWhere('otp.phone = :phone', { phone: params.phone });
+    const normalizedEmail = params.email
+      ? params.email.toLowerCase().trim()
+      : null;
+    const normalizedPhone = params.phone ? params.phone.trim() : null;
+    const result = await this.otpRepository.manager.transaction(
+      async (manager) => {
+        const repo = manager.getRepository(EmailOtp);
+        const queryBuilder = repo
+          .createQueryBuilder('otp')
+          .setLock('pessimistic_write')
+          .where('otp.purpose = :purpose', { purpose: params.purpose })
+          .andWhere('otp.used = :used', { used: false })
+          .orderBy('otp.createdAt', 'DESC');
+        if (normalizedEmail && normalizedPhone) {
+          queryBuilder.andWhere(
+            '(otp.email = :email OR otp.phone = :phone)',
+            {
+              email: normalizedEmail,
+              phone: normalizedPhone,
+            },
+          );
+        } else if (normalizedEmail) {
+          queryBuilder.andWhere('otp.email = :email', {
+            email: normalizedEmail,
+          });
+        } else if (normalizedPhone) {
+          queryBuilder.andWhere('otp.phone = :phone', {
+            phone: normalizedPhone,
+          });
+        }
 
-      const otp = await queryBuilder.getOne();
-      if (!otp || otp.expiresAt.getTime() <= Date.now()) return { error: 'invalid' as const };
-      if (otp.attempts >= 5) {
+        const otp = await queryBuilder.getOne();
+        if (!otp || otp.expiresAt.getTime() <= Date.now())
+          return { error: 'invalid' as const };
+        if (otp.attempts >= 5) {
+          otp.used = true;
+          await repo.save(otp);
+          return { error: 'attempts' as const };
+        }
+        const candidateTargets = Array.from(
+          new Set(
+            [
+              normalizedEmail,
+              normalizedPhone,
+              otp.email?.toLowerCase().trim() || null,
+              otp.phone?.trim() || null,
+            ].filter((t): t is string => Boolean(t)),
+          ),
+        );
+        if (candidateTargets.length === 0) candidateTargets.push('');
+        const hashMatches = candidateTargets.some((target) =>
+          this.safeCompareHash(
+            this.hashOtp(target, params.code),
+            otp.codeHash,
+          ),
+        );
+        if (!hashMatches) {
+          otp.attempts += 1;
+          if (otp.attempts >= 5) otp.used = true;
+          await repo.save(otp);
+          return { error: 'invalid' as const };
+        }
         otp.used = true;
         await repo.save(otp);
-        return { error: 'attempts' as const };
-      }
-      if (!this.safeCompareHash(this.hashOtp(target, params.code), otp.codeHash)) {
-        otp.attempts += 1;
-        if (otp.attempts >= 5) otp.used = true;
-        await repo.save(otp);
-        return { error: 'invalid' as const };
-      }
-      otp.used = true;
-      await repo.save(otp);
-      return { otp };
-    });
+        return { otp };
+      },
+    );
 
     if ('error' in result) {
       throw new BadRequestException(
-        this.i18n.t(result.error === 'attempts' ? 'otp.too_many_attempts' : 'otp.invalid_or_expired'),
+        this.i18n.t(
+          result.error === 'attempts'
+            ? 'otp.too_many_attempts'
+            : 'otp.invalid_or_expired',
+        ),
       );
     }
     return result.otp;
   }
 
-  getLanguages(): { languages: LanguageInfo[]; defaultLanguage: SupportedLanguage } {
+  getLanguages(): {
+    languages: LanguageInfo[];
+    defaultLanguage: SupportedLanguage;
+  } {
     return {
       languages: this.i18n.getSupportedLanguages(),
       defaultLanguage: 'ar',
@@ -375,7 +511,11 @@ export class AuthService {
   async setLanguage(
     userId?: string | null,
     language: SupportedLanguage = 'ar',
-  ): Promise<{ message: string; language: SupportedLanguage; direction: 'rtl' | 'ltr' }> {
+  ): Promise<{
+    message: string;
+    language: SupportedLanguage;
+    direction: 'rtl' | 'ltr';
+  }> {
     if (userId) {
       await this.usersService.updateLanguage(userId, language);
     }
@@ -397,12 +537,18 @@ export class AuthService {
     const existingUser = await this.usersService.findByEmail(normalizedEmail);
 
     if (existingUser && existingUser.emailVerified) {
-      throw new BadRequestException(this.i18n.t('auth.email_already_registered'));
+      throw new BadRequestException(
+        this.i18n.t('auth.email_already_registered'),
+      );
     }
 
-    const countryCode = dto.countryCode ?? dto.country_code;
+    const countryCode = dto.countryCode?.trim() || dto.country_code?.trim();
     const acceptTerms = Boolean(
-      dto.acceptTerms ?? dto.agreeToTerms ?? dto.accept_terms ?? dto.agree_to_terms ?? true,
+      dto.acceptTerms ??
+      dto.agreeToTerms ??
+      dto.accept_terms ??
+      dto.agree_to_terms ??
+      true,
     );
     this.validateE164Phone(countryCode, dto.phone);
 
@@ -420,6 +566,12 @@ export class AuthService {
     let user: User;
 
     if (existingUser && !existingUser.emailVerified) {
+      if (!emailVerified && typeof this.otpRepository.update === 'function') {
+        await this.otpRepository.update(
+          { email: normalizedEmail, purpose: 'signup', used: false },
+          { used: true },
+        );
+      }
       await this.usersService.setPassword(existingUser.id, passwordHash);
       await this.usersService.updateProfile(existingUser.id, {
         name: dto.name,
@@ -440,8 +592,12 @@ export class AuthService {
     }
 
     if (emailVerified) {
-      await this.usersService.markEmailVerified(user.id);
-      user.emailVerified = true;
+      const verifiedUser = await this.usersService.markEmailVerified(user.id);
+      if (verifiedUser) {
+        user = verifiedUser;
+      } else {
+        user.emailVerified = true;
+      }
     } else {
       // Automatically request and send OTP directly to the user's email upon signup
       await this.createAndSendOtp({
@@ -461,45 +617,50 @@ export class AuthService {
     };
     if (!emailVerified) return response;
     const tokens = await this.issueSession(user);
-    return { ...response, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+    return {
+      ...response,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
   }
 
   async requestSignupOtp(email: string): Promise<{ message: string }> {
     const normalizedEmail = email.toLowerCase().trim();
-    const existingUser = await this.usersService.findByEmail(normalizedEmail);
-
-    if (!existingUser) {
-      throw new BadRequestException(this.i18n.t('auth.account_not_found_email'));
+    try {
+      const existingUser = await this.usersService.findByEmail(normalizedEmail);
+      if (existingUser && !existingUser.emailVerified) {
+        await this.createAndSendOtp({
+          email: normalizedEmail,
+          channel: 'email',
+          purpose: 'signup',
+          subject: this.i18n.t('otp.subject_signup'),
+          expiresInMinutes: 5,
+        });
+      }
+    } catch {
+      // Keep the response indistinguishable for unknown accounts and delivery failures.
     }
-
-    if (existingUser.emailVerified) {
-      throw new BadRequestException(this.i18n.t('auth.email_already_registered'));
-    }
-
-    await this.createAndSendOtp({
-      email: normalizedEmail,
-      channel: 'email',
-      purpose: 'signup',
-      subject: this.i18n.t('otp.subject_signup'),
-      expiresInMinutes: 5,
-    });
-
-    return {
-      message: this.i18n.t('otp.sent_email'),
-    };
+    return { message: this.i18n.t('otp.signup_if_exists') };
   }
 
-  async verifySignupOtp(email: string, code: string): Promise<{
+  async verifySignupOtp(
+    email: string,
+    code: string,
+  ): Promise<{
     message: string;
     accessToken: string;
     refreshToken: string;
     data: ReturnType<AuthService['sanitizeUser']>;
   }> {
     const normalizedEmail = email.toLowerCase().trim();
-    const user = await this.usersService.findByEmail(normalizedEmail);
+    let user = await this.usersService.findByEmail(normalizedEmail);
 
     if (!user) {
       throw new BadRequestException(this.i18n.t('otp.invalid_or_expired'));
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException(this.i18n.t('auth.account_disabled'));
     }
 
     await this.verifyOtpRecord({
@@ -509,8 +670,12 @@ export class AuthService {
     });
 
     if (!user.emailVerified) {
-      await this.usersService.markEmailVerified(user.id);
-      user.emailVerified = true;
+      const verifiedUser = await this.usersService.markEmailVerified(user.id);
+      if (verifiedUser) {
+        user = verifiedUser;
+      } else {
+        user.emailVerified = true;
+      }
     }
     const tokens = await this.issueSession(user);
 
@@ -524,7 +689,8 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     const normalizedEmail = dto.email.toLowerCase().trim();
-    const user = await this.usersService.findByEmailWithPassword(normalizedEmail);
+    const user =
+      await this.usersService.findByEmailWithPassword(normalizedEmail);
 
     if (!user || !user.password) {
       throw new UnauthorizedException(this.i18n.t('auth.invalid_credentials'));
@@ -590,12 +756,16 @@ export class AuthService {
           expiresAt: MoreThan(new Date()),
         },
       });
-      if (!session) throw new UnauthorizedException(this.i18n.t('auth.invalid_token'));
+      if (!session)
+        throw new UnauthorizedException(this.i18n.t('auth.invalid_token'));
 
       const refreshId = randomUUID();
       const tokens = await this.generateTokens(user, session.id, refreshId);
-      const decoded = this.jwtService.decode(tokens.refreshToken) as { exp?: number } | null;
-      if (!decoded?.exp) throw new UnauthorizedException(this.i18n.t('auth.invalid_token'));
+      const decoded = this.jwtService.decode(tokens.refreshToken) as {
+        exp?: number;
+      } | null;
+      if (!decoded?.exp)
+        throw new UnauthorizedException(this.i18n.t('auth.invalid_token'));
       const rotation = await this.sessionsRepository.update(
         {
           id: session.id,
@@ -609,7 +779,8 @@ export class AuthService {
           expiresAt: new Date(decoded.exp * 1000),
         },
       );
-      if (rotation.affected !== 1) throw new UnauthorizedException(this.i18n.t('auth.invalid_token'));
+      if (rotation.affected !== 1)
+        throw new UnauthorizedException(this.i18n.t('auth.invalid_token'));
 
       return {
         accessToken: tokens.accessToken,
@@ -653,6 +824,10 @@ export class AuthService {
       throw new BadRequestException(this.i18n.t('otp.invalid_or_expired'));
     }
 
+    if (!user.isActive) {
+      throw new UnauthorizedException(this.i18n.t('auth.account_disabled'));
+    }
+
     await this.verifyOtpRecord({
       email: normalizedEmail,
       purpose: 'reset_password',
@@ -665,23 +840,28 @@ export class AuthService {
         sub: user.id,
         email: user.email,
         purpose: 'reset_password',
+        tokenType: 'password_reset',
         tokenVersion: user.tokenVersion,
         sid: resetSessionId,
       },
       { expiresIn: '15m' },
     );
-    const decoded = this.jwtService.decode(resetToken) as { exp?: number } | null;
+    const decoded = this.jwtService.decode(resetToken) as {
+      exp?: number;
+    } | null;
     if (!decoded?.exp) throw new Error('Reset token expiration is missing');
-    await this.sessionsRepository.save(this.sessionsRepository.create({
-      id: resetSessionId,
-      userId: user.id,
-      purpose: 'password_reset',
-      tokenHash: this.hashToken(resetToken),
-      tokenVersion: user.tokenVersion,
-      expiresAt: new Date(decoded.exp * 1000),
-      revokedAt: null,
-      consumedAt: null,
-    }));
+    await this.sessionsRepository.save(
+      this.sessionsRepository.create({
+        id: resetSessionId,
+        userId: user.id,
+        purpose: 'password_reset',
+        tokenHash: this.hashToken(resetToken),
+        tokenVersion: user.tokenVersion,
+        expiresAt: new Date(decoded.exp * 1000),
+        revokedAt: null,
+        consumedAt: null,
+      }),
+    );
 
     return {
       message: this.i18n.t('otp.code_valid'),
@@ -705,6 +885,10 @@ export class AuthService {
 
     if (!user) {
       throw new BadRequestException(this.i18n.t('otp.invalid_or_expired'));
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException(this.i18n.t('auth.account_disabled'));
     }
 
     if (dto.resetToken) {
@@ -750,7 +934,8 @@ export class AuthService {
         },
         { consumedAt: new Date() },
       );
-      if (consumed.affected !== 1) throw new BadRequestException(this.i18n.t('auth.invalid_token'));
+      if (consumed.affected !== 1)
+        throw new BadRequestException(this.i18n.t('auth.invalid_token'));
     } else if (dto.code) {
       await this.verifyOtpRecord({
         email: normalizedEmail,
@@ -817,18 +1002,25 @@ export class AuthService {
       throw new UnauthorizedException(this.i18n.t('auth.user_not_found'));
     }
 
+    if (user.password) {
+      if (!dto.currentPassword) {
+        throw new BadRequestException(
+          this.i18n.t('auth.invalid_current_password'),
+        );
+      }
+      const isMatch = await compare(dto.currentPassword, user.password);
+      if (!isMatch) {
+        throw new UnauthorizedException(
+          this.i18n.t('auth.current_password_incorrect'),
+        );
+      }
+    }
+
     await this.verifyOtpRecord({
       email: user.email,
       purpose: 'change_password',
       code: dto.code,
     });
-
-    if (dto.currentPassword && user.password) {
-      const isMatch = await compare(dto.currentPassword, user.password);
-      if (!isMatch) {
-        throw new UnauthorizedException(this.i18n.t('auth.current_password_incorrect'));
-      }
-    }
 
     const newPasswordHash = await hash(dto.newPassword, 10);
     await this.usersService.setPassword(userId, newPasswordHash);
@@ -844,7 +1036,10 @@ export class AuthService {
     };
   }
 
-  async requestChangeEmailOtp(userId: string, newEmail: string): Promise<{ message: string }> {
+  async requestChangeEmailOtp(
+    userId: string,
+    newEmail: string,
+  ): Promise<{ message: string }> {
     const user = await this.usersService.findById(userId);
     if (!user || !user.isActive) {
       throw new UnauthorizedException(this.i18n.t('auth.user_not_found'));
@@ -855,7 +1050,8 @@ export class AuthService {
       throw new BadRequestException(this.i18n.t('auth.email_same_as_current'));
     }
 
-    const existingUser = await this.usersService.findByEmail(normalizedNewEmail);
+    const existingUser =
+      await this.usersService.findByEmail(normalizedNewEmail);
     if (existingUser) {
       throw new ConflictException(this.i18n.t('auth.email_already_in_use'));
     }
@@ -876,14 +1072,18 @@ export class AuthService {
   async changeEmail(
     userId: string,
     dto: ChangeEmailDto,
-  ): Promise<{ message: string; data: ReturnType<AuthService['sanitizeUser']> }> {
+  ): Promise<{
+    message: string;
+    data: ReturnType<AuthService['sanitizeUser']>;
+  }> {
     const user = await this.usersService.findById(userId);
     if (!user || !user.isActive) {
       throw new UnauthorizedException(this.i18n.t('auth.user_not_found'));
     }
 
     const normalizedNewEmail = dto.newEmail.toLowerCase().trim();
-    const existingUser = await this.usersService.findByEmail(normalizedNewEmail);
+    const existingUser =
+      await this.usersService.findByEmail(normalizedNewEmail);
     if (existingUser && existingUser.id !== userId) {
       throw new ConflictException(this.i18n.t('auth.email_already_in_use'));
     }
@@ -894,7 +1094,10 @@ export class AuthService {
       code: dto.code,
     });
 
-    const updatedUser = await this.usersService.updateEmail(userId, normalizedNewEmail);
+    const updatedUser = await this.usersService.updateEmail(
+      userId,
+      normalizedNewEmail,
+    );
 
     return {
       message: this.i18n.t('auth.email_changed'),
@@ -915,8 +1118,11 @@ export class AuthService {
       if (!user.phone) {
         throw new BadRequestException(this.i18n.t('auth.no_phone_registered'));
       }
+      const formattedPhone = user.countryCode
+        ? `${user.countryCode.trim()}${user.phone.trim()}`
+        : user.phone.trim();
       await this.createAndSendOtp({
-        phone: user.phone,
+        phone: formattedPhone,
         email: user.email,
         channel: 'phone',
         purpose: 'delete_account',
@@ -941,16 +1147,25 @@ export class AuthService {
     };
   }
 
-  async deleteAccount(userId: string, code: string): Promise<{ message: string }> {
+  async deleteAccount(
+    userId: string,
+    code: string,
+  ): Promise<{ message: string }> {
     const user = await this.usersService.findById(userId);
 
     if (!user) {
       throw new NotFoundException(this.i18n.t('auth.user_not_found'));
     }
 
+    const formattedPhone = user.phone
+      ? user.countryCode
+        ? `${user.countryCode.trim()}${user.phone.trim()}`
+        : user.phone.trim()
+      : null;
+
     await this.verifyOtpRecord({
       email: user.email,
-      phone: user.phone,
+      phone: formattedPhone,
       purpose: 'delete_account',
       code,
     });
@@ -1005,13 +1220,16 @@ export class AuthService {
   async updatePhone(
     userId: string,
     dto: UpdatePhoneDto,
-  ): Promise<{ message: string; data: ReturnType<AuthService['sanitizeUser']> }> {
+  ): Promise<{
+    message: string;
+    data: ReturnType<AuthService['sanitizeUser']>;
+  }> {
     const user = await this.usersService.findById(userId);
     if (!user || !user.isActive) {
       throw new UnauthorizedException(this.i18n.t('auth.user_not_found'));
     }
 
-    const countryCode = (dto.countryCode ?? dto.country_code)!;
+    const countryCode = (dto.countryCode?.trim() || dto.country_code?.trim())!;
     this.validateE164Phone(countryCode, dto.phone);
 
     await this.verifyOtpRecord({
@@ -1036,18 +1254,23 @@ export class AuthService {
   async updateProfile(
     userId: string,
     dto: UpdateProfileDto,
-  ): Promise<{ message: string; data: ReturnType<AuthService['sanitizeUser']> }> {
+  ): Promise<{
+    message: string;
+    data: ReturnType<AuthService['sanitizeUser']>;
+  }> {
     const user = await this.usersService.findById(userId);
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException(this.i18n.t('auth.user_not_found'));
     }
 
-    const profileUrl = (dto.profileUrl ?? dto.profile_url)?.trim();
-    const rawReadingLang = (dto.readingLanguage ?? dto.reading_language)?.trim();
+    const profileUrl = dto.profileUrl?.trim() || dto.profile_url?.trim();
+    const rawReadingLang =
+      dto.readingLanguage?.trim() || dto.reading_language?.trim();
     const readingLanguage = rawReadingLang
       ? this.i18n.resolveReadingLanguage(rawReadingLang)
       : undefined;
+    const birthday = this.normalizeBirthday(dto.birthday);
 
     let country: string | undefined = undefined;
     if (dto.country !== undefined) {
@@ -1065,7 +1288,7 @@ export class AuthService {
 
     const updatedUser = await this.usersService.updateProfile(userId, {
       name: dto.name,
-      birthday: dto.birthday,
+      birthday: birthday ?? undefined,
       country,
       aboutMe: dto.aboutMe,
       profileUrl,
@@ -1084,16 +1307,21 @@ export class AuthService {
   async completeProfile(
     userId: string,
     dto: CompleteProfileDto,
-  ): Promise<{ message: string; data: ReturnType<AuthService['sanitizeUser']> }> {
+  ): Promise<{
+    message: string;
+    data: ReturnType<AuthService['sanitizeUser']>;
+  }> {
     const user = await this.usersService.findById(userId);
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException(this.i18n.t('auth.user_not_found'));
     }
 
-    const rawReadingLang = (dto.readingLanguage ?? dto.reading_language)?.trim();
+    const rawReadingLang =
+      dto.readingLanguage?.trim() || dto.reading_language?.trim();
     const readingLanguage = this.i18n.resolveReadingLanguage(rawReadingLang);
-    const profileUrl = (dto.profileUrl ?? dto.profile_url)?.trim();
+    const profileUrl = dto.profileUrl?.trim() || dto.profile_url?.trim();
+    const birthday = this.normalizeBirthday(dto.birthday);
 
     if (!profileUrl) {
       throw new BadRequestException(this.i18n.t('auth.profile_url_required'));
@@ -1111,7 +1339,7 @@ export class AuthService {
 
     const updatedUser = await this.usersService.updateProfile(userId, {
       profileUrl,
-      birthday: dto.birthday,
+      birthday: birthday ?? undefined,
       country,
       aboutMe: dto.aboutMe,
       readingLanguage,
@@ -1222,7 +1450,8 @@ export class AuthService {
     } else {
       const updates: { name?: string; profileUrl?: string } = {};
       if (!user.name && payload.name) updates.name = payload.name;
-      if (!user.profileUrl && payload.picture) updates.profileUrl = payload.picture;
+      if (!user.profileUrl && payload.picture)
+        updates.profileUrl = payload.picture;
       if (Object.keys(updates).length > 0) {
         user = await this.usersService.updateProfile(user.id, updates);
       }
@@ -1245,5 +1474,4 @@ export class AuthService {
       data: this.sanitizeUser(user),
     };
   }
-
 }
