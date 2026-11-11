@@ -226,7 +226,7 @@ export class AuthController {
     return this.authService.verifyOtp(body.email, body.code);
   }
   @UseGuards(JwtAuthGuard)
-  @Get('me')
+  @Get(['me', 'profile'])
   async getMe(@Req() req: AuthenticatedRequest) {
     return this.authService.getMe(req.user.userId);
   }
