@@ -4217,8 +4217,8 @@
                           "id": "query_following_0",
                           "name": "following",
                           "required": false,
-                          "description": "فلترة بمنشورات المتابعين فقط (true/false)",
-                          "type": "string",
+                          "description": "فلترة بمنشورات ومقالات المتابعين فقط (true / false)",
+                          "type": "boolean",
                           "enable": true,
                           "example": "false"
                         },
@@ -4235,8 +4235,8 @@
                           "id": "query_page_2",
                           "name": "page",
                           "required": false,
-                          "description": "",
-                          "type": "string",
+                          "description": "رقم الصفحة (افتراضي 1)",
+                          "type": "integer",
                           "enable": true,
                           "example": "1"
                         },
@@ -4244,8 +4244,8 @@
                           "id": "query_limit_3",
                           "name": "limit",
                           "required": false,
-                          "description": "",
-                          "type": "string",
+                          "description": "عدد العناصر في الصفحة (افتراضي 20)",
+                          "type": "integer",
                           "enable": true,
                           "example": "20"
                         },
