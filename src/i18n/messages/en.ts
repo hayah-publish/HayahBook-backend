@@ -289,6 +289,8 @@ export const en = {
   'reports.done_button': 'Done',
 
   // Aliases
+  'aliases.created': 'Alias created successfully',
+  'aliases.updated': 'Alias updated successfully',
   'aliases.nickname_already_taken': 'This nickname is already taken, please choose another one',
   'aliases.nickname_available': 'Nickname is available',
   'aliases.nickname_required': 'Nickname is required',

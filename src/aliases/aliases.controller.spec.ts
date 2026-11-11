@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AliasesController } from './aliases.controller';
 import { AliasesService } from './aliases.service';
+import { I18nService } from '../i18n/i18n.service';
 
 describe('AliasesController', () => {
   let controller: AliasesController;
@@ -56,6 +57,18 @@ describe('AliasesController', () => {
           provide: AliasesService,
           useValue: mockAliasesService,
         },
+        {
+          provide: I18nService,
+          useValue: {
+            t: jest.fn((k) =>
+              k === 'aliases.created'
+                ? 'تم إنشاء الاسم المستعار بنجاح'
+                : k === 'aliases.updated'
+                  ? 'تم تعديل الاسم المستعار بنجاح'
+                  : k,
+            ),
+          },
+        },
       ],
     }).compile();
 
@@ -98,7 +111,15 @@ describe('AliasesController', () => {
     const req = { user: { userId: 'user-1', role: 'user' } } as any;
     const res = await controller.createAlias(req, { nickname: 'I_am_not_a_vegetable' });
     expect(res.data).toBeDefined();
-    expect(res.message).toBe('Alias created successfully');
+    expect(res.message).toBe('تم إنشاء الاسم المستعار بنجاح');
+  });
+
+  it('should update caller alias with localized message', async () => {
+    const req = { user: { userId: 'user-1', role: 'user' } } as any;
+    mockAliasesService.getMyAlias.mockResolvedValueOnce({ id: 'alias-1', nickname: 'reader_1' });
+    const res = await controller.updateMyAlias(req, { nickname: 'Critic_of_critics' });
+    expect(res.data).toBeDefined();
+    expect(res.message).toBe('تم تعديل الاسم المستعار بنجاح');
   });
 
   it('should return alias profile', async () => {

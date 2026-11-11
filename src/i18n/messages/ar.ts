@@ -279,6 +279,8 @@ export const ar = {
   'reports.done_button': 'تم',
 
   // Aliases (الأسماء المستعارة)
+  'aliases.created': 'تم إنشاء الاسم المستعار بنجاح',
+  'aliases.updated': 'تم تعديل الاسم المستعار بنجاح',
   'aliases.nickname_already_taken': 'هذا الاسم المستعار مستخدم بالفعل، يرجى اختيار اسم آخر',
   'aliases.nickname_available': 'الاسم المستعار متاح',
   'aliases.nickname_required': 'الاسم المستعار مطلوب',

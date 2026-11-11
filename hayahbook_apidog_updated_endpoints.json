@@ -3401,7 +3401,7 @@
                     "responseExamples": [
                       {
                         "name": "Created",
-                        "data": "{\"message\":\"Alias created successfully\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"522df3b3-57a5-48ef-8b77-d510bf8da6d1\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":true,\"daysRemaining\":0,\"nextAllowedEditDate\":null,\"commentsCount\":0,\"bookRatingsCount\":0,\"bookReviewsCount\":0}}",
+                        "data": "{\"message\":\"تم إنشاء الاسم المستعار بنجاح\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"522df3b3-57a5-48ef-8b77-d510bf8da6d1\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":true,\"daysRemaining\":0,\"nextAllowedEditDate\":null,\"commentsCount\":0,\"bookRatingsCount\":0,\"bookReviewsCount\":0}}",
                         "responseId": "47000056"
                       }
                     ],
@@ -4118,7 +4118,7 @@
                     "responseExamples": [
                       {
                         "name": "OK",
-                        "data": "{\"message\":\"Alias updated successfully\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الصباح_المميز\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-owl-blue.jpg\",\"canEdit\":false,\"daysRemaining\":30,\"nextAllowedEditDate\":\"2026-12-11T00:00:00.000Z\"}}",
+                        "data": "{\"message\":\"تم تعديل الاسم المستعار بنجاح\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الصباح_المميز\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-owl-blue.jpg\",\"canEdit\":false,\"daysRemaining\":30,\"nextAllowedEditDate\":\"2026-12-11T00:00:00.000Z\"}}",
                         "responseId": "47000070"
                       }
                     ],

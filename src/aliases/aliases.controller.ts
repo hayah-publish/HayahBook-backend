@@ -21,6 +21,7 @@ import { AliasesService } from './aliases.service';
 import { CreateAliasDto } from './dto/create-alias.dto';
 import { UpdateAliasDto } from './dto/update-alias.dto';
 import type { UploadFile } from '../upload/upload-file.interface';
+import { I18nService } from '../i18n/i18n.service';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -30,7 +31,10 @@ interface AuthenticatedRequest extends Request {
 }
 @Controller('aliases')
 export class AliasesController {
-  constructor(private readonly aliasesService: AliasesService) {}
+  constructor(
+    private readonly aliasesService: AliasesService,
+    private readonly i18n: I18nService,
+  ) {}
 
   /**
    * GET /v1/aliases/presets (or /v1/aliases/avatars)
@@ -109,7 +113,7 @@ export class AliasesController {
       file,
     );
     return {
-      message: 'Alias created successfully',
+      message: this.i18n.t('aliases.created'),
       data: alias,
     };
   }
@@ -196,9 +200,7 @@ export class AliasesController {
   ) {
     const myAlias = await this.aliasesService.getMyAlias(req.user!.userId);
     if (!myAlias) {
-      throw new NotFoundException(
-        'الاسم المستعار غير موجود، يرجى إنشاء اسم مستعار أولاً',
-      );
+      throw new NotFoundException(this.i18n.t('aliases.not_found'));
     }
     const alias = await this.aliasesService.updateAlias(
       req.user!.userId,
@@ -207,7 +209,7 @@ export class AliasesController {
       file,
     );
     return {
-      message: 'Alias updated successfully',
+      message: this.i18n.t('aliases.updated'),
       data: alias,
     };
   }
@@ -232,7 +234,7 @@ export class AliasesController {
       file,
     );
     return {
-      message: 'Alias updated successfully',
+      message: this.i18n.t('aliases.updated'),
       data: alias,
     };
   }
