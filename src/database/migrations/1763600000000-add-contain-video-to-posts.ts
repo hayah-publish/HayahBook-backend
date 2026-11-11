@@ -43,3 +43,4 @@ export class AddContainVideoToPosts1763600000000 implements MigrationInterface {
     }
   }
 }
+

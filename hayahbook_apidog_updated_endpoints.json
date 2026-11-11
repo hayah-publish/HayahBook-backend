@@ -259,7 +259,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "signup - إنشاء حساب جديد"
                   }
                 },
                 {
@@ -358,7 +359,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "verify-otp - تأكيد البريد الإلكتروني وتفعيل الحساب"
                   }
                 },
                 {
@@ -457,7 +459,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "resend-otp - إعادة إرسال رمز التحقق"
                   }
                 },
                 {
@@ -556,7 +559,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "login - تسجيل الدخول"
                   }
                 },
                 {
@@ -655,7 +659,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "google-login - تسجيل الدخول بحساب جوجل"
                   }
                 },
                 {
@@ -754,7 +759,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "forgot-password - طلب استعادة كلمة المرور"
                   }
                 },
                 {
@@ -853,7 +859,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "verify-reset-code - التحقق من كود الاستعادة"
                   }
                 },
                 {
@@ -952,7 +959,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "reset-password - تعيين كلمة المرور الجديدة"
                   }
                 },
                 {
@@ -1051,7 +1059,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "refresh-token - تجديد توكن الدخول"
                   }
                 },
                 {
@@ -1143,7 +1152,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-profile - استرجاع بيانات الملف الشخصي للمستخدم الحالي"
                   }
                 },
                 {
@@ -1244,7 +1254,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "update-profile - تعديل بيانات الملف الشخصي"
                   }
                 },
                 {
@@ -1345,7 +1356,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "logout - تسجيل الخروج"
                   }
                 },
                 {
@@ -1437,7 +1449,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "delete-account - حذف الحساب نهائياً"
                   }
                 }
               ]
@@ -1478,7 +1491,104 @@
               "inheritPreProcessors": {},
               "items": [
                 {
-                  "name": "add-post - نشر منشور جديد",
+                  "name": "get-posts - استرجاع وتصفح المنشورات (مع فلترة الفيديو containVideo والبحث)",
+                  "api": {
+                    "id": "47000095",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/posts",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "containVideo",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "فلترة المنشورات حسب احتوائها على فيديو (true / false)"
+                        },
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث نصي في محتوى المنشورات"
+                        },
+                        {
+                          "name": "type",
+                          "type": "string",
+                          "required": false,
+                          "description": "نوع المحتوى: all, posts, articles, visuals"
+                        },
+                        {
+                          "name": "category",
+                          "type": "string",
+                          "required": false,
+                          "description": "فلترة حسب التصنيف"
+                        },
+                        {
+                          "name": "following",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "منشورات المتابعين فقط (true / false)"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)"
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر في الصفحة (افتراضي 20)"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000095_200",
+                        "code": 200,
+                        "name": "Success",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "OK",
+                        "data": "{\"data\":[{\"id\":\"987db5c6-4690-45f4-a9f7-fe5ff2e4c2e0\",\"type\":\"post\",\"content\":\"منشور مميز مع فيديو تعليمي\",\"containVideo\":true,\"videoUrl\":\"https://cdn.hayahbook.com/videos/sample.mp4\",\"likesCount\":12,\"commentsCount\":3,\"sharesCount\":2,\"shareUrl\":\"https://hayahbook.com/posts/mH-1xkaQRYSp9_5f-uTC4A\",\"createdAt\":\"2026-11-12T00:00:00.000Z\"}],\"total\":1,\"page\":1,\"limit\":20}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع قائمة المنشورات مع دعم كامل لفلترة الفيديو عن طريق containVideo=true/false والبحث والترقيم.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-posts - استرجاع وتصفح المنشورات (مع فلترة الفيديو containVideo والبحث)"
+                  }
+                },
+                {
+                  "name": "add-post - نشر منشور جديد (يدعم من 1 إلى 500 كلمة، وفحص الفيديو)",
                   "api": {
                     "id": "47000028",
                     "method": "post",
@@ -1530,7 +1640,7 @@
                     "responseExamples": [
                       {
                         "name": "Created",
-                        "data": "{\"message\":\"تم نشر المنشور بنجاح\",\"data\":{\"id\":\"987db5c6-4690-45f4-a9f7-fe5ff2e4c2e0\",\"type\":\"post\",\"content\":\"نص منشور تجريبي جديد مع مشاركة كتاب\",\"shareUrl\":\"https://hayahbook.com/posts/mH-1xkaQRYSp9_5f-uTC4A\",\"likesCount\":0,\"commentsCount\":0,\"sharesCount\":0}}",
+                        "data": "{\"message\":\"تم نشر المنشور بنجاح\",\"data\":{\"id\":\"987db5c6-4690-45f4-a9f7-fe5ff2e4c2e0\",\"type\":\"post\",\"content\":\"نص منشور تجريبي جديد مع مشاركة كتاب\",\"containVideo\":false,\"shareUrl\":\"https://hayahbook.com/posts/mH-1xkaQRYSp9_5f-uTC4A\",\"likesCount\":0,\"commentsCount\":0,\"sharesCount\":0}}",
                         "responseId": "47000027"
                       }
                     ],
@@ -1625,14 +1735,49 @@
                               "type": "string"
                             }
                           }
+                        },
+                        {
+                          "id": "mp_containVideo",
+                          "name": "containVideo",
+                          "required": false,
+                          "description": "تحديد ما إذا كان المنشور يحتوي على فيديو (يتم تحديده تلقائياً كـ true عند إرفاق فيديو أو videoUrl أو يمكن تمريره يدوياً)",
+                          "type": "boolean",
+                          "enable": true,
+                          "example": "false",
+                          "schema": {
+                            "type": "boolean"
+                          }
+                        },
+                        {
+                          "id": "mp_videoUrl",
+                          "name": "videoUrl",
+                          "required": false,
+                          "description": "رابط فيديو خارجي أو مرفوع مسبقاً",
+                          "type": "string",
+                          "enable": true,
+                          "example": "",
+                          "schema": {
+                            "type": "string"
+                          }
                         }
                       ],
                       "required": true,
                       "mediaType": "",
-                      "examples": [],
+                      "examples": [
+                        {
+                          "mediaType": "multipart/form-data",
+                          "name": "منشور نصي مع صورة وكتاب",
+                          "value": "{\n  \"content\": \"نص منشور تجريبي جديد مع مشاركة كتاب لا يتجاوز 500 كلمة\",\n  \"containVideo\": false,\n  \"bookId\": \"05bc8a29-33a3-453c-b862-0aef300ab7bd\"\n}"
+                        },
+                        {
+                          "mediaType": "multipart/form-data",
+                          "name": "منشور يحتوي على فيديو",
+                          "value": "{\n  \"content\": \"شاهد هذا المقطع التوضيحي الرائع لمراجعة الكتاب\",\n  \"containVideo\": true,\n  \"videoUrl\": \"https://cdn.hayahbook.com/videos/review-sample.mp4\"\n}"
+                        }
+                      ],
                       "oasExtensions": ""
                     },
-                    "description": "إنشاء منشور جديد يدعم من 1 إلى 500 كلمة في حال إدخال نص داخل content، أو يمكن تركه فارغاً عند إرفاق وسائط (صور، فيديو، كتاب، رابط).",
+                    "description": "إنشاء منشور جديد يدعم من 1 إلى 500 كلمة في حال إدخال نص داخل content (أو يمكن تركه فارغاً عند إرفاق وسائط). يدعم تحديد containVideo تلقائياً أو يدوياً.",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -1656,11 +1801,97 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "add-post - نشر منشور جديد (يدعم من 1 إلى 500 كلمة، وفحص الفيديو)"
                   }
                 },
                 {
-                  "name": "add-article - نشر مقال جديد (دعم Markdown من 501 إلى 5000 كلمة)",
+                  "name": "get-articles - استرجاع وتصفح المقالات (مع فلترة الفيديو containVideo والبحث)",
+                  "api": {
+                    "id": "47000096",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/articles",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "containVideo",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "فلترة المقالات حسب احتوائها على فيديو (true / false)"
+                        },
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث نصي في عناوين ومحتوى المقالات"
+                        },
+                        {
+                          "name": "category",
+                          "type": "string",
+                          "required": false,
+                          "description": "معرف أو اسم التصنيف"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)"
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد المقالات في الصفحة (افتراضي 20)"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000096_200",
+                        "code": 200,
+                        "name": "Success",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "OK",
+                        "data": "{\"data\":[{\"id\":\"c1f19d08-0bf1-4e76-bf10-1a7428f5dd4a\",\"type\":\"article\",\"title\":\"مستقبل القراءة الرقمية وأثرها على الإدراك\",\"content\":\"# مقدمة\\n> القراءة تصنع إنساناً كاملاً...\",\"contentFormat\":\"markdown\",\"coverImageUrl\":\"https://cdn.hayahbook.com/articles/covers/cover_sample.jpg\",\"containVideo\":false,\"category\":\"تطوير الذات\",\"sharesCount\":5,\"commentsCount\":2,\"createdAt\":\"2026-11-12T00:00:00.000Z\"}],\"total\":1,\"page\":1,\"limit\":20}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع قائمة المقالات المنشورة مع دعم فلترة الفيديو عبر containVideo والبحث بالتصنيف والكلمات المفتاحية.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-articles - استرجاع وتصفح المقالات (مع فلترة الفيديو containVideo والبحث)"
+                  }
+                },
+                {
+                  "name": "add-article - نشر مقال جديد (دعم Markdown من 501 إلى 5000 كلمة، وفحص الفيديو)",
                   "api": {
                     "id": "47000030",
                     "method": "post",
@@ -1712,7 +1943,7 @@
                     "responseExamples": [
                       {
                         "name": "Created",
-                        "data": "{\"message\":\"تم نشر المقال بنجاح\",\"data\":{\"id\":\"c1f19d08-0bf1-4e76-bf10-1a7428f5dd4a\",\"type\":\"article\",\"title\":\"مستقبل القراءة الرقمية وأثرها على الإدراك\",\"content\":\"# مقدمة\\n> القراءة تصنع إنساناً كاملاً...\",\"contentFormat\":\"markdown\",\"coverImageUrl\":\"https://cdn.hayahbook.com/articles/covers/cover_sample.jpg\",\"category\":\"تطوير الذات\",\"sharesCount\":0,\"commentsCount\":0}}",
+                        "data": "{\"message\":\"تم نشر المقال بنجاح\",\"data\":{\"id\":\"c1f19d08-0bf1-4e76-bf10-1a7428f5dd4a\",\"type\":\"article\",\"title\":\"مستقبل القراءة الرقمية وأثرها على الإدراك\",\"content\":\"# مقدمة\\n> القراءة تصنع إنساناً كاملاً...\",\"contentFormat\":\"markdown\",\"coverImageUrl\":\"https://cdn.hayahbook.com/articles/covers/cover_sample.jpg\",\"containVideo\":false,\"category\":\"تطوير الذات\",\"sharesCount\":0,\"commentsCount\":0}}",
                         "responseId": "47000029"
                       }
                     ],
@@ -1791,6 +2022,30 @@
                           "schema": {
                             "type": "string"
                           }
+                        },
+                        {
+                          "id": "mp_containVideo_art",
+                          "name": "containVideo",
+                          "required": false,
+                          "description": "تحديد ما إذا كان المقال يحتوي على فيديو",
+                          "type": "boolean",
+                          "enable": true,
+                          "example": "false",
+                          "schema": {
+                            "type": "boolean"
+                          }
+                        },
+                        {
+                          "id": "mp_videoUrl_art",
+                          "name": "videoUrl",
+                          "required": false,
+                          "description": "رابط فيديو خارجي مرفق بالمقال",
+                          "type": "string",
+                          "enable": true,
+                          "example": "",
+                          "schema": {
+                            "type": "string"
+                          }
                         }
                       ],
                       "required": true,
@@ -1798,7 +2053,7 @@
                       "examples": [],
                       "oasExtensions": ""
                     },
-                    "description": "نشر مقال طويل يدعم تنسيق الماركداون (الاقتباسات > والقوائم 1. - والروابط) مع فحص عدد الكلمات المقروءة 501-5000 كلمة",
+                    "description": "نشر مقال طويل يدعم تنسيق الماركداون (الاقتباسات > والقوائم 1. - والروابط) مع فحص عدد الكلمات المقروءة 501-5000 كلمة، وتحديد containVideo.",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -1822,7 +2077,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "add-article - نشر مقال جديد (دعم Markdown من 501 إلى 5000 كلمة، وفحص الفيديو)"
                   }
                 },
                 {
@@ -1833,14 +2089,7 @@
                     "path": "http://localhost:3000/v1/articles/categories",
                     "parameters": {
                       "path": [],
-                      "query": [
-                        {
-                          "name": "containVideo",
-                          "type": "boolean",
-                          "required": false,
-                          "description": "فلترة المنشورات/المقالات حسب احتوائها على فيديو (true / false)"
-                        }
-                      ],
+                      "query": [],
                       "header": [
                         {
                           "id": "header_lang",
@@ -1919,11 +2168,12 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-article-categories - تصنيفات المقالات"
                   }
                 },
                 {
-                  "name": "edit-post - تعديل منشور",
+                  "name": "edit-post - تعديل منشور (دعم 1 إلى 500 كلمة، وتحديث الفيديو)",
                   "api": {
                     "id": "47000034",
                     "method": "patch",
@@ -1985,7 +2235,7 @@
                     "responseExamples": [
                       {
                         "name": "OK",
-                        "data": "{\"message\":\"تم تحديث المنشور بنجاح\",\"data\":{\"id\":\"987db5c6-4690-45f4-a9f7-fe5ff2e4c2e0\",\"content\":\"نص المنشور الجديد بعد التعديل...\"}}",
+                        "data": "{\"message\":\"تم تعديل المنشور بنجاح\",\"data\":{\"id\":\"987db5c6-4690-45f4-a9f7-fe5ff2e4c2e0\",\"content\":\"نص المنشور المعدل بدقة\",\"containVideo\":false,\"updatedAt\":\"2026-11-12T00:00:00.000Z\"}}",
                         "responseId": "47000033"
                       }
                     ],
@@ -2030,7 +2280,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "edit-post - تعديل منشور (دعم 1 إلى 500 كلمة، وتحديث الفيديو)"
                   }
                 },
                 {
@@ -2132,7 +2383,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "delete-post - حذف منشور"
                   }
                 },
                 {
@@ -2234,7 +2486,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "delete-article - حذف مقال"
                   }
                 },
                 {
@@ -2334,7 +2587,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "share-post - مشاركة المنشور برابط ويب مشفر (Share Post & Encrypted Link)"
                   }
                 },
                 {
@@ -2434,7 +2688,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "resolve-share-token - فك تشفير رابط المشاركة وعرض المنشور"
                   }
                 },
                 {
@@ -2536,7 +2791,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "toggle-view-less - إخفاء المنشور / عرض محتوى أقل بنظام Toggle"
                   }
                 },
                 {
@@ -2647,7 +2903,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "toggle-comments - تعطيل / تفعيل التعليقات على المنشور أو المقال"
                   }
                 },
                 {
@@ -2658,14 +2915,7 @@
                     "path": "http://localhost:3000/v1/posts/report-reasons",
                     "parameters": {
                       "path": [],
-                      "query": [
-                        {
-                          "name": "containVideo",
-                          "type": "boolean",
-                          "required": false,
-                          "description": "فلترة المنشورات/المقالات حسب احتوائها على فيديو (true / false)"
-                        }
-                      ],
+                      "query": [],
                       "header": [
                         {
                           "id": "header_lang",
@@ -2744,7 +2994,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-post-report-reasons - أسباب الإبلاغ عن منشور أو مقال"
                   }
                 },
                 {
@@ -2855,7 +3106,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "report-post - تقديم بلاغ عن منشور أو مقال"
                   }
                 }
               ]
@@ -2982,7 +3234,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-preset-avatars - استرجاع الصور الرمزية الجاهزة (صور فقط)"
                   }
                 },
                 {
@@ -3091,7 +3344,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "check-nickname - الفحص الفوري لتوفر وصحة الاسم المستعار (30 حرف - بدون مسافات - بدون خلط لغات)"
                   }
                 },
                 {
@@ -3249,7 +3503,7 @@
                     "responseExamples": [
                       {
                         "name": "OK",
-                        "data": "{\"data\":{\"userOption\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"type\":\"user\",\"name\":\"محمد خالد\",\"avatarUrl\":null},\"aliases\":[{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"type\":\"alias\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"isDefault\":true}],\"anonymousOption\":{\"type\":\"anonymous\",\"name\":\"مجهول #1042\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/anonymous-avatar.png\"}}}",
+                        "data": "{\"data\":{\"primary\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"محمد خالد\",\"profileUrl\":null,\"userType\":\"User\",\"isVerified\":false},\"alias\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\"},\"aliases\":[{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\"}],\"anonymousOption\":{\"type\":\"anonymous\",\"name\":\"مجهول #1042\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/anonymous-avatar.png\"}}}",
                         "responseId": "47000058"
                       }
                     ],
@@ -3285,7 +3539,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-identity-options - خيارات الهوية للمستخدم (النافذة السفلية Bottom Sheet)"
                   }
                 },
                 {
@@ -3478,7 +3733,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-alias-profile - الملف العام للاسم المستعار مع الإحصائيات"
                   }
                 },
                 {
@@ -3597,7 +3853,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-alias-comments - تعليقات الاسم المستعار (التبويب 1)"
                   }
                 },
                 {
@@ -3697,7 +3954,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-alias-book-reviews - مراجعات الكتب للاسم المستعار (التبويب 2)"
                   }
                 },
                 {
@@ -3797,7 +4055,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-alias-book-ratings - تقييمات الكتب للاسم المستعار (التبويب 2)"
                   }
                 },
                 {
@@ -4060,7 +4319,7 @@
                     "responseExamples": [
                       {
                         "name": "OK",
-                        "data": "{\"counts\":{\"all\":10,\"posts\":4,\"articles\":6,\"visuals\":1,\"snippets\":0},\"data\":[{\"id\":\"987db5c6-4690-45f4-a9f7-fe5ff2e4c2e0\",\"type\":\"post\",\"content\":\"نص منشور تجريبي\",\"likesCount\":2,\"commentsCount\":1,\"isFollowingAuthor\":false,\"shareUrl\":\"https://hayahbook.com/posts/mH-1xkaQRYSp9_5f-uTC4A\"}],\"total\":10,\"page\":1,\"limit\":20,\"totalPages\":1}",
+                        "data": "{\"counts\":{\"all\":10,\"posts\":4,\"articles\":6,\"visuals\":1,\"snippets\":0},\"data\":[{\"id\":\"987db5c6-4690-45f4-a9f7-fe5ff2e4c2e0\",\"type\":\"post\",\"content\":\"نص منشور تجريبي جديد\",\"containVideo\":false,\"likesCount\":2,\"commentsCount\":1,\"isFollowingAuthor\":false,\"shareUrl\":\"https://hayahbook.com/posts/mH-1xkaQRYSp9_5f-uTC4A\",\"createdAt\":\"2026-11-12T00:00:00.000Z\"},{\"id\":\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\"type\":\"post\",\"content\":\"مقطع فيديو قصير لمراجعة رواية موسم الهجرة إلى الشمال\",\"containVideo\":true,\"videoUrl\":\"https://cdn.hayahbook.com/videos/season-sample.mp4\",\"likesCount\":8,\"commentsCount\":4,\"isFollowingAuthor\":true,\"shareUrl\":\"https://hayahbook.com/posts/aB-3yzaXYZp8_4g-vUD5B\",\"createdAt\":\"2026-11-12T00:00:00.000Z\"}],\"total\":2,\"page\":1,\"limit\":20}",
                         "responseId": "47000075"
                       }
                     ],
@@ -4096,7 +4355,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "home-feed - استرجاع تغذية الصفحة الرئيسية"
                   }
                 },
                 {
@@ -4207,7 +4467,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "toggle-reaction - التفاعل على منشور أو مقال (أوافق، أعجبني، أصفق...)"
                   }
                 },
                 {
@@ -4337,7 +4598,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-reacting-users - قائمة المتفاعلين مع المنشور أو المقال"
                   }
                 }
               ]
@@ -4485,7 +4747,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "add-comment - إضافة تعليق (يدعم الهوية الحقيقية، الاسم المستعار، أو المجهول)"
                   }
                 },
                 {
@@ -4613,7 +4876,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-comments - استرجاع تعليقات المنشور أو المقال"
                   }
                 },
                 {
@@ -4724,7 +4988,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "reply-to-comment - الرد على تعليق"
                   }
                 },
                 {
@@ -4843,7 +5108,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-comment-replies - استرجاع الردود على تعليق محدد"
                   }
                 },
                 {
@@ -4945,7 +5211,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "toggle-comment-like - الإعجاب بالتعليق (Like / Unlike)"
                   }
                 },
                 {
@@ -5056,7 +5323,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "report-comment - الإبلاغ عن تعليق مسيء"
                   }
                 },
                 {
@@ -5167,7 +5435,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "edit-comment - تعديل التعليق"
                   }
                 },
                 {
@@ -5269,7 +5538,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "delete-comment - حذف التعليق"
                   }
                 },
                 {
@@ -5359,7 +5629,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-comment-sort-options - خيارات ترتيب التعليقات"
                   }
                 }
               ]
@@ -5523,7 +5794,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-books - استعراض قائمة الكتب"
                   }
                 },
                 {
@@ -5652,7 +5924,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-my-books - كتبي (قيد القراءة / المكتملة / أرغب في قراءتها)"
                   }
                 },
                 {
@@ -5742,7 +6015,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-latest-books - أحدث الكتب المضافة"
                   }
                 },
                 {
@@ -5842,7 +6116,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "search-books - البحث في الكتب"
                   }
                 },
                 {
@@ -5932,7 +6207,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-book-categories - تصنيفات الكتب"
                   }
                 },
                 {
@@ -6032,7 +6308,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-book-by-id - تفاصيل كتاب محدد"
                   }
                 },
                 {
@@ -6143,7 +6420,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "update-reading-status - تحديث حالة القراءة ونسبة الإنجاز"
                   }
                 },
                 {
@@ -6254,7 +6532,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "rate-book - تقييم الكتاب بالنجوم"
                   }
                 },
                 {
@@ -6365,7 +6644,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "review-book - كتابة مراجعة ونقد للكتاب"
                   }
                 },
                 {
@@ -6474,7 +6754,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-audiobooks - قائمة الكتب الصوتية"
                   }
                 },
                 {
@@ -6574,7 +6855,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-audiobook-by-id - تفاصيل كتاب صوتي"
                   }
                 }
               ]
@@ -6713,7 +6995,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "toggle-bookmark - حفظ / إلغاء حفظ المنشور أو المقال (Toggle Save)"
                   }
                 },
                 {
@@ -6833,7 +7116,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-bookmarks - استرجاع المحفوظات الخاصة بي"
                   }
                 }
               ]
@@ -6972,7 +7256,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "toggle-follow-user - متابعة / إلغاء متابعة الكاتب بنظام Toggle"
                   }
                 },
                 {
@@ -7074,7 +7359,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "block-user - حظر مستخدم"
                   }
                 },
                 {
@@ -7176,7 +7462,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "unblock-user - إلغاء حظر مستخدم"
                   }
                 },
                 {
@@ -7268,7 +7555,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "my-blocked-users - قائمة المستخدمين المحظورين لدي"
                   }
                 },
                 {
@@ -7370,7 +7658,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "my-following - قائمة الذين أتابعهم (مع ميزة البحث الفوري أثناء كتابة @)"
                   }
                 },
                 {
@@ -7462,7 +7751,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "my-followers - قائمة المتابعين لي"
                   }
                 },
                 {
@@ -7562,7 +7852,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-user-profile - الملف العام لمستخدم"
                   }
                 }
               ]
@@ -7717,7 +8008,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-authors - استعراض قائمة المؤلفين والكتّاب"
                   }
                 },
                 {
@@ -7817,7 +8109,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-author-by-id - تفاصيل مؤلف وكتبه ومقالاته"
                   }
                 },
                 {
@@ -7926,7 +8219,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-creators - استعراض صناع المحتوى"
                   }
                 },
                 {
@@ -8026,7 +8320,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-creator-by-id - تفاصيل صانع محتوى"
                   }
                 }
               ]
@@ -8153,7 +8448,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-all-categories - استرجاع كل التصنيفات العامة"
                   }
                 },
                 {
@@ -8243,7 +8539,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-user-interests - جلب قائمة الاهتمامات المتاحة للاختيار"
                   }
                 },
                 {
@@ -8344,7 +8641,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "save-user-interests - حفظ اهتمامات المستخدم"
                   }
                 },
                 {
@@ -8450,7 +8748,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "upload-file - رفع صورة أو ملف وسائط"
                   }
                 },
                 {
@@ -8540,7 +8839,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-countries - قائمة الدول المدعومة ورموز الاتصال"
                   }
                 },
                 {
@@ -8630,7 +8930,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-languages - لغات التطبيق المدعومة"
                   }
                 },
                 {
@@ -8731,7 +9032,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "set-language - حفظ لغة التطبيق المفضلة"
                   }
                 }
               ]
