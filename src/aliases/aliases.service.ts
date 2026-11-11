@@ -16,6 +16,7 @@ import { UploadFile } from '../upload/upload-file.interface';
 import { I18nService } from '../i18n/i18n.service';
 import { CreateAliasDto } from './dto/create-alias.dto';
 import { UpdateAliasDto } from './dto/update-alias.dto';
+import { validateNicknameFormat } from './validators/nickname.validator';
 
 export interface AliasPresetAvatar {
   id: string;
@@ -182,12 +183,19 @@ export class AliasesService {
       throw new BadRequestException(this.i18n.t('aliases.nickname_required'));
     }
 
-    if (trimmed.length > 50) {
-      throw new BadRequestException(
+    const validation = validateNicknameFormat(
+      trimmed,
+      (this.i18n.getCurrentLanguage?.() || 'ar') === 'ar' ? 'ar' : 'en',
+    );
+    if (!validation.isValid) {
+      const msg =
         this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Nickname cannot exceed 50 characters'
-          : 'الاسم المستعار لا يمكن أن يتجاوز 50 حرفاً',
-      );
+          ? validation.messageEn
+          : validation.message;
+      return {
+        available: false,
+        message: msg,
+      };
     }
 
     let query = this.aliasRepo
@@ -224,8 +232,16 @@ export class AliasesService {
     file?: UploadFile,
   ): Promise<UserAlias> {
     const normalizedNickname = dto.nickname?.trim();
-    if (!normalizedNickname) {
-      throw new BadRequestException(this.i18n.t('aliases.nickname_required'));
+    const validation = validateNicknameFormat(
+      normalizedNickname,
+      (this.i18n.getCurrentLanguage?.() || 'ar') === 'ar' ? 'ar' : 'en',
+    );
+    if (!validation.isValid) {
+      throw new BadRequestException(
+        this.i18n.getCurrentLanguage?.() === 'en'
+          ? validation.messageEn
+          : validation.message,
+      );
     }
 
     let uploadedUrl: string | null = null;
@@ -699,9 +715,15 @@ export class AliasesService {
           );
         if (dto.nickname !== undefined) {
           const normalizedNickname = dto.nickname.trim();
-          if (!normalizedNickname) {
+          const validation = validateNicknameFormat(
+            normalizedNickname,
+            (this.i18n.getCurrentLanguage?.() || 'ar') === 'ar' ? 'ar' : 'en',
+          );
+          if (!validation.isValid) {
             throw new BadRequestException(
-              this.i18n.t('aliases.nickname_required'),
+              this.i18n.getCurrentLanguage?.() === 'en'
+                ? validation.messageEn
+                : validation.message,
             );
           }
 

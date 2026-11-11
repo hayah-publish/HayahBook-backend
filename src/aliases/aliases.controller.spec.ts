@@ -22,12 +22,12 @@ describe('AliasesController', () => {
     getMyAlias: jest.fn().mockResolvedValue(null),
     createAlias: jest.fn().mockResolvedValue({
       id: 'alias-1',
-      nickname: 'I am not a vegetable',
+      nickname: 'I_am_not_a_vegetable',
       avatarUrl: 'https://cdn.hayahbook.com/presets/alias-monster-green.png',
     }),
     getAliasProfile: jest.fn().mockResolvedValue({
       id: 'alias-1',
-      nickname: 'I am not a vegetable',
+      nickname: 'I_am_not_a_vegetable',
       badges: { agreedCount: 44, searchCount: 106 },
     }),
     getAliasComments: jest.fn().mockResolvedValue({
@@ -44,7 +44,7 @@ describe('AliasesController', () => {
     }),
     updateAlias: jest.fn().mockResolvedValue({
       id: 'alias-1',
-      nickname: 'Critic of critics',
+      nickname: 'Critic_of_critics',
     }),
     deleteAlias: jest.fn().mockResolvedValue({
       message: 'Deleted successfully',
@@ -90,7 +90,7 @@ describe('AliasesController', () => {
 
   it('should create an alias', async () => {
     const req = { user: { userId: 'user-1', role: 'user' } } as any;
-    const res = await controller.createAlias(req, { nickname: 'I am not a vegetable' });
+    const res = await controller.createAlias(req, { nickname: 'I_am_not_a_vegetable' });
     expect(res.data).toBeDefined();
     expect(res.message).toBe('Alias created successfully');
   });

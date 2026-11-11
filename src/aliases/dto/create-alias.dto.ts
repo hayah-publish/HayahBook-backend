@@ -7,12 +7,14 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsValidNickname } from '../validators/nickname.validator';
 
 export class CreateAliasDto {
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString({ message: 'Nickname must be a string' })
   @IsNotEmpty({ message: 'Nickname cannot be empty' })
-  @MaxLength(50, { message: 'Nickname cannot exceed 50 characters' })
+  @MaxLength(30, { message: 'Nickname cannot exceed 30 characters' })
+  @IsValidNickname()
   nickname: string;
 
   @IsOptional()

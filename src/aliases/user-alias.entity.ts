@@ -24,7 +24,7 @@ export class UserAlias {
   user: User;
 
   @Index({ unique: true })
-  @Column({ type: 'varchar', length: 100, unique: true })
+  @Column({ type: 'varchar', length: 30, unique: true })
   nickname: string;
 
   @Column({ name: 'avatar_url', type: 'varchar', length: 500, nullable: true })

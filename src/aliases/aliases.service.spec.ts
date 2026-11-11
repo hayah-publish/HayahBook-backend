@@ -83,6 +83,20 @@ describe('AliasesService - Unique Nickname & Picture-Only Presets', () => {
       await expect(service.checkNicknameAvailability('   ')).rejects.toThrow(BadRequestException);
     });
 
+    it('returns available: false if nickname violates format (spaces, >30 chars, mixed scripts)', async () => {
+      const spaceRes = await service.checkNicknameAvailability('I am not a vegetable');
+      expect(spaceRes.available).toBe(false);
+      expect(spaceRes.message).toContain('مسافات');
+
+      const longRes = await service.checkNicknameAvailability('a'.repeat(31));
+      expect(longRes.available).toBe(false);
+      expect(longRes.message).toContain('30 حرفاً');
+
+      const mixedRes = await service.checkNicknameAvailability('reader_قارئ');
+      expect(mixedRes.available).toBe(false);
+      expect(mixedRes.message).toContain('الخلط بين الحروف');
+    });
+
     it('returns available: false when nickname is already in use', async () => {
       const qb: any = {
         where: jest.fn().mockReturnThis(),
