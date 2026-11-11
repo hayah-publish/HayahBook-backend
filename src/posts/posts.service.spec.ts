@@ -1071,6 +1071,7 @@ describe('PostsService public post formatting', () => {
       mockPostsRepo = {
         findOne: jest.fn(),
         save: jest.fn((p) => Promise.resolve(p)),
+        create: jest.fn((p) => p),
         increment: jest.fn().mockResolvedValue(undefined),
       };
       mockUsersRepo = {
@@ -1108,8 +1109,8 @@ describe('PostsService public post formatting', () => {
       serviceWithActions = new PostsService(
         mockPostsRepo,
         mockUsersRepo,
-        {} as any,
-        {} as any,
+        { findOne: jest.fn().mockResolvedValue(null) } as any,
+        { findOne: jest.fn().mockResolvedValue(null) } as any,
         {
           uploadPostImages: jest
             .fn()
@@ -1350,6 +1351,59 @@ describe('PostsService public post formatting', () => {
       expect(reportRes.report.reasonId).toBe(
         '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
       );
+    });
+
+    it('sets containVideo = true when post contains a videoUrl and filters by containVideo', async () => {
+      mockPostsRepo.create.mockImplementation((dto: any) => ({
+        id: 'post-video-1',
+        ...dto,
+      }));
+      mockPostsRepo.save.mockImplementation((p: any) => Promise.resolve(p));
+
+      const created = await serviceWithActions.createPost(
+        'user-1',
+        {
+          content: 'Post with a video',
+          videoUrl: 'https://example.com/video.mp4',
+        } as any,
+        [],
+      );
+
+      expect(created.data.containVideo).toBe(true);
+
+      const qb: any = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([
+          [
+            {
+              id: 'post-video-1',
+              type: 'post',
+              content: 'Video post',
+              videoUrl: 'https://example.com/video.mp4',
+              containVideo: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ],
+          1,
+        ]),
+      };
+      mockPostsRepo.createQueryBuilder = jest.fn().mockReturnValue(qb);
+
+      const res = await serviceWithActions.findAll({
+        containVideo: true,
+      } as any);
+
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        'post.containVideo = :containVideo',
+        { containVideo: true },
+      );
+      expect(res.data[0].containVideo).toBe(true);
     });
   });
 });

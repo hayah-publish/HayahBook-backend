@@ -85,6 +85,15 @@ describe('AliasesController', () => {
     expect(mockAliasesService.getIdentityOptions).toHaveBeenCalledWith('user-1', 'ar');
   });
 
+  it('should return caller single alias with cooldown info', async () => {
+    const req = { user: { userId: 'user-1', role: 'user' } } as any;
+    const mockAlias = { id: 'alias-1', nickname: 'reader_1', canEdit: true };
+    mockAliasesService.getMyAlias.mockResolvedValueOnce(mockAlias);
+    const res = await controller.getMyAlias(req);
+    expect(res).toEqual({ data: mockAlias, alias: mockAlias });
+    expect(mockAliasesService.getMyAlias).toHaveBeenCalledWith('user-1');
+  });
+
   it('should create an alias', async () => {
     const req = { user: { userId: 'user-1', role: 'user' } } as any;
     const res = await controller.createAlias(req, { nickname: 'I_am_not_a_vegetable' });

@@ -75,15 +75,15 @@ export class AliasesController {
   }
 
   /**
-   * GET /v1/aliases/my (or /v1/me/aliases)
+   * GET /v1/aliases/my (or /v1/aliases/me)
    * Get unique alias owned by caller with 30-day edit cooldown status
    */
   @UseGuards(JwtAuthGuard)
   @Get(['my', 'me'])
-  async getMyAliases(@Req() req: AuthenticatedRequest) {
+  async getMyAlias(@Req() req: AuthenticatedRequest) {
     const alias = await this.aliasesService.getMyAlias(req.user!.userId);
     return {
-      data: alias ? [alias] : [],
+      data: alias || null,
       alias: alias || null,
     };
   }

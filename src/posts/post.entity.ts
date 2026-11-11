@@ -51,6 +51,10 @@ export class Post {
   @Column({ name: 'video_url', type: 'text', nullable: true })
   videoUrl: string | null;
 
+  @Index()
+  @Column({ name: 'contain_video', type: 'boolean', default: false })
+  containVideo: boolean;
+
   @Column({ name: 'link_url', type: 'text', nullable: true })
   linkUrl: string | null;
 

@@ -132,6 +132,7 @@ export interface FormattedPost {
   content: string;
   images: string[];
   videoUrl: string | null;
+  containVideo: boolean;
   link: {
     url: string;
     title: string | null;
@@ -854,6 +855,11 @@ export class PostsService {
         finalVideoUrl = uploadedVideoUrl = uploadRes.videoUrl;
       }
 
+      const containVideo =
+        dto.containVideo !== undefined
+          ? Boolean(dto.containVideo)
+          : Boolean(finalVideoUrl && finalVideoUrl.trim());
+
       const post = this.postsRepository.create({
         userId,
         type: dto.type || 'post',
@@ -861,6 +867,7 @@ export class PostsService {
         content: processedContent,
         images: finalImages,
         videoUrl: finalVideoUrl,
+        containVideo,
         linkUrl,
         linkTitle,
         bookId: book?.id || null,
@@ -1088,6 +1095,11 @@ export class PostsService {
         uploadedUrlsToCleanup.push(finalVideoUrl);
       }
 
+      const containVideo =
+        dto.containVideo !== undefined
+          ? Boolean(dto.containVideo)
+          : Boolean(finalVideoUrl && finalVideoUrl.trim());
+
       const post = this.postsRepository.create({
         userId,
         type: 'article',
@@ -1099,6 +1111,7 @@ export class PostsService {
         content: processedContent,
         images: finalImages,
         videoUrl: finalVideoUrl,
+        containVideo,
         linkUrl,
         linkTitle,
         bookId: book?.id || null,
@@ -1357,6 +1370,12 @@ export class PostsService {
       qb.andWhere('(post.category ILIKE :cat OR post.category_id = :catId)', {
         cat: `%${query.category.trim()}%`,
         catId: query.category.trim(),
+      });
+    }
+
+    if (query.containVideo !== undefined) {
+      qb.andWhere('post.containVideo = :containVideo', {
+        containVideo: query.containVideo,
       });
     }
 
@@ -2058,6 +2077,10 @@ export class PostsService {
       content: post.content,
       images: post.images || [],
       videoUrl: post.videoUrl,
+      containVideo:
+        post.containVideo !== undefined && post.containVideo !== null
+          ? Boolean(post.containVideo)
+          : Boolean(post.videoUrl && post.videoUrl.trim()),
       link: formattedLink,
       links: allLinks,
       book: formattedBook,
@@ -2833,6 +2856,11 @@ export class PostsService {
           (url) => imageFiles.length && url !== post.videoUrl,
         ),
       ];
+      if (dto.containVideo !== undefined) {
+        post.containVideo = Boolean(dto.containVideo);
+      } else if (dto.videoUrl !== undefined || videoFiles.length > 0) {
+        post.containVideo = Boolean(post.videoUrl && post.videoUrl.trim());
+      }
       savedPost = await this.postsRepository.save(post);
     } catch (error) {
       await Promise.all(

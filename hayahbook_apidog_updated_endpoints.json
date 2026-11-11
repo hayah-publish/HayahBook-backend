@@ -1833,7 +1833,14 @@
                     "path": "http://localhost:3000/v1/articles/categories",
                     "parameters": {
                       "path": [],
-                      "query": [],
+                      "query": [
+                        {
+                          "name": "containVideo",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "فلترة المنشورات/المقالات حسب احتوائها على فيديو (true / false)"
+                        }
+                      ],
                       "header": [
                         {
                           "id": "header_lang",
@@ -2651,7 +2658,14 @@
                     "path": "http://localhost:3000/v1/posts/report-reasons",
                     "parameters": {
                       "path": [],
-                      "query": [],
+                      "query": [
+                        {
+                          "name": "containVideo",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "فلترة المنشورات/المقالات حسب احتوائها على فيديو (true / false)"
+                        }
+                      ],
                       "header": [
                         {
                           "id": "header_lang",
@@ -3133,7 +3147,7 @@
                     "responseExamples": [
                       {
                         "name": "Created",
-                        "data": "{\"message\":\"Alias created successfully\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"522df3b3-57a5-48ef-8b77-d510bf8da6d1\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"isDefault\":true,\"commentsCount\":0,\"bookRatingsCount\":0,\"bookReviewsCount\":0}}",
+                        "data": "{\"message\":\"Alias created successfully\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"522df3b3-57a5-48ef-8b77-d510bf8da6d1\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":true,\"daysRemaining\":0,\"nextAllowedEditDate\":null,\"commentsCount\":0,\"bookRatingsCount\":0,\"bookReviewsCount\":0}}",
                         "responseId": "47000056"
                       }
                     ],
@@ -3149,7 +3163,7 @@
                       "examples": [
                         {
                           "mediaType": "application/json",
-                          "value": "{\n  \"nickname\": \"قارئ_الليل\",\n  \"avatarUrl\": \"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\n  \"isDefault\": true\n}"
+                          "value": "{\n  \"nickname\": \"قارئ_الليل\",\n  \"avatarUrl\": \"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\"\n}"
                         }
                       ],
                       "oasExtensions": ""
@@ -3178,7 +3192,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "create-alias - إنشاء الاسم المستعار الفريد الخاص بالمستخدم (اسم مستعار واحد فقط)"
                   }
                 },
                 {
@@ -3326,7 +3341,7 @@
                     "responseExamples": [
                       {
                         "name": "OK",
-                        "data": "{\"data\":[{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"isDefault\":true,\"commentsCount\":3,\"bookRatingsCount\":2}]}",
+                        "data": "{\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":false,\"daysRemaining\":26,\"nextAllowedEditDate\":\"2026-12-07T00:00:00.000Z\",\"commentsCount\":3,\"bookRatingsCount\":2},\"alias\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الليل\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-cat-purple.jpg\",\"canEdit\":false,\"daysRemaining\":26,\"nextAllowedEditDate\":\"2026-12-07T00:00:00.000Z\",\"commentsCount\":3,\"bookRatingsCount\":2}}",
                         "responseId": "47000060"
                       }
                     ],
@@ -3790,19 +3805,9 @@
                   "api": {
                     "id": "47000071",
                     "method": "patch",
-                    "path": "http://localhost:3000/v1/aliases/{id}",
+                    "path": "http://localhost:3000/v1/aliases/my",
                     "parameters": {
-                      "path": [
-                        {
-                          "id": "path_id_0",
-                          "name": "id",
-                          "required": true,
-                          "description": "معرف الاسم المستعار",
-                          "type": "string",
-                          "enable": true,
-                          "example": "9d15c7e0-43ef-4f1b-87b6-9430c4e43209"
-                        }
-                      ],
+                      "path": [],
                       "query": [],
                       "header": [
                         {
@@ -3855,7 +3860,7 @@
                     "responseExamples": [
                       {
                         "name": "OK",
-                        "data": "{\"message\":\"Alias updated successfully\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"nickname\":\"قارئ_الصباح_المميز\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-owl-blue.jpg\",\"isDefault\":true}}",
+                        "data": "{\"message\":\"Alias updated successfully\",\"data\":{\"id\":\"9d15c7e0-43ef-4f1b-87b6-9430c4e43209\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"nickname\":\"قارئ_الصباح_المميز\",\"avatarUrl\":\"https://cdn.hayahbook.com/presets/aliases/preset-owl-blue.jpg\",\"canEdit\":false,\"daysRemaining\":30,\"nextAllowedEditDate\":\"2026-12-11T00:00:00.000Z\"}}",
                         "responseId": "47000070"
                       }
                     ],
@@ -3871,7 +3876,7 @@
                       "examples": [
                         {
                           "mediaType": "application/json",
-                          "value": "{\n  \"nickname\": \"قارئ_الصباح_المميز\",\n  \"avatarUrl\": \"https://cdn.hayahbook.com/presets/aliases/preset-owl-blue.jpg\",\n  \"isDefault\": true\n}"
+                          "value": "{\n  \"nickname\": \"قارئ_الصباح_المميز\",\n  \"avatarUrl\": \"https://cdn.hayahbook.com/presets/aliases/preset-owl-blue.jpg\"\n}"
                         }
                       ],
                       "oasExtensions": ""
@@ -4003,6 +4008,12 @@
                           "type": "string",
                           "enable": true,
                           "example": ""
+                        },
+                        {
+                          "name": "containVideo",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "فلترة المنشورات/المقالات حسب احتوائها على فيديو (true / false)"
                         }
                       ],
                       "header": [
