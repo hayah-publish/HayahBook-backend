@@ -1405,5 +1405,39 @@ describe('PostsService public post formatting', () => {
       );
       expect(res.data[0].containVideo).toBe(true);
     });
+
+    it('sets containVideo = false when creating post/article without video and true when with video', async () => {
+      mockPostsRepo.create.mockImplementation((dto: any) => ({
+        id: 'post-no-video',
+        ...dto,
+      }));
+      mockPostsRepo.save.mockImplementation((p: any) => Promise.resolve(p));
+
+      const withoutVideo = await serviceWithActions.createPost(
+        'user-1',
+        {
+          content: 'Plain post without video',
+        } as any,
+        [],
+      );
+      expect(withoutVideo.data.containVideo).toBe(false);
+
+      const withUploadedVideo = await serviceWithActions.createPost(
+        'user-1',
+        {
+          content: 'Post with uploaded video file',
+        } as any,
+        [
+          {
+            fieldname: 'video',
+            originalname: 'clip.mp4',
+            mimetype: 'video/mp4',
+            buffer: Buffer.from('test video'),
+            size: 100,
+          } as any,
+        ],
+      );
+      expect(withUploadedVideo.data.containVideo).toBe(true);
+    });
   });
 });

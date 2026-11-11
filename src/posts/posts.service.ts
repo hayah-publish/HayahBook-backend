@@ -855,10 +855,9 @@ export class PostsService {
         finalVideoUrl = uploadedVideoUrl = uploadRes.videoUrl;
       }
 
-      const containVideo =
-        dto.containVideo !== undefined
-          ? Boolean(dto.containVideo)
-          : Boolean(finalVideoUrl && finalVideoUrl.trim());
+      const containVideo = Boolean(
+        (finalVideoUrl && finalVideoUrl.trim()) || dto.containVideo,
+      );
 
       const post = this.postsRepository.create({
         userId,
@@ -1095,10 +1094,9 @@ export class PostsService {
         uploadedUrlsToCleanup.push(finalVideoUrl);
       }
 
-      const containVideo =
-        dto.containVideo !== undefined
-          ? Boolean(dto.containVideo)
-          : Boolean(finalVideoUrl && finalVideoUrl.trim());
+      const containVideo = Boolean(
+        (finalVideoUrl && finalVideoUrl.trim()) || dto.containVideo,
+      );
 
       const post = this.postsRepository.create({
         userId,
@@ -2077,10 +2075,9 @@ export class PostsService {
       content: post.content,
       images: post.images || [],
       videoUrl: post.videoUrl,
-      containVideo:
-        post.containVideo !== undefined && post.containVideo !== null
-          ? Boolean(post.containVideo)
-          : Boolean(post.videoUrl && post.videoUrl.trim()),
+      containVideo: Boolean(
+        post.containVideo || (post.videoUrl && post.videoUrl.trim()),
+      ),
       link: formattedLink,
       links: allLinks,
       book: formattedBook,
@@ -2856,10 +2853,12 @@ export class PostsService {
           (url) => imageFiles.length && url !== post.videoUrl,
         ),
       ];
-      if (dto.containVideo !== undefined) {
+      if (post.videoUrl && post.videoUrl.trim()) {
+        post.containVideo = true;
+      } else if (dto.containVideo !== undefined) {
         post.containVideo = Boolean(dto.containVideo);
-      } else if (dto.videoUrl !== undefined || videoFiles.length > 0) {
-        post.containVideo = Boolean(post.videoUrl && post.videoUrl.trim());
+      } else {
+        post.containVideo = false;
       }
       savedPost = await this.postsRepository.save(post);
     } catch (error) {

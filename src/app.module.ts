@@ -33,6 +33,10 @@ import { UserAliasesAndCommentIdentity1763000000000 } from './database/migration
 import { UserAnonymousNumber1763100000000 } from './database/migrations/1763100000000-user-anonymous-number';
 import { AddPostContentFormat1763200000000 } from './database/migrations/1763200000000-add-post-content-format';
 import { UniqueAliasNickname1763300000000 } from './database/migrations/1763300000000-unique-alias-nickname';
+import { OneAliasPerUserAnd30DayCooldown1763400000000 } from './database/migrations/1763400000000-one-alias-per-user-and-30-day-cooldown';
+import { AliasNicknameFormatAndLengthConstraint1763500000000 } from './database/migrations/1763500000000-alias-nickname-format-and-length-constraint';
+import { AddContainVideoToPosts1763600000000 } from './database/migrations/1763600000000-add-contain-video-to-posts';
+import { CreateUserBookExcerptsTable1763700000000 } from './database/migrations/1763700000000-create-user-book-excerpts-table';
 
 @Module({
   imports: [
@@ -76,6 +80,10 @@ import { UniqueAliasNickname1763300000000 } from './database/migrations/17633000
               UserAnonymousNumber1763100000000,
               AddPostContentFormat1763200000000,
               UniqueAliasNickname1763300000000,
+              OneAliasPerUserAnd30DayCooldown1763400000000,
+              AliasNicknameFormatAndLengthConstraint1763500000000,
+              AddContainVideoToPosts1763600000000,
+              CreateUserBookExcerptsTable1763700000000,
             ],
             migrationsRun: true,
           };
@@ -103,6 +111,10 @@ import { UniqueAliasNickname1763300000000 } from './database/migrations/17633000
             UserAnonymousNumber1763100000000,
             AddPostContentFormat1763200000000,
             UniqueAliasNickname1763300000000,
+            OneAliasPerUserAnd30DayCooldown1763400000000,
+            AliasNicknameFormatAndLengthConstraint1763500000000,
+            AddContainVideoToPosts1763600000000,
+            CreateUserBookExcerptsTable1763700000000,
           ],
           migrationsRun: true,
         };

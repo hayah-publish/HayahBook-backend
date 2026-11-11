@@ -6858,6 +6858,458 @@
                     "inheritPreProcessors": {},
                     "name": "get-audiobook-by-id - تفاصيل كتاب صوتي"
                   }
+                },
+                {
+                  "name": "add-book-excerpt - حفظ مقتطف أو تمييز جديد من الكتاب (خاص بالمستخدم)",
+                  "api": {
+                    "id": "47000101",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/books/{bookId}/excerpts",
+                    "parameters": {
+                      "path": [
+                        {
+                          "id": "path_bookId",
+                          "name": "bookId",
+                          "required": true,
+                          "description": "معرف الكتاب (UUID)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "05bc8a29-33a3-453c-b862-0aef300ab7bd"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000101_201",
+                        "code": 201,
+                        "name": "Created",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "data": "{\"message\":\"تم حفظ المقتطف بنجاح\",\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\"note\":\"حبيت الجملة دي اووي\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/14[chap07]!/4/2/12/1:0)\",\"createdAt\":\"2026-11-12T00:30:00.000Z\",\"updatedAt\":\"2026-11-12T00:30:00.000Z\"}}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "application/json",
+                      "parameters": [],
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {}
+                      },
+                      "required": true,
+                      "examples": [
+                        {
+                          "name": "حفظ جملة مميزة مع ملاحظة ولون",
+                          "value": "{\n  \"content\": \"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\n  \"note\": \"حبيت الجملة دي اووي\",\n  \"chapter\": \"الفصل السابع\",\n  \"pageNumber\": 632,\n  \"color\": \"#FF7A00\",\n  \"cfiRange\": \"epubcfi(/6/14[chap07]!/4/2/12/1:0)\"\n}"
+                        }
+                      ]
+                    },
+                    "description": "حفظ جملة أو فقرة من كتاب كمقتطف (تمييز وملاحظة) خاص بالمستخدم من داخل قارئ الكتب، مع رقم الصفحة، اسم الفصل، لون التمييز، وملاحظة شخصية. خاص تماماً ولا يمكن لأي مستخدم آخر الاطلاع عليه.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "add-book-excerpt - حفظ مقتطف أو تمييز جديد من الكتاب (خاص بالمستخدم)"
+                  }
+                },
+                {
+                  "name": "get-book-excerpts - استرجاع تمييزات ومقتطفات كتاب محدد (خاصة بالمستخدم فقط)",
+                  "api": {
+                    "id": "47000102",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/books/{bookId}/excerpts",
+                    "parameters": {
+                      "path": [
+                        {
+                          "id": "path_bookId",
+                          "name": "bookId",
+                          "required": true,
+                          "description": "معرف الكتاب (UUID)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "05bc8a29-33a3-453c-b862-0aef300ab7bd"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث نصي داخل الاقتباس أو الملاحظة"
+                        },
+                        {
+                          "name": "chapter",
+                          "type": "string",
+                          "required": false,
+                          "description": "فلترة بفصل معين (مثال: الفصل السابع)"
+                        },
+                        {
+                          "name": "sortBy",
+                          "type": "string",
+                          "required": false,
+                          "description": "الترتيب: createdAt (تاريخ الإضافة) أو pageNumber (رقم الصفحة)"
+                        },
+                        {
+                          "name": "order",
+                          "type": "string",
+                          "required": false,
+                          "description": "اتجاه الترتيب: DESC أو ASC"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)"
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد المقتطفات في الصفحة (افتراضي 20)"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000102_200",
+                        "code": 200,
+                        "name": "Success",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "data": "{\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"خلف الأبواب الموصدة\",\"author\":\"منى عبد الحليم\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/behind-closed-doors.jpg\",\"category\":\"روايات\"},\"data\":[{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\"note\":\"حبيت الجملة دي اووي\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/14[chap07]!/4/2/12/1:0)\",\"createdAt\":\"2026-11-12T00:30:00.000Z\",\"updatedAt\":\"2026-11-12T00:30:00.000Z\"},{\"id\":\"b3c2a109-87fe-4980-87a1-24c4ea3d7ea0\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"الشجرة كانت جميلة،\",\"note\":null,\"chapter\":\"الفصل الثالث\",\"pageNumber\":42,\"color\":\"#FF7A00\",\"cfiRange\":null,\"createdAt\":\"2026-11-12T00:25:00.000Z\",\"updatedAt\":\"2026-11-12T00:25:00.000Z\"}],\"total\":2,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع قائمة المقتطفات والتمييزات والملاحظات الخاصة بالمستخدم الحالي لكتاب محدد (تظهر مقتطفات كل كتاب في قائمة منفصلة). خاص تماماً.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-book-excerpts - استرجاع تمييزات ومقتطفات كتاب محدد (خاصة بالمستخدم فقط)"
+                  }
+                },
+                {
+                  "name": "get-my-books-with-excerpts - استعراض الكتب التي تحتوي على مقتطفاتي (مجمعة لكل كتاب)",
+                  "api": {
+                    "id": "47000103",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/books/excerpts/my",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث في عنوان الكتاب أو اسم المؤلف"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة"
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد الكتب في الصفحة"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000103_200",
+                        "code": 200,
+                        "name": "Success",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "data": "{\"data\":[{\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"خلف الأبواب الموصدة\",\"author\":\"منى عبد الحليم\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/behind-closed-doors.jpg\",\"category\":\"روايات\",\"excerptsCount\":12,\"latestExcerptAt\":\"2026-11-12T00:30:00.000Z\"},{\"bookId\":\"1a31fd07-744e-4896-b787-b1d4c96ea222\",\"title\":\"موسم الهجرة إلى الشمال\",\"author\":\"الطيب صالح\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/season-migration.jpg\",\"category\":\"أدب عربي\",\"excerptsCount\":4,\"latestExcerptAt\":\"2026-11-11T21:10:00.000Z\"}],\"total\":2,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع قائمة بجميع الكتب التي حفظ المستخدم مقتطفات منها مع عدد المقتطفات وتاريخ آخر مقتطف لكل كتاب، لعرض القوائم المنفصلة.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-my-books-with-excerpts - استعراض الكتب التي تحتوي على مقتطفاتي (مجمعة لكل كتاب)"
+                  }
+                },
+                {
+                  "name": "get-excerpt-by-id - استرجاع تفاصيل مقتطف محدد (محمي بملكية المستخدم)",
+                  "api": {
+                    "id": "47000104",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/books/excerpts/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "id": "path_excerptId",
+                          "name": "id",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "e4f8bb61-4fa3-433e-bfa3-82ef5be023b8"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000104_200",
+                        "code": 200,
+                        "name": "Success",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "data": "{\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\"note\":\"حبيت الجملة دي اووي\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/14[chap07]!/4/2/12/1:0)\",\"createdAt\":\"2026-11-12T00:30:00.000Z\",\"updatedAt\":\"2026-11-12T00:30:00.000Z\",\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"خلف الأبواب الموصدة\",\"author\":\"منى عبد الحليم\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/behind-closed-doors.jpg\"}}}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع تفاصيل مقتطف محدد للمستخدم الحالي. محمي بالملكية؛ لا يستطيع أي يوزر آخر الاطلاع عليه (يرجع 404 في حال عدم الملكية).",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-excerpt-by-id - استرجاع تفاصيل مقتطف محدد (محمي بملكية المستخدم)"
+                  }
+                },
+                {
+                  "name": "update-book-excerpt - تعديل الملاحظة أو لون التمييز للمقتطف",
+                  "api": {
+                    "id": "47000105",
+                    "method": "patch",
+                    "path": "http://localhost:3000/v1/books/excerpts/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "id": "path_excerptId",
+                          "name": "id",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "e4f8bb61-4fa3-433e-bfa3-82ef5be023b8"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000105_200",
+                        "code": 200,
+                        "name": "Success",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "data": "{\"message\":\"تم تعديل المقتطف بنجاح\",\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها...\",\"note\":\"ملاحظة معدلة: تعبير مجازي عميق جداً\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#2196F3\",\"updatedAt\":\"2026-11-12T00:35:00.000Z\"}}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "application/json",
+                      "parameters": [],
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {}
+                      },
+                      "required": true,
+                      "examples": [
+                        {
+                          "name": "تعديل الملاحظة واللون",
+                          "value": "{\n  \"note\": \"ملاحظة معدلة: تعبير مجازي عميق جداً\",\n  \"color\": \"#2196F3\"\n}"
+                        }
+                      ]
+                    },
+                    "description": "تعديل الملاحظة الشخصية المرفقة بالمقتطف، أو تغيير لون التمييز أو رقم الصفحة/الفصل. محمي بالملكية الصارمة.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "update-book-excerpt - تعديل الملاحظة أو لون التمييز للمقتطف"
+                  }
+                },
+                {
+                  "name": "delete-book-excerpt - حذف مقتطف محدد",
+                  "api": {
+                    "id": "47000106",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/books/excerpts/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "id": "path_excerptId",
+                          "name": "id",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "e4f8bb61-4fa3-433e-bfa3-82ef5be023b8"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": ""
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000106_200",
+                        "code": 200,
+                        "name": "Success",
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "data": "{\"message\":\"تم حذف المقتطف بنجاح\",\"success\":true}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "حذف مقتطف محدد نهائياً. محمي بالملكية الصارمة (لا يستطيع أي مستخدم آخر حذفه).",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "delete-book-excerpt - حذف مقتطف محدد"
+                  }
                 }
               ]
             },
