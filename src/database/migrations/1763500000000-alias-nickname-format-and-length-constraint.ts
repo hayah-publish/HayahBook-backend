@@ -31,3 +31,4 @@ export class AliasNicknameFormatAndLengthConstraint1763500000000
     }
   }
 }
+

@@ -816,55 +816,6 @@ export class AliasesService {
   }
 
   /**
-   * Delete an alias
-   */
-  async deleteAlias(
-    userId: string,
-    aliasId: string,
-  ): Promise<{ message: string }> {
-    const alias = await this.aliasRepo.findOne({ where: { id: aliasId } });
-    if (!alias)
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Alias not found'
-          : 'الاسم المستعار غير موجود',
-      );
-    if (alias.userId !== userId)
-      throw new ForbiddenException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'You do not own this alias'
-          : 'ليس لديك صلاحية لتعديل هذا الاسم المستعار',
-      );
-    const wasDefault = alias.isDefault;
-    await this.dataSource.transaction(async (manager) => {
-      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [
-        userId,
-      ]);
-      const aliases = manager.getRepository(UserAlias);
-      await aliases.delete({ id: aliasId, userId });
-      if (wasDefault) {
-        const next = await aliases.findOne({
-          where: { userId },
-          order: { createdAt: 'ASC' },
-        });
-        if (next) {
-          next.isDefault = true;
-          await aliases.save(next);
-        }
-      }
-    });
-    if (this.isOwnedAliasAvatar(userId, alias.avatarUrl)) {
-      await this.uploadService.deleteFileByUrl(alias.avatarUrl);
-    }
-    return {
-      message:
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Alias deleted successfully'
-          : 'تم حذف الاسم المستعار بنجاح',
-    };
-  }
-
-  /**
    * Validate alias ownership helper
    */
   async validateUserAlias(userId: string, aliasId: string): Promise<UserAlias> {

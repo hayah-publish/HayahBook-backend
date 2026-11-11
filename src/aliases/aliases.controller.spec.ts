@@ -46,9 +46,6 @@ describe('AliasesController', () => {
       id: 'alias-1',
       nickname: 'Critic_of_critics',
     }),
-    deleteAlias: jest.fn().mockResolvedValue({
-      message: 'Deleted successfully',
-    }),
   };
 
   beforeEach(async () => {

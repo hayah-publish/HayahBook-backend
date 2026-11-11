@@ -1,10 +1,7 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   NotFoundException,
   Param,
   ParseUUIDPipe,
@@ -238,24 +235,6 @@ export class AliasesController {
     return {
       message: 'Alias updated successfully',
       data: alias,
-    };
-  }
-
-  /**
-   * DELETE /v1/aliases/:id
-   * Delete an alias
-   */
-  @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  async deleteAlias(
-    @Req() req: AuthenticatedRequest,
-    @Param('id', new ParseUUIDPipe()) id: string,
-  ) {
-    const result = await this.aliasesService.deleteAlias(req.user!.userId, id);
-    return {
-      message: result.message,
-      data: { id, deleted: true },
     };
   }
 }
