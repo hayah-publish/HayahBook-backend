@@ -19,6 +19,7 @@ describe('AliasesController', () => {
       anonymousOption: { title: 'Comment without showing your name' },
     }),
     getMyAliases: jest.fn().mockResolvedValue([]),
+    getMyAlias: jest.fn().mockResolvedValue(null),
     createAlias: jest.fn().mockResolvedValue({
       id: 'alias-1',
       nickname: 'I am not a vegetable',

@@ -251,13 +251,14 @@ export class AliasesService {
           userId,
         ]);
         const aliases = manager.getRepository(UserAlias);
-        const existingCount = await aliases.count({ where: { userId } });
-        if (existingCount >= 5)
-          throw new BadRequestException(
+        const existingAlias = await aliases.findOne({ where: { userId } });
+        if (existingAlias) {
+          throw new ConflictException(
             this.i18n.getCurrentLanguage?.() === 'en'
-              ? 'You can create a maximum of 5 aliases'
-              : 'يمكنك إنشاء 5 أسماء مستعارة بحد أقصى',
+              ? 'You already have an active alias. Each user can only have one alias, but you can edit your current alias.'
+              : 'لديك بالفعل اسم مستعار مفعّل. لا يمكنك إنشاء أكثر من اسم مستعار واحد، ولكن يمكنك تعديل اسمك المستعار الحالي.',
           );
+        }
 
         // Check if nickname is already taken by another alias (case-insensitive)
         const nicknameTaken = await aliases
@@ -273,19 +274,27 @@ export class AliasesService {
           );
         }
 
-        const isDefault = dto.isDefault ?? existingCount === 0;
-        if (isDefault) await aliases.update({ userId }, { isDefault: false });
-        return aliases.save(
+        const saved = await aliases.save(
           aliases.create({
             userId,
             nickname: normalizedNickname,
             avatarUrl,
-            isDefault,
+            isDefault: true,
+            lastModifiedAt: null,
           }),
         );
+        const cooldown = this.getEditCooldownInfo(saved);
+        return Object.assign(saved, cooldown);
       });
     } catch (error) {
       if (uploadedUrl) await this.uploadService.deleteFileByUrl(uploadedUrl);
+      if (this.isUserAliasUniqueViolation(error)) {
+        throw new ConflictException(
+          this.i18n.getCurrentLanguage?.() === 'en'
+            ? 'You already have an active alias. Each user can only have one alias, but you can edit your current alias.'
+            : 'لديك بالفعل اسم مستعار مفعّل. لا يمكنك إنشاء أكثر من اسم مستعار واحد، ولكن يمكنك تعديل اسمك المستعار الحالي.',
+        );
+      }
       if (this.isNicknameUniqueViolation(error)) {
         throw new ConflictException(
           this.i18n.t('aliases.nickname_already_taken'),
@@ -296,13 +305,64 @@ export class AliasesService {
   }
 
   /**
-   * Get all aliases owned by caller
+   * Calculate 30-day edit cooldown info for an alias
    */
-  async getMyAliases(userId: string): Promise<UserAlias[]> {
-    return this.aliasRepo.find({
+  getEditCooldownInfo(alias: UserAlias): {
+    canEdit: boolean;
+    daysRemaining: number;
+    nextAllowedEditDate: string | null;
+  } {
+    const COOLDOWN_DAYS = 30;
+    const COOLDOWN_MS = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+    if (!alias.lastModifiedAt) {
+      return {
+        canEdit: true,
+        daysRemaining: 0,
+        nextAllowedEditDate: null,
+      };
+    }
+    const timeSinceLastEdit =
+      Date.now() - new Date(alias.lastModifiedAt).getTime();
+    if (timeSinceLastEdit >= COOLDOWN_MS) {
+      return {
+        canEdit: true,
+        daysRemaining: 0,
+        nextAllowedEditDate: null,
+      };
+    }
+    const remainingMs = COOLDOWN_MS - timeSinceLastEdit;
+    const daysRemaining = Math.max(
+      1,
+      Math.ceil(remainingMs / (24 * 60 * 60 * 1000)),
+    );
+    const nextAllowedDate = new Date(
+      new Date(alias.lastModifiedAt).getTime() + COOLDOWN_MS,
+    );
+    return {
+      canEdit: false,
+      daysRemaining,
+      nextAllowedEditDate: nextAllowedDate.toISOString(),
+    };
+  }
+
+  /**
+   * Get unique alias owned by caller with edit cooldown metadata
+   */
+  async getMyAlias(userId: string): Promise<any> {
+    const alias = await this.aliasRepo.findOne({
       where: { userId },
-      order: { isDefault: 'DESC', createdAt: 'DESC' },
     });
+    if (!alias) return null;
+    const cooldown = this.getEditCooldownInfo(alias);
+    return Object.assign(alias, cooldown);
+  }
+
+  /**
+   * Get all aliases owned by caller (enforces 1 alias per user)
+   */
+  async getMyAliases(userId: string): Promise<any[]> {
+    const alias = await this.getMyAlias(userId);
+    return alias ? [alias] : [];
   }
 
   /**
@@ -582,6 +642,30 @@ export class AliasesService {
           : 'ليس لديك صلاحية لتعديل هذا الاسم المستعار',
       );
     }
+
+    // 30-day edit cooldown rule
+    const COOLDOWN_DAYS = 30;
+    const COOLDOWN_MS = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+    if (existing.lastModifiedAt) {
+      const timeSinceLastEdit =
+        Date.now() - new Date(existing.lastModifiedAt).getTime();
+      if (timeSinceLastEdit < COOLDOWN_MS) {
+        const remainingMs = COOLDOWN_MS - timeSinceLastEdit;
+        const daysRemaining = Math.max(
+          1,
+          Math.ceil(remainingMs / (24 * 60 * 60 * 1000)),
+        );
+        const nextAllowedDate = new Date(
+          new Date(existing.lastModifiedAt).getTime() + COOLDOWN_MS,
+        );
+        const dateString = nextAllowedDate.toISOString().split('T')[0];
+        throw new BadRequestException(
+          this.i18n.getCurrentLanguage?.() === 'en'
+            ? `You can only edit your alias once every 30 days. You can edit again in ${daysRemaining} day(s) on ${dateString}.`
+            : `لا يمكنك تعديل الاسم المستعار أو الصورة إلا بعد مرور 30 يوماً من آخر تعديل. يمكنك التعديل مجدداً بعد ${daysRemaining} يوم (بتاريخ ${dateString}).`,
+        );
+      }
+    }
     if (
       !file &&
       dto.avatarUrl?.trim() &&
@@ -646,6 +730,7 @@ export class AliasesService {
           await aliases.update({ userId }, { isDefault: false });
           alias.isDefault = true;
         } else if (dto.isDefault === false) alias.isDefault = false;
+        alias.lastModifiedAt = new Date();
         return aliases.save(alias);
       });
       if (
@@ -654,9 +739,17 @@ export class AliasesService {
         this.isOwnedAliasAvatar(userId, previousAvatar)
       )
         await this.uploadService.deleteFileByUrl(previousAvatar);
-      return updated;
+      const cooldown = this.getEditCooldownInfo(updated);
+      return Object.assign(updated, cooldown);
     } catch (error) {
       if (uploadedUrl) await this.uploadService.deleteFileByUrl(uploadedUrl);
+      if (this.isUserAliasUniqueViolation(error)) {
+        throw new ConflictException(
+          this.i18n.getCurrentLanguage?.() === 'en'
+            ? 'You already have an active alias. Each user can only have one alias, but you can edit your current alias.'
+            : 'لديك بالفعل اسم مستعار مفعّل. لا يمكنك إنشاء أكثر من اسم مستعار واحد، ولكن يمكنك تعديل اسمك المستعار الحالي.',
+        );
+      }
       if (this.isNicknameUniqueViolation(error)) {
         throw new ConflictException(
           this.i18n.t('aliases.nickname_already_taken'),
@@ -664,6 +757,23 @@ export class AliasesService {
       }
       throw error;
     }
+  }
+
+  private isUserAliasUniqueViolation(error: unknown): boolean {
+    const databaseError = error as {
+      code?: string;
+      driverError?: { code?: string; constraint?: string };
+      constraint?: string;
+    };
+    const code = databaseError?.driverError?.code ?? databaseError?.code;
+    const constraint =
+      databaseError?.driverError?.constraint ?? databaseError?.constraint;
+    return (
+      code === '23505' &&
+      !!constraint &&
+      (constraint.includes('user_id') ||
+        constraint.includes('user_aliases_user'))
+    );
   }
 
   private isNicknameUniqueViolation(error: unknown): boolean {

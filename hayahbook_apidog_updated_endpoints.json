@@ -3081,7 +3081,7 @@
                   }
                 },
                 {
-                  "name": "create-alias - إنشاء اسم مستعار فريد مع صورة مختارة (Save)",
+                  "name": "create-alias - إنشاء الاسم المستعار الفريد الخاص بالمستخدم (اسم واحد فقط)",
                   "api": {
                     "id": "47000057",
                     "method": "post",
@@ -3154,7 +3154,7 @@
                       ],
                       "oasExtensions": ""
                     },
-                    "description": "إنشاء هوية مستعارة جديدة مع التحقق من تفرد الاسم وعدم تكراره في النظام",
+                    "description": "إنشاء اسم مستعار فريد واختيار صورة رمزية (صورة فقط). كل مستخدم يمتلك اسماً مستعاراً واحداً فقط في النظام. في حال وجود اسم مستعار سابق، يتم رفض الطلب بكود 409 Conflict وتوجيهه لتعديل اسمه الحالي.",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -3274,7 +3274,7 @@
                   }
                 },
                 {
-                  "name": "get-my-aliases - قائمة الأسماء المستعارة الخاصة بي",
+                  "name": "get-my-alias - استرجاع الاسم المستعار الخاص بي وحالة التعديل (30 يوم)",
                   "api": {
                     "id": "47000061",
                     "method": "get",
@@ -3338,7 +3338,7 @@
                       "examples": [],
                       "oasExtensions": ""
                     },
-                    "description": "",
+                    "description": "استرجاع الاسم المستعار الوحيد للمستخدم الحالي مع حالة إمكانية التعديل، وعدد الأيام المتبقية لتفعيل التعديل القادم (بشرط مرور 30 يوماً بين كل تعديل).",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -3362,7 +3362,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "get-my-alias - استرجاع الاسم المستعار الخاص بي وحالة التعديل (30 يوم)"
                   }
                 },
                 {
@@ -3785,7 +3786,7 @@
                   }
                 },
                 {
-                  "name": "update-alias - تعديل الاسم المستعار أو صورته",
+                  "name": "update-alias - تعديل الاسم المستعار أو صورته (بشرط فاصل 30 يوماً بين التعديلات)",
                   "api": {
                     "id": "47000071",
                     "method": "patch",
@@ -3842,6 +3843,13 @@
                         "description": "",
                         "contentType": "json",
                         "mediaType": ""
+                      },
+                      {
+                        "id": "resp-update-alias-cooldown-400",
+                        "name": "400 - التعديل غير متاح قبل مرور 30 يوماً",
+                        "code": 400,
+                        "contentType": "json",
+                        "jsonBody": "{\n  \"statusCode\": 400,\n  \"message\": \"لا يمكنك تعديل الاسم المستعار أو الصورة إلا بعد مرور 30 يوماً من آخر تعديل. يمكنك التعديل مجدداً بعد 26 يوم (بتاريخ 2026-12-07).\",\n  \"error\": \"Bad Request\"\n}"
                       }
                     ],
                     "responseExamples": [
@@ -3868,7 +3876,7 @@
                       ],
                       "oasExtensions": ""
                     },
-                    "description": "",
+                    "description": "تعديل الاسم المستعار الفريد أو صورته الرمزية. القاعدة الصارمة: لا يمكن التعديل إلا إذا مضى 30 يوماً على الأقل منذ آخر تعديل. إذا لم تمضِ المدة يُرجع السيرفر 400 Bad Request موضحاً عدد الأيام المتبقية والتاريخ المسموح به. يمكن استدعاء المسار عبر /v1/aliases/{id} أو مباشرة عبر /v1/aliases/my دون الحاجة لمعرفة المعرف.",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -3892,7 +3900,8 @@
                     "preProcessors": [],
                     "postProcessors": [],
                     "inheritPostProcessors": {},
-                    "inheritPreProcessors": {}
+                    "inheritPreProcessors": {},
+                    "name": "update-alias - تعديل الاسم المستعار أو صورته (بشرط فاصل 30 يوماً بين التعديلات)"
                   }
                 },
                 {

@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -78,13 +79,16 @@ export class AliasesController {
 
   /**
    * GET /v1/aliases/my (or /v1/me/aliases)
-   * Get all aliases owned by caller
+   * Get unique alias owned by caller with 30-day edit cooldown status
    */
   @UseGuards(JwtAuthGuard)
   @Get(['my', 'me'])
   async getMyAliases(@Req() req: AuthenticatedRequest) {
-    const aliases = await this.aliasesService.getMyAliases(req.user!.userId);
-    return { data: aliases };
+    const alias = await this.aliasesService.getMyAlias(req.user!.userId);
+    return {
+      data: alias ? [alias] : [],
+      alias: alias || null,
+    };
   }
 
   /**
@@ -180,6 +184,36 @@ export class AliasesController {
       Number(limit) || 20,
     );
     return result;
+  }
+
+  /**
+   * PATCH /v1/aliases/my
+   * Update caller's unique alias without needing alias UUID
+   */
+  @UseGuards(JwtAuthGuard)
+  @Patch(['my', 'me'])
+  @UseInterceptors(FileInterceptor('avatar'))
+  async updateMyAlias(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: UpdateAliasDto,
+    @UploadedFile() file?: UploadFile,
+  ) {
+    const myAlias = await this.aliasesService.getMyAlias(req.user!.userId);
+    if (!myAlias) {
+      throw new NotFoundException(
+        'الاسم المستعار غير موجود، يرجى إنشاء اسم مستعار أولاً',
+      );
+    }
+    const alias = await this.aliasesService.updateAlias(
+      req.user!.userId,
+      myAlias.id,
+      dto,
+      file,
+    );
+    return {
+      message: 'Alias updated successfully',
+      data: alias,
+    };
   }
 
   /**

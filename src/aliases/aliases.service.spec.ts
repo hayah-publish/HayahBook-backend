@@ -125,7 +125,20 @@ describe('AliasesService - Unique Nickname & Picture-Only Presets', () => {
       expect(mockI18n.t).toHaveBeenCalledWith('aliases.nickname_already_taken');
     });
 
-    it('creates alias successfully when nickname is unique', async () => {
+    it('rejects creation with ConflictException if user already has an alias', async () => {
+      mockAliasRepo.findOne.mockResolvedValue({
+        id: 'existing-alias',
+        userId: 'user-1',
+        nickname: 'OldAlias',
+      });
+
+      await expect(
+        service.createAlias('user-1', { nickname: 'BrandNewNick' }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('creates alias successfully when nickname is unique and user has no alias', async () => {
+      mockAliasRepo.findOne.mockResolvedValue(null);
       const qb: any = {
         where: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(null),
@@ -136,6 +149,46 @@ describe('AliasesService - Unique Nickname & Picture-Only Presets', () => {
       const created = await service.createAlias('user-1', { nickname: 'BrandNewNick' });
       expect(created).toBeDefined();
       expect(created.nickname).toBe('BrandNewNick');
+      expect((created as any).canEdit).toBe(true);
+    });
+  });
+
+  describe('updateAlias with 30-day edit cooldown rule', () => {
+    it('rejects update with BadRequestException if last modification was less than 30 days ago', async () => {
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+      mockAliasRepo.findOne.mockResolvedValue({
+        id: 'alias-1',
+        userId: 'user-1',
+        nickname: 'CurrentNick',
+        lastModifiedAt: tenDaysAgo,
+      });
+
+      await expect(
+        service.updateAlias('user-1', 'alias-1', { nickname: 'UpdatedNick' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('allows update if last modification was more than 30 days ago (or never modified)', async () => {
+      const thirtyFiveDaysAgo = new Date(Date.now() - 35 * 24 * 60 * 60 * 1000);
+      mockAliasRepo.findOne.mockResolvedValue({
+        id: 'alias-1',
+        userId: 'user-1',
+        nickname: 'CurrentNick',
+        lastModifiedAt: thirtyFiveDaysAgo,
+      });
+
+      const qb: any = {
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null),
+      };
+      mockAliasRepo.createQueryBuilder.mockReturnValue(qb);
+
+      const updated = await service.updateAlias('user-1', 'alias-1', {
+        nickname: 'NewAllowedNick',
+      });
+      expect(updated).toBeDefined();
+      expect(updated.nickname).toBe('NewAllowedNick');
+      expect(updated.lastModifiedAt).toBeInstanceOf(Date);
     });
   });
 

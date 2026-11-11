@@ -15,8 +15,8 @@ export class UserAlias {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
-  @Column({ name: 'user_id', type: 'uuid' })
+  @Index({ unique: true })
+  @Column({ name: 'user_id', type: 'uuid', unique: true })
   userId: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
@@ -47,6 +47,9 @@ export class UserAlias {
 
   @Column({ name: 'ratings_count', type: 'integer', default: 0 })
   ratingsCount: number;
+
+  @Column({ name: 'last_modified_at', type: 'timestamptz', nullable: true })
+  lastModifiedAt: Date | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
