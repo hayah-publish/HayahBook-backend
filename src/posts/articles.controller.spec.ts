@@ -222,6 +222,19 @@ describe('ArticlesController', () => {
     expect(res.data[0].type).toBe('article');
   });
 
+  it('GET /v1/articles passes following and containVideo filters to postsService.findAll', async () => {
+    const req: any = { user: { userId: 'user-1' } };
+    await controller.getArticles({ following: true, containVideo: true } as any, req);
+    expect(postsService.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'article',
+        following: true,
+        containVideo: true,
+      }),
+      'user-1',
+    );
+  });
+
   it('GET /v1/articles/:id returns single article', async () => {
     const req: any = { user: { userId: 'user-1' } };
     const res = await controller.getArticleById('article-uuid-1', req);

@@ -1800,7 +1800,7 @@
                   }
                 },
                 {
-                  "name": "get-articles - استرجاع وتصفح المقالات (مع فلترة الفيديو containVideo والبحث)",
+                  "name": "get-articles - استرجاع وتصفح المقالات (مع فلترة الفيديو containVideo والمتابعين following والبحث)",
                   "api": {
                     "id": "47000096",
                     "method": "get",
@@ -1825,6 +1825,12 @@
                           "type": "string",
                           "required": false,
                           "description": "معرف أو اسم التصنيف"
+                        },
+                        {
+                          "name": "following",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "مقالات كتاب ومؤلفي الحسابات المتابعة فقط (true / false)"
                         },
                         {
                           "name": "page",
@@ -1878,10 +1884,10 @@
                       "type": "none",
                       "parameters": []
                     },
-                    "description": "استرجاع قائمة المقالات المنشورة مع دعم فلترة الفيديو عبر containVideo والبحث بالتصنيف والكلمات المفتاحية.",
+                    "description": "استرجاع وتصفح قائمة المقالات فقط (type=article) مع دعم فلترة الفيديو containVideo والبحث بالتصنيف والكلمات المفتاحية وحسابات المتابعين following.",
                     "tags": [],
                     "status": "developing",
-                    "name": "get-articles - استرجاع وتصفح المقالات (مع فلترة الفيديو containVideo والبحث)"
+                    "name": "get-articles - استرجاع وتصفح المقالات (مع فلترة الفيديو containVideo والمتابعين following والبحث)"
                   }
                 },
                 {

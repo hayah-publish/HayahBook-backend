@@ -1340,16 +1340,28 @@ export class PostsService {
       this.applyFeedTabFilter(qb, tab);
     }
 
+    const isFollowing = query.following === true;
+    let followingIds = query.followingUserIds;
+
+    if (isFollowing && !followingIds) {
+      if (!currentUserId) {
+        throw new UnauthorizedException(
+          this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
+        );
+      }
+      followingIds = await this.getFollowedUserIds(currentUserId);
+    }
+
     if (
-      Array.isArray(query.followingUserIds) &&
-      query.followingUserIds.length > 0
+      Array.isArray(followingIds) &&
+      followingIds.length > 0
     ) {
       qb.andWhere('post.user_id IN (:...followingUserIds)', {
-        followingUserIds: query.followingUserIds,
+        followingUserIds: followingIds,
       });
     } else if (
-      Array.isArray(query.followingUserIds) &&
-      query.followingUserIds.length === 0
+      Array.isArray(followingIds) &&
+      followingIds.length === 0
     ) {
       qb.andWhere('1 = 0');
     }
