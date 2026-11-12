@@ -9,18 +9,23 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { PostsService } from './posts.service';
 import { PostsQueryDto } from './dto/posts-query.dto';
+import { CreateVisualDto } from './dto/create-visual.dto';
 import { ReactPostDto } from './dto/react-post.dto';
 import { ReactionsQueryDto } from './dto/reactions-query.dto';
 import { ReportPostDto } from './dto/report-post.dto';
+import { UploadFile } from '../upload/upload-file.interface';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -30,9 +35,38 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-@Controller('visuals')
+@Controller(['visuals', 'reels'])
 export class VisualsController {
   constructor(private readonly postsService: PostsService) {}
+
+  /**
+   * POST /v1/visuals
+   * POST /v1/reels
+   * Publish a reel / visual video post.
+   * Requirements:
+   * - Type is 'visual'.
+   * - Aspect ratio must be 9:16.
+   * - Exactly ONE video only (max 500MB).
+   * - User mentions and links supported.
+   * - If mentioning a book, strictly ONE book only.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      limits: {
+        fileSize: 500 * 1024 * 1024,
+        files: 5,
+      },
+    }),
+  )
+  async createVisual(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateVisualDto,
+    @UploadedFiles() files?: UploadFile[],
+  ) {
+    return this.postsService.createVisual(req.user!.userId, dto, files);
+  }
 
   /**
    * GET /v1/visuals

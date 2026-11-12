@@ -324,4 +324,13 @@ export const en = {
   'snippets.published': 'Snippet published to your profile successfully',
   'snippets.quote_required': 'Snippet quote is required',
   'snippets.deleted': 'Published snippet deleted successfully',
+
+  // Visuals & Reels
+  'visuals.published': 'Reel published successfully',
+  'visuals.video_required': 'A video is required to publish a reel',
+  'visuals.single_video_only': 'Only one video can be uploaded for reels',
+  'visuals.no_images_allowed': 'Images cannot be attached to reels',
+  'visuals.invalid_aspect_ratio': 'Video aspect ratio must be 9:16 (vertical reel)',
+  'visuals.single_book_only': 'Only one book can be mentioned in reels',
+  'visuals.video_size_exceeded': 'Video size cannot exceed 500MB',
 };

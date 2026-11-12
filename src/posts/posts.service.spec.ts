@@ -1583,5 +1583,122 @@ describe('PostsService public post formatting', () => {
         expect(hasCategoryClause).toBe(false);
       });
     });
+
+    describe('Publishing Reels (createVisual)', () => {
+      it('rejects if no video is provided (neither file nor videoUrl)', async () => {
+        await expect(
+          serviceWithActions.createVisual('user-1', {
+            content: 'No video reel',
+          }),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('rejects if images are uploaded with reel', async () => {
+        const imageFile: any = {
+          mimetype: 'image/jpeg',
+          fieldname: 'image',
+          buffer: Buffer.from('fake-image'),
+        };
+        await expect(
+          serviceWithActions.createVisual(
+            'user-1',
+            { videoUrl: 'https://example.com/video.mp4' },
+            [imageFile],
+          ),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('rejects if more than 1 video is provided', async () => {
+        const video1: any = {
+          mimetype: 'video/mp4',
+          fieldname: 'video',
+          size: 10 * 1024 * 1024,
+          buffer: Buffer.from('fake-video-1'),
+        };
+        const video2: any = {
+          mimetype: 'video/mp4',
+          fieldname: 'video',
+          size: 10 * 1024 * 1024,
+          buffer: Buffer.from('fake-video-2'),
+        };
+        await expect(
+          serviceWithActions.createVisual('user-1', {}, [video1, video2]),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('rejects if video file size exceeds 500MB', async () => {
+        const oversizedVideo: any = {
+          mimetype: 'video/mp4',
+          fieldname: 'video',
+          size: 501 * 1024 * 1024, // 501MB
+          buffer: Buffer.from('fake-large-video'),
+        };
+        await expect(
+          serviceWithActions.createVisual('user-1', {}, [oversizedVideo]),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('rejects if aspect ratio is not 9:16', async () => {
+        await expect(
+          serviceWithActions.createVisual('user-1', {
+            videoUrl: 'https://example.com/video.mp4',
+            aspectRatio: '16:9',
+          }),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('rejects if more than 1 book is mentioned', async () => {
+        await expect(
+          serviceWithActions.createVisual('user-1', {
+            videoUrl: 'https://example.com/video.mp4',
+            bookId: 'book-uuid-1',
+            audiobookId: 'audiobook-uuid-2',
+          }),
+        ).rejects.toThrow(BadRequestException);
+
+        await expect(
+          serviceWithActions.createVisual('user-1', {
+            videoUrl: 'https://example.com/video.mp4',
+            bookIds: ['book-uuid-1', 'book-uuid-2'],
+          }),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('successfully creates reel with type visual, 1 book, user mentions, and links', async () => {
+        (serviceWithActions as any).booksRepository = {
+          findOne: jest.fn().mockResolvedValue({
+            id: 'book-1',
+            title: 'Atomic Habits',
+            author: 'James Clear',
+            coverUrl: 'https://cdn.example.com/cover.jpg',
+          }),
+        };
+        mockPostsRepo.create.mockImplementation((entity: any) => ({
+          id: 'reel-uuid-1',
+          ...entity,
+        }));
+        mockPostsRepo.save.mockImplementation((entity: any) =>
+          Promise.resolve(entity),
+        );
+
+        const res = await serviceWithActions.createVisual('user-1', {
+          content: 'شاهد مراجعة هذا الكتاب الرائع',
+          aspectRatio: '9:16',
+          bookId: 'book-1',
+          mentions: ['user-2'],
+          linkUrl: 'https://hayahbook.com',
+          linkTitle: 'حياة بوك',
+          videoUrl: 'https://cdn.hayahbook.com/videos/reel-test.mp4',
+        });
+
+        expect(res.data.type).toBe('visual');
+        expect(res.data.containVideo).toBe(true);
+        expect(res.data.videoUrl).toBe(
+          'https://cdn.hayahbook.com/videos/reel-test.mp4',
+        );
+        expect(res.data.book).toBeDefined();
+        expect(res.message).toBe('visuals.published');
+      });
+    });
   });
 });

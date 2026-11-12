@@ -313,4 +313,13 @@ export const ar = {
   'snippets.published': 'تم نشر المقتطف في ملفك الشخصي بنجاح',
   'snippets.quote_required': 'نص المقتطف إلزامي للنشر',
   'snippets.deleted': 'تم حذف المقتطف المنشور بنجاح',
+
+  // Visuals & Reels (المرئيات والريلز)
+  'visuals.published': 'تم نشر الريلز بنجاح',
+  'visuals.video_required': 'يجب إرفاق مقطع فيديو لنشر الريلز',
+  'visuals.single_video_only': 'يمكن رفع فيديو واحد فقط للريلز',
+  'visuals.no_images_allowed': 'لا يمكن إرفاق صور مع الريلز، الريلز يتطلب فيديو فقط',
+  'visuals.invalid_aspect_ratio': 'أبعاد الفيديو يجب أن تكون 9:16 (فيديو عمودي للريلز)',
+  'visuals.single_book_only': 'في حالة الإشارة إلى كتاب، يسمح بكتاب واحد فقط',
+  'visuals.video_size_exceeded': 'حجم الفيديو يجب ألا يتجاوز 500 ميجابايت',
 };

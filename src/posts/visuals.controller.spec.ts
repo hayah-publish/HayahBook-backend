@@ -54,6 +54,10 @@ describe('VisualsController', () => {
       toggleComments: jest.fn().mockResolvedValue({ success: true, commentsDisabled: true }),
       reportPost: jest.fn().mockResolvedValue({ success: true }),
       getPostMenu: jest.fn().mockResolvedValue({ menuActions: [] }),
+      createVisual: jest.fn().mockResolvedValue({
+        message: 'تم نشر الريلز بنجاح',
+        data: mockVisualData,
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -112,6 +116,20 @@ describe('VisualsController', () => {
     const res = await controller.deleteVisual(mockUserReq, 'visual-uuid-1');
     expect(postsService.remove).toHaveBeenCalledWith('visual-uuid-1', 'user-uuid-1', false, 'post');
     expect(res.success).toBe(true);
+  });
+
+  it('POST /v1/visuals creates a visual/reel post with video, 9:16 aspect ratio, mentions, and single book', async () => {
+    const dto = {
+      content: 'مراجعة مرئية سريعة لكتاب عادات ذرية',
+      aspectRatio: '9:16',
+      bookId: 'book-uuid-1',
+      mentions: ['user-uuid-2'],
+      videoUrl: 'https://cdn.hayahbook.com/videos/reel-1.mp4',
+    };
+    const res = await controller.createVisual(mockUserReq, dto as any);
+    expect(postsService.createVisual).toHaveBeenCalledWith('user-uuid-1', dto, undefined);
+    expect(res.message).toBe('تم نشر الريلز بنجاح');
+    expect(res.data.type).toBe('visual');
   });
 });
 

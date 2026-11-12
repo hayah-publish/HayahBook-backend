@@ -3930,6 +3930,159 @@
                   }
                 },
                 {
+                  "name": "create-reel - نشر ريلز ومحتوى مرئي (Reels / Visuals Post بأبعاد 9:16 وفيديو واحد حتى 500MB ومنشن كتاب واحد)",
+                  "api": {
+                    "id": "create_reel_visual_post_01",
+                    "name": "create-reel - نشر ريلز ومحتوى مرئي (Reels / Visuals Post بأبعاد 9:16 وفيديو واحد حتى 500MB ومنشن كتاب واحد)",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/visuals",
+                    "description": "نشر مقطع ريلز أو محتوى مرئي جديد (type: visual). الشروط المطبقة:\n1. نوع المحتوى visual و containVideo: true.\n2. إرفاق فيديو واحد فقط (فيديو واحد ولا يسمح برفع صور مع الريلز).\n3. الحد الأقصى لحجم الفيديو 500 ميجابايت (500MB).\n4. أبعاد الفيديو يجب أن تكون بنسبة 9:16 (فيديو عمودي مناسب للريلز).\n5. دعم منشن المستخدمين (mentions).\n6. دعم إضافة الروابط الخارجية (links / link / linkUrl).\n7. في حال الإشارة إلى كتاب، يسمح بكتاب واحد فقط (bookId / audiobookId).\n8. المسار البديل: http://localhost:3000/v1/reels",
+                    "status": "released",
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "{{token}}"
+                      }
+                    },
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_auth_reel",
+                          "name": "Authorization",
+                          "required": true,
+                          "description": "Bearer token للمستخدم المسجل",
+                          "type": "string",
+                          "enable": true,
+                          "example": "Bearer {{token}}"
+                        },
+                        {
+                          "id": "header_content_type_reel",
+                          "name": "Content-Type",
+                          "required": true,
+                          "description": "multipart/form-data",
+                          "type": "string",
+                          "enable": true,
+                          "example": "multipart/form-data"
+                        }
+                      ]
+                    },
+                    "requestBody": {
+                      "type": "form-data",
+                      "parameters": [
+                        {
+                          "id": "param_video_file",
+                          "name": "video",
+                          "type": "file",
+                          "required": false,
+                          "description": "ملف الفيديو بصيغة عمودية 9:16 وحجم أقصى 500MB (MP4, MOV, WEBM, MKV)"
+                        },
+                        {
+                          "id": "param_video_url",
+                          "name": "videoUrl",
+                          "type": "string",
+                          "required": false,
+                          "description": "رابط الفيديو المباشر (في حال عدم رفع ملف الفيديو كـ binary)",
+                          "example": "https://cdn.hayahbook.com/videos/reel-sample.mp4"
+                        },
+                        {
+                          "id": "param_aspect_ratio",
+                          "name": "aspectRatio",
+                          "type": "string",
+                          "required": false,
+                          "description": "نسبة أبعاد الفيديو (إجباري 9:16 للريلز)",
+                          "example": "9:16"
+                        },
+                        {
+                          "id": "param_content",
+                          "name": "content",
+                          "type": "string",
+                          "required": false,
+                          "description": "نص وصفي أو تعليق مصاحب للريلز حتى 500 كلمة، يدعم الروابط المضمنة والمنشن",
+                          "example": "شاهد مراجعة سريعة لأهم الأفكار في كتاب عادات ذرية من جيمس كلير @ahmed_murad"
+                        },
+                        {
+                          "id": "param_book_id",
+                          "name": "bookId",
+                          "type": "string",
+                          "required": false,
+                          "description": "معرف الكتاب المشار إليه (بشرط كتاب واحد فقط)",
+                          "example": "27da05bd-423d-4b58-bc3a-82b1bef1c3ed"
+                        },
+                        {
+                          "id": "param_mentions",
+                          "name": "mentions",
+                          "type": "string",
+                          "required": false,
+                          "description": "مصفوفة معرفات المستخدمين المشار إليهم (JSON Array أو قائمة UUIDs)",
+                          "example": "[\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\"]"
+                        },
+                        {
+                          "id": "param_links",
+                          "name": "links",
+                          "type": "string",
+                          "required": false,
+                          "description": "روابط خارجية مرفقة بالريلز (JSON Array of { url, title })",
+                          "example": "[{\"url\":\"https://hayahbook.com/books/atomic-habits\",\"title\":\"صفحة الكتاب\"}]"
+                        },
+                        {
+                          "id": "param_category",
+                          "name": "category",
+                          "type": "string",
+                          "required": false,
+                          "description": "تصنيف الريلز (مثل: التاريخ والوثائقيات، الفكر والعلوم الإنسانية، أسلوب الحياة...)",
+                          "example": "أسلوب الحياة"
+                        },
+                        {
+                          "id": "param_comments_disabled",
+                          "name": "commentsDisabled",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "تعطيل أو تمكين التعليقات على الريلز",
+                          "example": "false"
+                        }
+                      ]
+                    },
+                    "responses": [
+                      {
+                        "id": "201_create_reel",
+                        "name": "Created",
+                        "code": 201,
+                        "contentType": "json"
+                      },
+                      {
+                        "id": "400_create_reel_error",
+                        "name": "Bad Request",
+                        "code": 400,
+                        "contentType": "json"
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - 201 Created (تم النشر بنجاح)",
+                        "responseId": "201_create_reel",
+                        "data": "{\n  \"message\": \"تم نشر الريلز بنجاح\",\n  \"data\": {\n    \"id\": \"a71e4d89-6345-4231-89a1-94d8f7e6c5b2\",\n    \"userId\": \"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\n    \"type\": \"visual\",\n    \"title\": null,\n    \"content\": \"شاهد مراجعة سريعة لأهم الأفكار في كتاب عادات ذرية من جيمس كلير @ahmed_murad\",\n    \"contentFormat\": \"plain\",\n    \"images\": [],\n    \"videoUrl\": \"https://cdn.hayahbook.com/videos/reels/reel-6f955425_1794463000.mp4\",\n    \"containVideo\": true,\n    \"linkUrl\": \"https://hayahbook.com/books/atomic-habits\",\n    \"linkTitle\": \"صفحة الكتاب\",\n    \"category\": \"أسلوب الحياة\",\n    \"categoryId\": null,\n    \"mentions\": [\n      \"6f955425-2969-431d-b2f5-2a10c6c8a9eb\"\n    ],\n    \"likesCount\": 0,\n    \"reactionsCount\": {\n      \"total\": 0,\n      \"agree\": 0,\n      \"love\": 0,\n      \"applaud\": 0,\n      \"insightful\": 0,\n      \"disagree\": 0\n    },\n    \"commentsCount\": 0,\n    \"commentsDisabled\": false,\n    \"sharesCount\": 0,\n    \"bookmarksCount\": 0,\n    \"createdAt\": \"2026-11-12T08:50:00.000Z\",\n    \"updatedAt\": \"2026-11-12T08:50:00.000Z\",\n    \"book\": {\n      \"id\": \"27da05bd-423d-4b58-bc3a-82b1bef1c3ed\",\n      \"title\": \"عادات ذرية\",\n      \"author\": \"جيمس كلير\",\n      \"coverUrl\": \"https://cdn.hayahbook.com/covers/atomic-habits.jpg\"\n    },\n    \"publisher\": {\n      \"id\": \"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\n      \"name\": \"محمود علي\",\n      \"profileUrl\": \"https://cdn.hayahbook.com/avatars/user.jpg\",\n      \"userType\": \"regular\",\n      \"isVerified\": false\n    }\n  }\n}"
+                      },
+                      {
+                        "name": "Error - Invalid Aspect Ratio (أبعاد غير 9:16)",
+                        "responseId": "400_create_reel_error",
+                        "data": "{\n  \"statusCode\": 400,\n  \"message\": \"أبعاد الفيديو يجب أن تكون 9:16 (فيديو عمودي للريلز)\",\n  \"error\": \"Bad Request\"\n}"
+                      },
+                      {
+                        "name": "Error - More Than One Book (أكثر من كتاب)",
+                        "responseId": "400_create_reel_error",
+                        "data": "{\n  \"statusCode\": 400,\n  \"message\": \"في حالة الإشارة إلى كتاب، يسمح بكتاب واحد فقط\",\n  \"error\": \"Bad Request\"\n}"
+                      },
+                      {
+                        "name": "Error - Images Not Allowed (لا يسمح بالصور)",
+                        "responseId": "400_create_reel_error",
+                        "data": "{\n  \"statusCode\": 400,\n  \"message\": \"لا يمكن إرفاق صور مع الريلز، الريلز يتطلب فيديو فقط\",\n  \"error\": \"Bad Request\"\n}"
+                      }
+                    ]
+                  }
+                },
+                {
                   "name": "react-visual - التفاعل مع محتوى مرئي أو فيديو (agree, love, applaud, insightful, disagree)",
                   "api": {
                     "id": "47000116",

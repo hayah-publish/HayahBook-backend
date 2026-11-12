@@ -33,6 +33,7 @@ import { Audiobook } from '../books/audiobook.entity';
 import { UserBookExcerpt } from '../books/user-book-excerpt.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
+import { CreateVisualDto } from './dto/create-visual.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ReportPostDto } from './dto/report-post.dto';
 import { PostsQueryDto } from './dto/posts-query.dto';
@@ -44,6 +45,7 @@ import { UploadFile } from '../upload/upload-file.interface';
 import { InterestsService } from '../interests/interests.service';
 import { countWords } from './validators/word-count.validator';
 import { sanitizeMarkdown } from './utils/markdown-sanitizer.util';
+import { validateReelAspectRatio } from './utils/video-aspect-ratio.util';
 import {
   formatHomeTaxonomy,
   resolveTaxonomyCategory,
@@ -741,6 +743,9 @@ export class PostsService {
         'Articles must be created through the articles endpoint',
       );
     }
+    if ((dto as { type?: string }).type === 'visual') {
+      return this.createVisual(userId, dto as any, files);
+    }
     const imageFiles = (files || []).filter(
       (f) =>
         f.mimetype.startsWith('image/') ||
@@ -919,6 +924,245 @@ export class PostsService {
 
     return {
       message: this.i18n.t('posts.created'),
+      data: formatted,
+    };
+  }
+
+  /**
+   * Create and publish a Reel / Visual post.
+   * Requirements:
+   * 1. Post type is 'visual' (post.type = 'visual', containVideo = true).
+   * 2. Exactly ONE video only (فيديو واحد فقط). No images allowed.
+   * 3. Max video file size: 500MB.
+   * 4. Aspect ratio must be 9:16 (vertical reel format).
+   * 5. Mentions: supports user mentions (mentions array).
+   * 6. Links: supports inline and explicit links (links, link, linkUrl).
+   * 7. Book mention: strictly ONE book only (بشرط كتاب واحد فقط).
+   */
+  async createVisual(
+    userId: string,
+    dto: CreateVisualDto,
+    files?: UploadFile[],
+  ): Promise<{ message: string; data: FormattedPost }> {
+    const videoFiles = (files || []).filter(
+      (f) => f.mimetype.startsWith('video/') || f.fieldname === 'video',
+    );
+    const imageFiles = (files || []).filter(
+      (f) =>
+        f.mimetype.startsWith('image/') ||
+        f.fieldname === 'image' ||
+        f.fieldname === 'images',
+    );
+
+    // 1. Strictly no images allowed for reels
+    if (
+      imageFiles.length > 0 ||
+      (Array.isArray(dto.images) && dto.images.length > 0) ||
+      dto.image
+    ) {
+      throw new BadRequestException(
+        this.i18n?.t
+          ? this.i18n.t('visuals.no_images_allowed')
+          : 'لا يمكن إرفاق صور مع الريلز، الريلز يتطلب فيديو فقط',
+      );
+    }
+
+    // 2. Must contain exactly one video
+    const hasVideoFile = videoFiles.length > 0;
+    const hasVideoDto = !!dto.videoUrl;
+
+    if (!hasVideoFile && !hasVideoDto) {
+      throw new BadRequestException(
+        this.i18n?.t
+          ? this.i18n.t('visuals.video_required')
+          : 'يجب إرفاق مقطع فيديو لنشر الريلز',
+      );
+    }
+
+    if (videoFiles.length > 1 || (hasVideoFile && hasVideoDto)) {
+      throw new BadRequestException(
+        this.i18n?.t
+          ? this.i18n.t('visuals.single_video_only')
+          : 'يمكن رفع فيديو واحد فقط للريلز',
+      );
+    }
+
+    // 3. Max video size: 500MB
+    const MAX_VIDEO_SIZE = 500 * 1024 * 1024;
+    if (hasVideoFile && videoFiles[0].size > MAX_VIDEO_SIZE) {
+      throw new BadRequestException(
+        this.i18n?.t
+          ? this.i18n.t('visuals.video_size_exceeded')
+          : 'حجم الفيديو يجب ألا يتجاوز 500 ميجابايت',
+      );
+    }
+
+    // 4. Aspect ratio validation: must be 9:16
+    const aspectValidation = validateReelAspectRatio({
+      aspectRatio: dto.aspectRatio,
+      width: dto.width,
+      height: dto.height,
+      buffer: hasVideoFile ? videoFiles[0].buffer : undefined,
+    });
+    if (!aspectValidation.isValid) {
+      throw new BadRequestException(
+        this.i18n?.t
+          ? this.i18n.t('visuals.invalid_aspect_ratio')
+          : 'أبعاد الفيديو يجب أن تكون 9:16 (فيديو عمودي للريلز)',
+      );
+    }
+
+    // 5. Book mention condition: strictly ONE book only
+    const candidateBookIds: string[] = [];
+    if (dto.bookId) candidateBookIds.push(dto.bookId);
+    if (dto.audiobookId && !candidateBookIds.includes(dto.audiobookId)) {
+      candidateBookIds.push(dto.audiobookId);
+    }
+    if (Array.isArray(dto.bookIds)) {
+      for (const bid of dto.bookIds) {
+        if (bid && !candidateBookIds.includes(bid)) {
+          candidateBookIds.push(bid);
+        }
+      }
+    }
+
+    if (candidateBookIds.length > 1) {
+      throw new BadRequestException(
+        this.i18n?.t
+          ? this.i18n.t('visuals.single_book_only')
+          : 'في حالة الإشارة إلى كتاب، يسمح بكتاب واحد فقط',
+      );
+    }
+
+    let book: Book | null = null;
+    let audiobook: Audiobook | null = null;
+    if (candidateBookIds.length === 1) {
+      const resolved = await this.resolveBookOrAudiobook(
+        candidateBookIds[0],
+        candidateBookIds[0],
+      );
+      book = resolved.book;
+      audiobook = resolved.audiobook;
+      if (!book && !audiobook) {
+        throw new NotFoundException(
+          this.i18n?.t
+            ? this.i18n.t('books.not_found')
+            : 'الكتاب المشار إليه غير موجود',
+        );
+      }
+    }
+
+    // 6. Content, Links, and Mentions
+    const trimmedContent = (dto.content || '').trim();
+    const hasText = trimmedContent.length > 0;
+
+    if (hasText) {
+      const wordCount = countWords(trimmedContent);
+      if (wordCount > 500) {
+        throw new BadRequestException(this.i18n.t('posts.max_words_exceeded'));
+      }
+    }
+
+    let linkUrl = dto.link?.url || dto.linkUrl || null;
+    let linkTitle = dto.link?.title || dto.linkTitle || null;
+
+    if (!linkUrl && Array.isArray(dto.links) && dto.links.length > 0) {
+      linkUrl = dto.links[0].url || null;
+      linkTitle = dto.links[0].title || null;
+    }
+
+    const explicitLinks: { url: string; title?: string | null }[] = [];
+    if (dto.link?.url) {
+      explicitLinks.push({ url: dto.link.url, title: dto.link.title });
+    }
+    if (dto.linkUrl) {
+      explicitLinks.push({ url: dto.linkUrl, title: dto.linkTitle });
+    }
+    if (Array.isArray(dto.links)) {
+      for (const item of dto.links) {
+        if (item?.url) {
+          explicitLinks.push({ url: item.url, title: item.title });
+        }
+      }
+    }
+
+    const processedContent = hasText
+      ? this.formatContentWithLinks(trimmedContent, explicitLinks)
+      : '';
+
+    if (!linkUrl && processedContent) {
+      const detected = this.extractLinkFromContent(processedContent);
+      if (detected) {
+        linkUrl = detected.url;
+        linkTitle = detected.title;
+      }
+    }
+
+    // 7. Atomic Upload Video to R2
+    let finalVideoUrl = dto.videoUrl || null;
+    let uploadedVideoUrl: string | null = null;
+    let saved: Post;
+
+    try {
+      if (hasVideoFile) {
+        const uploadRes = await this.uploadService.uploadPostVideo(
+          userId,
+          videoFiles[0],
+        );
+        finalVideoUrl = uploadedVideoUrl = uploadRes.videoUrl;
+      }
+
+      let category = dto.category?.trim() || null;
+      let categoryId = dto.categoryId || null;
+      if (dto.subcategory || dto.topic) {
+        category = (dto.subcategory || dto.topic)!.trim();
+      }
+
+      const post = this.postsRepository.create({
+        userId,
+        type: 'visual',
+        title: dto.title?.trim() || null,
+        contentFormat: 'plain',
+        content: processedContent,
+        images: [],
+        videoUrl: finalVideoUrl,
+        containVideo: true,
+        linkUrl,
+        linkTitle,
+        bookId: book?.id || null,
+        audiobookId: audiobook?.id || null,
+        book: book || undefined,
+        audiobook: audiobook || undefined,
+        category,
+        categoryId,
+        mentions: Array.isArray(dto.mentions) ? dto.mentions : [],
+        commentsDisabled: dto.commentsDisabled === true,
+      });
+
+      saved = await this.postsRepository.save(post);
+    } catch (error) {
+      if (uploadedVideoUrl) {
+        await this.uploadService
+          .deleteFileByUrl(uploadedVideoUrl)
+          .catch(() => {});
+      }
+      throw error;
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+
+    saved.user = user!;
+    saved.book = book;
+    saved.audiobook = audiobook;
+
+    const formatted = await this.formatPost(saved);
+
+    return {
+      message: this.i18n?.t
+        ? this.i18n.t('visuals.published')
+        : 'تم نشر الريلز بنجاح',
       data: formatted,
     };
   }
