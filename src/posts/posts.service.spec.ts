@@ -1474,5 +1474,114 @@ describe('PostsService public post formatting', () => {
       expect(res.data.type).toBe('snippet');
       expect(res.data.quote).toBe('لا ترتقي لمستوى أهدافك بل تهبط لمستوى أنظمتك');
     });
+
+    describe('Home Feed Bottom Sheet Filters & Taxonomy', () => {
+      it('returns hierarchical categories and subcategories taxonomy matching UI bottom-sheet', () => {
+        const filtersAr = serviceWithActions.getHomeFilters('ar');
+        expect(filtersAr.data).toBeDefined();
+        expect(filtersAr.data.length).toBe(10); // All + 9 categories
+
+        // Find History & Documentaries
+        const histCat = filtersAr.data.find(
+          (c) => c.id === 'history-and-documentaries',
+        );
+        expect(histCat).toBeDefined();
+        expect(histCat?.displayName).toBe('التاريخ والوثائقيات');
+        expect(histCat?.nameAr).toBe('التاريخ والوثائقيات');
+        expect(histCat?.nameEn).toBe('History and Documentaries');
+
+        // Subcategories match screenshot exactly
+        const subIds = histCat?.subcategories.map((s) => s.id);
+        expect(subIds).toEqual([
+          'all',
+          'documentaries',
+          'civilizations',
+          'history',
+          'archaeology',
+          'wars',
+          'historical-figures',
+          'travel-and-journeys',
+          'geography',
+        ]);
+
+        const civilizations = histCat?.subcategories.find(
+          (s) => s.id === 'civilizations',
+        );
+        expect(civilizations?.nameAr).toBe('حضارات');
+        expect(civilizations?.nameEn).toBe('Civilizations');
+      });
+
+      it('localizes displayName when lang=en is passed', () => {
+        const filtersEn = serviceWithActions.getHomeFilters('en');
+        const histCat = filtersEn.data.find(
+          (c) => c.id === 'history-and-documentaries',
+        );
+        expect(histCat?.displayName).toBe('History and Documentaries');
+
+        const civilizations = histCat?.subcategories.find(
+          (s) => s.id === 'civilizations',
+        );
+        expect(civilizations?.displayName).toBe('Civilizations');
+      });
+
+      it('applies two-tiered category and subcategory filter to query builder in findAll', async () => {
+        const qb: any = {
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+        };
+        mockPostsRepo.createQueryBuilder = jest.fn().mockReturnValue(qb);
+
+        await serviceWithActions.findAll({
+          category: 'History and Documentaries',
+          subcategory: 'Civilizations',
+        });
+
+        // Verifies category filter condition was added
+        expect(qb.andWhere).toHaveBeenCalledWith(
+          expect.stringContaining('post.category ILIKE :catAr'),
+          expect.objectContaining({
+            catAr: '%التاريخ والوثائقيات%',
+            catEn: '%History and Documentaries%',
+          }),
+        );
+
+        // Verifies subcategory filter condition was added
+        expect(qb.andWhere).toHaveBeenCalledWith(
+          expect.stringContaining('post.category ILIKE :subAr'),
+          expect.objectContaining({
+            subAr: '%حضارات%',
+            subEn: '%Civilizations%',
+          }),
+        );
+      });
+
+      it('ignores category and subcategory filters when set to all/الكل', async () => {
+        const qb: any = {
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+        };
+        mockPostsRepo.createQueryBuilder = jest.fn().mockReturnValue(qb);
+
+        await serviceWithActions.findAll({
+          category: 'all',
+          subcategory: 'الكل',
+        });
+
+        // Neither category nor subcategory where clause should be added for 'all'
+        const calls = qb.andWhere.mock.calls;
+        const hasCategoryClause = calls.some((c: any[]) =>
+          typeof c[0] === 'string' && c[0].includes('post.category ILIKE'),
+        );
+        expect(hasCategoryClause).toBe(false);
+      });
+    });
   });
 });

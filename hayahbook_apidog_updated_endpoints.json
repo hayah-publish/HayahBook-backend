@@ -5328,16 +5328,34 @@
                           "id": "query_category_5",
                           "name": "category",
                           "required": false,
-                          "description": "فلترة بتصنيف معين",
+                          "description": "فلترة بالتصنيف الرئيسي من شيت الفلترة (مثل: الدين، التاريخ والوثائقيات، السياسة والاقتصاد، الفكر والعلوم الإنسانية، أسلوب الحياة، الفن والإعلام، العلوم والتكنولوجيا، المحتوى الصوتي والمرئي، الترفيه / History and Documentaries, Religion, etc.)",
                           "type": "string",
                           "enable": true,
-                          "example": ""
+                          "example": "History and Documentaries"
                         },
                         {
                           "name": "containVideo",
                           "type": "boolean",
                           "required": false,
                           "description": "فلترة المحتوى المجمّع حسب احتوائه على فيديو (true / false) بفحص مفتاح containVideo"
+                        },
+                        {
+                          "id": "query_subcategory_6",
+                          "name": "subcategory",
+                          "required": false,
+                          "description": "فلترة بالتصنيف الفرعي من شيت الفلترة (مثل: وثائقيات، حضارات، تاريخ، آثار، حروب، شخصيات تاريخية، السفر والرحلات، جغرافيا / Documentaries, Civilizations, etc.)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "Civilizations"
+                        },
+                        {
+                          "id": "query_topic_7",
+                          "name": "topic",
+                          "required": false,
+                          "description": "اسم بديل لـ subcategory للفلترة بالتصنيف الفرعي",
+                          "type": "string",
+                          "enable": true,
+                          "example": "حضارات"
                         }
                       ],
                       "header": [
@@ -5422,6 +5440,77 @@
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
                     "name": "home-feed - استرجاع تغذية الصفحة الرئيسية المجمعة (دعم type و containVideo والبحث)"
+                  }
+                },
+                {
+                  "name": "get-home-filters - استرجاع شجرة تصنيفات وخيارات الفلترة للصفحة الرئيسية (Bottom Sheet Filters Taxonomy)",
+                  "api": {
+                    "id": "home_feed_filters_taxonomy_01",
+                    "name": "get-home-filters - استرجاع شجرة تصنيفات وخيارات الفلترة للصفحة الرئيسية (Bottom Sheet Filters Taxonomy)",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/home/filters",
+                    "description": "استرجاع خيارات الفلترة الهرمية المخصصة للـ bottom sheet في الصفحة الرئيسية. يعود بالمستويين: 1) التصنيفات الرئيسية (All, Religion, History and Documentaries, Politics and Economics, Thought and Humanities, Lifestyle, Art and Media, Science and Technology, Audio and Visual Content, Entertainment). 2) التصنيفات الفرعية المرتبطة بكل تصنيف رئيسي مع دعم كامل لخاصية displayName و nameAr و nameEn.",
+                    "status": "released",
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "{{token}}"
+                      }
+                    },
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "id": "query_filters_lang",
+                          "name": "lang",
+                          "required": false,
+                          "description": "لغة عرض التسميات: ar (العربية) أو en (الإنجليزية)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_filters_auth",
+                          "name": "Authorization",
+                          "required": true,
+                          "description": "Bearer token للمستخدم المسجل",
+                          "type": "string",
+                          "enable": true,
+                          "example": "Bearer {{token}}"
+                        },
+                        {
+                          "id": "header_filters_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference header (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "responses": [
+                      {
+                        "id": "200_home_filters",
+                        "name": "OK",
+                        "code": 200,
+                        "contentType": "json"
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Arabic (افتراضي)",
+                        "responseId": "200_home_filters",
+                        "data": "{\n  \"message\": \"تم جلب خيارات وتصنيفات فلترة الصفحة الرئيسية بنجاح\",\n  \"data\": [\n    {\n      \"id\": \"all\",\n      \"name\": \"الكل\",\n      \"displayName\": \"الكل\",\n      \"nameAr\": \"الكل\",\n      \"nameEn\": \"All\",\n      \"subcategories\": [\n        {\n          \"id\": \"all\",\n          \"name\": \"الكل\",\n          \"displayName\": \"الكل\",\n          \"nameAr\": \"الكل\",\n          \"nameEn\": \"All\"\n        }\n      ]\n    },\n    {\n      \"id\": \"history-and-documentaries\",\n      \"name\": \"التاريخ والوثائقيات\",\n      \"displayName\": \"التاريخ والوثائقيات\",\n      \"nameAr\": \"التاريخ والوثائقيات\",\n      \"nameEn\": \"History and Documentaries\",\n      \"subcategories\": [\n        {\n          \"id\": \"all\",\n          \"name\": \"الكل\",\n          \"displayName\": \"الكل\",\n          \"nameAr\": \"الكل\",\n          \"nameEn\": \"All\"\n        },\n        {\n          \"id\": \"documentaries\",\n          \"name\": \"وثائقيات\",\n          \"displayName\": \"وثائقيات\",\n          \"nameAr\": \"وثائقيات\",\n          \"nameEn\": \"Documentaries\"\n        },\n        {\n          \"id\": \"civilizations\",\n          \"name\": \"حضارات\",\n          \"displayName\": \"حضارات\",\n          \"nameAr\": \"حضارات\",\n          \"nameEn\": \"Civilizations\"\n        },\n        {\n          \"id\": \"history\",\n          \"name\": \"تاريخ\",\n          \"displayName\": \"تاريخ\",\n          \"nameAr\": \"تاريخ\",\n          \"nameEn\": \"History\"\n        },\n        {\n          \"id\": \"archaeology\",\n          \"name\": \"آثار\",\n          \"displayName\": \"آثار\",\n          \"nameAr\": \"آثار\",\n          \"nameEn\": \"Archaeology\"\n        },\n        {\n          \"id\": \"wars\",\n          \"name\": \"حروب\",\n          \"displayName\": \"حروب\",\n          \"nameAr\": \"حروب\",\n          \"nameEn\": \"Wars\"\n        },\n        {\n          \"id\": \"historical-figures\",\n          \"name\": \"شخصيات تاريخية\",\n          \"displayName\": \"شخصيات تاريخية\",\n          \"nameAr\": \"شخصيات تاريخية\",\n          \"nameEn\": \"Historical Figures\"\n        },\n        {\n          \"id\": \"travel-and-journeys\",\n          \"name\": \"السفر والرحلات\",\n          \"displayName\": \"السفر والرحلات\",\n          \"nameAr\": \"السفر والرحلات\",\n          \"nameEn\": \"Travel and Journeys\"\n        },\n        {\n          \"id\": \"geography\",\n          \"name\": \"جغرافيا\",\n          \"displayName\": \"جغرافيا\",\n          \"nameAr\": \"جغرافيا\",\n          \"nameEn\": \"Geography\"\n        }\n      ]\n    }\n  ]\n}"
+                      },
+                      {
+                        "name": "English (?lang=en)",
+                        "responseId": "200_home_filters",
+                        "data": "{\n  \"message\": \"Home feed filters retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"all\",\n      \"name\": \"All\",\n      \"displayName\": \"All\",\n      \"nameAr\": \"الكل\",\n      \"nameEn\": \"All\",\n      \"subcategories\": [\n        {\n          \"id\": \"all\",\n          \"name\": \"All\",\n          \"displayName\": \"All\",\n          \"nameAr\": \"الكل\",\n          \"nameEn\": \"All\"\n        }\n      ]\n    },\n    {\n      \"id\": \"history-and-documentaries\",\n      \"name\": \"History and Documentaries\",\n      \"displayName\": \"History and Documentaries\",\n      \"nameAr\": \"التاريخ والوثائقيات\",\n      \"nameEn\": \"History and Documentaries\",\n      \"subcategories\": [\n        {\n          \"id\": \"all\",\n          \"name\": \"All\",\n          \"displayName\": \"All\",\n          \"nameAr\": \"الكل\",\n          \"nameEn\": \"All\"\n        },\n        {\n          \"id\": \"documentaries\",\n          \"name\": \"Documentaries\",\n          \"displayName\": \"Documentaries\",\n          \"nameAr\": \"وثائقيات\",\n          \"nameEn\": \"Documentaries\"\n        },\n        {\n          \"id\": \"civilizations\",\n          \"name\": \"Civilizations\",\n          \"displayName\": \"Civilizations\",\n          \"nameAr\": \"حضارات\",\n          \"nameEn\": \"Civilizations\"\n        },\n        {\n          \"id\": \"history\",\n          \"name\": \"History\",\n          \"displayName\": \"History\",\n          \"nameAr\": \"تاريخ\",\n          \"nameEn\": \"History\"\n        },\n        {\n          \"id\": \"archaeology\",\n          \"name\": \"Archaeology\",\n          \"displayName\": \"Archaeology\",\n          \"nameAr\": \"آثار\",\n          \"nameEn\": \"Archaeology\"\n        },\n        {\n          \"id\": \"wars\",\n          \"name\": \"Wars\",\n          \"displayName\": \"Wars\",\n          \"nameAr\": \"حروب\",\n          \"nameEn\": \"Wars\"\n        },\n        {\n          \"id\": \"historical-figures\",\n          \"name\": \"Historical Figures\",\n          \"displayName\": \"Historical Figures\",\n          \"nameAr\": \"شخصيات تاريخية\",\n          \"nameEn\": \"Historical Figures\"\n        },\n        {\n          \"id\": \"travel-and-journeys\",\n          \"name\": \"Travel and Journeys\",\n          \"displayName\": \"Travel and Journeys\",\n          \"nameAr\": \"السفر والرحلات\",\n          \"nameEn\": \"Travel and Journeys\"\n        },\n        {\n          \"id\": \"geography\",\n          \"name\": \"Geography\",\n          \"displayName\": \"Geography\",\n          \"nameAr\": \"جغرافيا\",\n          \"nameEn\": \"Geography\"\n        }\n      ]\n    }\n  ]\n}"
+                      }
+                    ]
                   }
                 },
                 {

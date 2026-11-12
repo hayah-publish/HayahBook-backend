@@ -46,6 +46,34 @@ describe('HomeController', () => {
         counts: { total: 1 },
         data: [],
       }),
+      getHomeFilters: jest.fn().mockReturnValue({
+        message: 'تم جلب خيارات وتصنيفات فلترة الصفحة الرئيسية بنجاح',
+        data: [
+          {
+            id: 'history-and-documentaries',
+            name: 'التاريخ والوثائقيات',
+            displayName: 'التاريخ والوثائقيات',
+            nameAr: 'التاريخ والوثائقيات',
+            nameEn: 'History and Documentaries',
+            subcategories: [
+              {
+                id: 'all',
+                name: 'الكل',
+                displayName: 'الكل',
+                nameAr: 'الكل',
+                nameEn: 'All',
+              },
+              {
+                id: 'civilizations',
+                name: 'حضارات',
+                displayName: 'حضارات',
+                nameAr: 'حضارات',
+                nameEn: 'Civilizations',
+              },
+            ],
+          },
+        ],
+      }),
     };
 
     i18nService = {
@@ -182,6 +210,25 @@ describe('HomeController', () => {
 
       expect(postsService.getPostReactions).toHaveBeenCalledWith('item-1', { type: 'all' }, 'user-viewer-1');
       expect(res.counts.total).toBe(1);
+    });
+  });
+
+  describe('getHomeFilters', () => {
+    it('returns hierarchical categories and subcategories taxonomy', async () => {
+      const mockReq: any = { headers: { 'accept-language': 'ar' } };
+      const res = await controller.getHomeFilters('ar', mockReq);
+
+      expect(postsService.getHomeFilters).toHaveBeenCalledWith('ar');
+      expect(res.data).toBeDefined();
+      expect(res.data[0].id).toBe('history-and-documentaries');
+      expect(res.data[0].subcategories[1].nameAr).toBe('حضارات');
+    });
+
+    it('supports English lang resolution from headers when query is not provided', async () => {
+      const mockReq: any = { headers: { 'accept-language': 'en-US,en;q=0.9' } };
+      await controller.getHomeFilters(undefined, mockReq);
+
+      expect(postsService.getHomeFilters).toHaveBeenCalledWith('en');
     });
   });
 });

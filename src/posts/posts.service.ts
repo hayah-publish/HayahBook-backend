@@ -44,6 +44,12 @@ import { UploadFile } from '../upload/upload-file.interface';
 import { InterestsService } from '../interests/interests.service';
 import { countWords } from './validators/word-count.validator';
 import { sanitizeMarkdown } from './utils/markdown-sanitizer.util';
+import {
+  formatHomeTaxonomy,
+  resolveTaxonomyCategory,
+  resolveTaxonomySubcategory,
+  FormattedTaxonomyCategory,
+} from './home-feed-taxonomy';
 
 export interface FormattedPostPublisher {
   id: string;
@@ -1458,9 +1464,67 @@ export class PostsService {
   }
 
   /**
-   * Calculate item counts for the 5 tabs in the feed (supports filtering by followed user IDs)
+   * Apply two-tiered taxonomy filter (category & subcategory/topic) matching the Home Feed bottom-sheet filter
    */
-  async getFeedCounts(filterUserIds?: string[]): Promise<{
+  private applyTaxonomyFilters(
+    qb: SelectQueryBuilder<Post>,
+    query: PostsQueryDto,
+  ) {
+    if (typeof qb.andWhere !== 'function') return;
+    const rawCat = query.category?.trim();
+    const rawSubcat = (query.subcategory || query.topic)?.trim();
+
+    // 1. Top Section Filter (Primary Category)
+    if (rawCat && rawCat.toLowerCase() !== 'all' && rawCat !== 'الكل') {
+      const resolvedCat = resolveTaxonomyCategory(rawCat);
+      if (resolvedCat) {
+        qb.andWhere(
+          '(post.category ILIKE :catAr OR post.category ILIKE :catEn OR post.category ILIKE :catRaw OR post.category_id = :catRaw OR book.category ILIKE :catAr OR book.category ILIKE :catEn OR audiobook.category ILIKE :catAr OR audiobook.category ILIKE :catEn)',
+          {
+            catAr: `%${resolvedCat.nameAr}%`,
+            catEn: `%${resolvedCat.nameEn}%`,
+            catRaw: `%${rawCat}%`,
+          },
+        );
+      } else {
+        qb.andWhere(
+          '(post.category ILIKE :catRaw OR post.category_id = :catRaw OR book.category ILIKE :catRaw OR audiobook.category ILIKE :catRaw)',
+          {
+            catRaw: `%${rawCat}%`,
+          },
+        );
+      }
+    }
+
+    // 2. Bottom Section Filter (Subcategory / Topic)
+    if (rawSubcat && rawSubcat.toLowerCase() !== 'all' && rawSubcat !== 'الكل') {
+      const resolvedSub = resolveTaxonomySubcategory(rawSubcat, rawCat);
+      if (resolvedSub) {
+        qb.andWhere(
+          '(post.category ILIKE :subAr OR post.category ILIKE :subEn OR post.title ILIKE :subAr OR post.title ILIKE :subEn OR post.content ILIKE :subAr OR post.content ILIKE :subEn OR book.category ILIKE :subAr OR book.category ILIKE :subEn OR audiobook.category ILIKE :subAr OR audiobook.category ILIKE :subEn)',
+          {
+            subAr: `%${resolvedSub.nameAr}%`,
+            subEn: `%${resolvedSub.nameEn}%`,
+          },
+        );
+      } else {
+        qb.andWhere(
+          '(post.category ILIKE :subRaw OR post.title ILIKE :subRaw OR post.content ILIKE :subRaw OR book.category ILIKE :subRaw OR audiobook.category ILIKE :subRaw)',
+          {
+            subRaw: `%${rawSubcat}%`,
+          },
+        );
+      }
+    }
+  }
+
+  /**
+   * Calculate item counts for the 5 tabs in the feed (supports filtering by followed user IDs and taxonomy filters)
+   */
+  async getFeedCounts(
+    filterUserIds?: string[],
+    query?: PostsQueryDto,
+  ): Promise<{
     all: number;
     posts: number;
     articles: number;
@@ -1487,6 +1551,14 @@ export class PostsService {
 
     if (Array.isArray(filterUserIds) && filterUserIds.length > 0) {
       qb.where('post.user_id IN (:...filterUserIds)', { filterUserIds });
+    }
+
+    if (query && (query.category || query.subcategory || query.topic)) {
+      if (typeof (qb as any).leftJoin === 'function') {
+        qb.leftJoin('post.book', 'book');
+        qb.leftJoin('post.audiobook', 'audiobook');
+      }
+      this.applyTaxonomyFilters(qb, query);
     }
 
     const counts = (await qb.getRawOne()) ?? {};
@@ -1551,11 +1623,33 @@ export class PostsService {
       }),
       currentUserId,
     );
-    const counts = await this.getFeedCounts(filterUserIds);
+    const counts = await this.getFeedCounts(filterUserIds, query);
 
     return {
       counts,
       ...feed,
+    };
+  }
+
+  /**
+   * Return hierarchical taxonomy categories & subcategories for the Home Feed filter bottom-sheet
+   */
+  getHomeFilters(lang?: SupportedLanguage): {
+    message: string;
+    data: FormattedTaxonomyCategory[];
+  } {
+    const currentLang =
+      lang ||
+      (this.i18n?.getCurrentLanguage
+        ? this.i18n.getCurrentLanguage()
+        : 'ar');
+    const isEn = currentLang === 'en';
+    const data = formatHomeTaxonomy(isEn ? 'en' : 'ar');
+    return {
+      message: isEn
+        ? 'Home feed filters retrieved successfully'
+        : 'تم جلب خيارات وتصنيفات فلترة الصفحة الرئيسية بنجاح',
+      data,
     };
   }
 
@@ -1620,12 +1714,7 @@ export class PostsService {
       });
     }
 
-    if (query.category?.trim()) {
-      qb.andWhere('(post.category ILIKE :cat OR post.category_id = :catId)', {
-        cat: `%${query.category.trim()}%`,
-        catId: query.category.trim(),
-      });
-    }
+    this.applyTaxonomyFilters(qb, query);
 
     if (query.containVideo !== undefined) {
       qb.andWhere('post.containVideo = :containVideo', {

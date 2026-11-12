@@ -92,6 +92,18 @@ export class PostsController {
   }
 
   /**
+   * GET /v1/posts/filters (or /v1/posts/categories)
+   * Hierarchical categories and subcategories taxonomy for feed filters
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get(['filters', 'categories'])
+  async getPostFilters(@Query('lang') lang?: string, @Req() req?: any) {
+    const headerLang = req?.headers?.['accept-language'];
+    const currentLang = (lang || (headerLang?.includes('en') ? 'en' : 'ar')) as any;
+    return this.postsService.getHomeFilters(currentLang);
+  }
+
+  /**
    * GET /v1/posts/report-reasons (or /v1/posts/reports/reasons)
    * Get post report reasons with standard 8 UUIDs
    */

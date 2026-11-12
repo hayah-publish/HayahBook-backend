@@ -20,6 +20,7 @@ import { ReactPostDto } from '../posts/dto/react-post.dto';
 import { ReactionsQueryDto } from '../posts/dto/reactions-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { I18nService } from '../i18n/i18n.service';
+import { SupportedLanguage } from '../i18n/i18n.types';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -120,7 +121,24 @@ export class HomeController {
     const filterUserIds = isFollowing
       ? await this.postsService.getFollowedUserIds(userId)
       : undefined;
-    return this.postsService.getFeedCounts(filterUserIds);
+    const hasTaxonomyFilter = Boolean(query.category || query.subcategory || query.topic);
+    return hasTaxonomyFilter
+      ? this.postsService.getFeedCounts(filterUserIds, query)
+      : this.postsService.getFeedCounts(filterUserIds);
+  }
+
+  /**
+   * GET /v1/home/filters
+   * GET /v1/feed/filters
+   * GET /v1/home/categories
+   * GET /v1/feed/categories
+   * Hierarchical categories and subcategories taxonomy for the Home Feed filter bottom sheet
+   */
+  @Get(['filters', 'categories'])
+  async getHomeFilters(@Query('lang') lang?: string, @Req() req?: any) {
+    const headerLang = req?.headers?.['accept-language'];
+    const currentLang = (lang || (headerLang?.includes('en') ? 'en' : 'ar')) as SupportedLanguage;
+    return this.postsService.getHomeFilters(currentLang);
   }
 
   /**
