@@ -3595,6 +3595,581 @@
                     "status": "developing",
                     "name": "get-quote-by-id - استرجاع تفاصيل اقتباس محدد"
                   }
+                },
+                {
+                  "name": "react-quote - التفاعل مع اقتباس محدد (agree, love, applaud, insightful, disagree)",
+                  "api": {
+                    "id": "47000119",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/quotes/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)",
+                          "example": "992004a5-9760-461b-a9e9-8cf9b7862af2"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000119_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000119_200",
+                        "data": "{\"message\":\"تم التفاعل بنجاح\",\"action\":\"added\",\"userReaction\":\"agree\",\"reactionsCount\":{\"total\":55,\"agree\":40,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"]}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "application/json",
+                      "parameters": [],
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reaction": {
+                            "type": "string",
+                            "description": "نوع التفاعل: agree (اتفق), love (احببته), applaud (احسنت), insightful (يستحق التفكير), disagree (اعترض)"
+                          }
+                        },
+                        "required": [
+                          "reaction"
+                        ]
+                      },
+                      "required": true,
+                      "mediaType": "",
+                      "examples": [
+                        {
+                          "mediaType": "application/json",
+                          "name": "تفاعل اتفق (Agree)",
+                          "value": "{\n  \"reaction\": \"agree\"\n}"
+                        }
+                      ]
+                    },
+                    "description": "إضافة تفاعل أو تعديله أو إلغائه بنظام Toggle على اقتباس محدد.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "react-quote - التفاعل مع اقتباس محدد (agree, love, applaud, insightful, disagree)"
+                  }
+                },
+                {
+                  "name": "remove-quote-reaction - إلغاء التفاعل عن اقتباس محدد",
+                  "api": {
+                    "id": "47000120",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/quotes/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)",
+                          "example": "992004a5-9760-461b-a9e9-8cf9b7862af2"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000120_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000120_200",
+                        "data": "{\"message\":\"تمت إزالة التفاعل بنجاح\",\"action\":\"removed\",\"userReaction\":null,\"reactionsCount\":{\"total\":54,\"agree\":39,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"]}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "إزالة التفاعل بشكل صريح ومباشر عن اقتباس محدد.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "remove-quote-reaction - إلغاء التفاعل عن اقتباس محدد"
+                  }
+                },
+                {
+                  "name": "get-quote-reactions - استرجاع المتفاعلين مع الاقتباس (مع تبويبات الفلترة)",
+                  "api": {
+                    "id": "47000121",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/quotes/{id}/reacts",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)",
+                          "example": "992004a5-9760-461b-a9e9-8cf9b7862af2"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "type",
+                          "type": "string",
+                          "required": false,
+                          "description": "فلترة نوع التفاعل (all, agree, love, applaud, insightful, disagree)",
+                          "example": "all"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر بالصفحة",
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000121_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000121_200",
+                        "data": "{\"counts\":{\"all\":55,\"total\":55,\"agree\":40,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"data\":[{\"id\":\"react-uuid-1\",\"reaction\":\"agree\",\"reactionIcon\":\"🤝\",\"reactionLabelAr\":\"اتفق\",\"reactionLabelEn\":\"Agree\",\"createdAt\":\"2026-11-12T06:05:00.000Z\",\"user\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"Ahmed Murad\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/ahmed.jpg\",\"userType\":\"Author\",\"isVerified\":true,\"isFollowing\":false}}],\"total\":1,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع قائمة المتفاعلين مع اقتباس محدد مقسمة حسب التبويبات مع أسماء المستخدمين وحالة المتابعة.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-quote-reactions - استرجاع المتفاعلين مع الاقتباس (مع تبويبات الفلترة)"
+                  }
+                },
+                {
+                  "name": "get-visuals - استرجاع وتصفح المرئيات والفيديوهات (Visuals Feed مع الفلاتر والبحث)",
+                  "api": {
+                    "id": "47000115",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/visuals",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث نصي في محتوى وعناوين المرئيات"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر في الصفحة (افتراضي 20)",
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000115_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000115_200",
+                        "data": "{\"data\":[{\"id\":\"visual-uuid-1\",\"type\":\"visual\",\"contentFormat\":\"plain\",\"content\":\"فيديو توضيحي لأهم الأفكار في كتاب العادات الذرية وكيفية تطبيقها عملياً\",\"videoUrl\":\"https://cdn.hayahbook.com/videos/habits-summary.mp4\",\"containVideo\":true,\"images\":[],\"category\":\"المرئيات\",\"book\":{\"id\":\"27da05bd-423d-4b58-bc3a-82b1bef1c3ed\",\"title\":\"العادات الذرية\",\"author\":\"جيمس كلير\",\"coverUrl\":\"https://cdn.hayahbook.com/covers/atomic-habits.jpg\",\"rating\":4.8},\"publisher\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"Ahmed Murad\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/ahmed.jpg\",\"role\":\"user\",\"isVerified\":true},\"reactionsCount\":{\"total\":35,\"agree\":20,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"],\"userReaction\":\"agree\",\"commentsCount\":15,\"sharesCount\":8,\"bookmarksCount\":4,\"createdAt\":\"2026-11-12T05:00:00.000Z\"}],\"total\":1,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "تغذية الفيديوهات والمحتوى المرئي في المنصة مع دعم كامل للتفاعل والتعليقات والمشاركات.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-visuals - استرجاع وتصفح المرئيات والفيديوهات (Visuals Feed مع الفلاتر والبحث)"
+                  }
+                },
+                {
+                  "name": "react-visual - التفاعل مع محتوى مرئي أو فيديو (agree, love, applaud, insightful, disagree)",
+                  "api": {
+                    "id": "47000116",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/visuals/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)",
+                          "example": "visual-uuid-1"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000116_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000116_200",
+                        "data": "{\"message\":\"تم التفاعل بنجاح\",\"action\":\"added\",\"userReaction\":\"love\",\"reactionsCount\":{\"total\":36,\"agree\":20,\"love\":11,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"]}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "application/json",
+                      "parameters": [],
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reaction": {
+                            "type": "string",
+                            "description": "نوع التفاعل: agree (اتفق), love (احببته), applaud (احسنت), insightful (يستحق التفكير), disagree (اعترض)"
+                          }
+                        },
+                        "required": [
+                          "reaction"
+                        ]
+                      },
+                      "required": true,
+                      "mediaType": "",
+                      "examples": [
+                        {
+                          "mediaType": "application/json",
+                          "name": "تفاعل أحببته (Love)",
+                          "value": "{\n  \"reaction\": \"love\"\n}"
+                        }
+                      ]
+                    },
+                    "description": "إضافة تفاعل أو تعديله أو إلغائه بنظام Toggle على محتوى مرئي أو فيديو.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "react-visual - التفاعل مع محتوى مرئي أو فيديو (agree, love, applaud, insightful, disagree)"
+                  }
+                },
+                {
+                  "name": "remove-visual-reaction - إلغاء التفاعل عن محتوى مرئي أو فيديو",
+                  "api": {
+                    "id": "47000117",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/visuals/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)",
+                          "example": "visual-uuid-1"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000117_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000117_200",
+                        "data": "{\"message\":\"تمت إزالة التفاعل بنجاح\",\"action\":\"removed\",\"userReaction\":null,\"reactionsCount\":{\"total\":35,\"agree\":20,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"]}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "إلغاء التفاعل صراحة عن محتوى مرئي أو فيديو.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "remove-visual-reaction - إلغاء التفاعل عن محتوى مرئي أو فيديو"
+                  }
+                },
+                {
+                  "name": "get-visual-reactions - استرجاع المتفاعلين مع المحتوى المرئي (مع تبويبات الفلترة)",
+                  "api": {
+                    "id": "47000118",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/visuals/{id}/reacts",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)",
+                          "example": "visual-uuid-1"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "type",
+                          "type": "string",
+                          "required": false,
+                          "description": "فلترة نوع التفاعل (all, agree, love, applaud, insightful, disagree)",
+                          "example": "all"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر بالصفحة",
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000118_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000118_200",
+                        "data": "{\"counts\":{\"all\":35,\"total\":35,\"agree\":20,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"data\":[{\"id\":\"react-uuid-2\",\"reaction\":\"love\",\"reactionIcon\":\"❤️\",\"reactionLabelAr\":\"احببته\",\"reactionLabelEn\":\"Love\",\"createdAt\":\"2026-11-12T06:10:00.000Z\",\"user\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"Ahmed Murad\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/ahmed.jpg\",\"userType\":\"Author\",\"isVerified\":true,\"isFollowing\":false}}],\"total\":1,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع قائمة المتفاعلين مع محتوى مرئي مقسمة حسب التبويبات والإحصائيات.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-visual-reactions - استرجاع المتفاعلين مع المحتوى المرئي (مع تبويبات الفلترة)"
+                  }
                 }
               ]
             },
@@ -4845,7 +5420,7 @@
                   }
                 },
                 {
-                  "name": "toggle-reaction - التفاعل على منشور أو مقال (أوافق، أعجبني، أصفق...)",
+                  "name": "toggle-reaction - التفاعل الموحد على المنشورات والمقالات والاقتباسات والمرئيات (أوافق، أعجبني، أصفق، يستحق التفكير، أعترض)",
                   "api": {
                     "id": "47000078",
                     "method": "post",
@@ -4916,7 +5491,12 @@
                       "parameters": [],
                       "jsonSchema": {
                         "type": "object",
-                        "properties": {}
+                        "properties": {
+                          "reaction": {
+                            "type": "string",
+                            "description": "نوع التفاعل (agree, love, applaud, insightful, disagree / اتفق، احببته، احسنت، يستحق التفكير، اعترض)"
+                          }
+                        }
                       },
                       "required": true,
                       "mediaType": "",
@@ -4928,7 +5508,7 @@
                       ],
                       "oasExtensions": ""
                     },
-                    "description": "",
+                    "description": "نظام التفاعلات الموحد الذي يدعم كافة أنواع المحتوى الأربعة في المنصة: المنشورات (posts)، المقالات (articles)، الاقتباسات والمقتطفات (quotes / snippets)، ومحتوى المرئيات والفيديوهات (visuals). يدعم 5 أنواع تفاعل: اتفق (agree)، أحببته (love)، أحسنت (applaud)، يستحق التفكير (insightful)، وأعترض (disagree). النقر على نفس التفاعل يلغيه، والنقر على تفاعل مختلف يقوم بتبديله تلقائياً.",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -4953,11 +5533,11 @@
                     "postProcessors": [],
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
-                    "name": "toggle-reaction - التفاعل على منشور أو مقال (أوافق، أعجبني، أصفق...)"
+                    "name": "toggle-reaction - التفاعل الموحد على المنشورات والمقالات والاقتباسات والمرئيات (أوافق، أعجبني، أصفق، يستحق التفكير، أعترض)"
                   }
                 },
                 {
-                  "name": "get-reacting-users - قائمة المتفاعلين مع المنشور أو المقال",
+                  "name": "get-reacting-users - قائمة المتفاعلين مع المنشور أو المقال أو الاقتباس أو المحتوى المرئي",
                   "api": {
                     "id": "47000080",
                     "method": "get",
@@ -5059,7 +5639,7 @@
                       "examples": [],
                       "oasExtensions": ""
                     },
-                    "description": "",
+                    "description": "استرجاع قائمة المستخدمين المتفاعلين مع أي نوع محتوى (منشور، مقال، اقتباس، محتوى مرئي) مع تبويبات الفلترة حسب نوع التفاعل (الكل، أوافق، أحببته، أحسنت، يستحق التفكير، أعترض) وإحصائيات كل تفاعل.",
                     "tags": [],
                     "status": "developing",
                     "serverId": "",
@@ -5084,7 +5664,75 @@
                     "postProcessors": [],
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
-                    "name": "get-reacting-users - قائمة المتفاعلين مع المنشور أو المقال"
+                    "name": "get-reacting-users - قائمة المتفاعلين مع المنشور أو المقال أو الاقتباس أو المحتوى المرئي"
+                  }
+                },
+                {
+                  "name": "remove-reaction - إلغاء التفاعل عن المنشور أو المقال أو الاقتباس أو المحتوى المرئي",
+                  "api": {
+                    "id": "47000081",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/reactions/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المنشور أو المقال أو الاقتباس أو المحتوى المرئي (UUID)",
+                          "example": "992004a5-9760-461b-a9e9-8cf9b7862af2"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000081_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000081_200",
+                        "data": "{\"message\":\"تمت إزالة التفاعل بنجاح\",\"action\":\"removed\",\"userReaction\":null,\"reactionsCount\":{\"total\":54,\"agree\":39,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"]}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "إلغاء وإزالة التفاعل الصريح للمستخدم عن أي عنصر من عناصر المنصة (منشور، مقال، اقتباس، محتوى مرئي).",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "remove-reaction - إلغاء التفاعل عن المنشور أو المقال أو الاقتباس أو المحتوى المرئي"
                   }
                 }
               ]

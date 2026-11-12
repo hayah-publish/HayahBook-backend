@@ -16,7 +16,7 @@ import { UserBookExcerpt } from '../books/user-book-excerpt.entity';
 import type { PostReactionsCount } from './post-reaction.entity';
 import type { Comment } from '../comments/comment.entity';
 
-export type PostType = 'post' | 'article' | 'snippet';
+export type PostType = 'post' | 'article' | 'snippet' | 'visual';
 
 @Entity('posts')
 @Index(['userId', 'createdAt'])

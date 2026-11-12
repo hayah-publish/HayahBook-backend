@@ -122,7 +122,7 @@ export interface FormattedPostLink {
 
 export interface FormattedPost {
   id: string;
-  type: 'post' | 'article' | 'snippet';
+  type: 'post' | 'article' | 'snippet' | 'visual';
   contentFormat?: string;
   title?: string | null;
   coverImageUrl?: string | null;

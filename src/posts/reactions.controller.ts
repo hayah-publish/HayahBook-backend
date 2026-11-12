@@ -36,13 +36,13 @@ export class ReactionsController {
   ) {}
 
   /**
-   * POST /v1/reactions/:id
-   * POST /v1/react/:id
-   * Unified reaction endpoint for all 4 types: posts, articles, visuals, and snippets.
+   * POST /v1/reactions/:id (or /v1/reactions/:id/react)
+   * POST /v1/react/:id (or /v1/react/:id/react)
+   * Unified reaction endpoint for all 4 types: posts, articles, visuals, and quotes/snippets.
    * Toggles off if the same reaction is clicked again. Switches type if a different reaction is selected.
    */
   @UseGuards(JwtAuthGuard)
-  @Post(':id')
+  @Post([':id', ':id/react'])
   async reactParam(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ReactPostDto,
@@ -72,12 +72,12 @@ export class ReactionsController {
   }
 
   /**
-   * DELETE /v1/reactions/:id
-   * DELETE /v1/react/:id
-   * Explicitly remove reaction from any item (post, article, visual, snippet)
+   * DELETE /v1/reactions/:id (or /v1/reactions/:id/react)
+   * DELETE /v1/react/:id (or /v1/react/:id/react)
+   * Explicitly remove reaction from any item (post, article, visual, quote/snippet)
    */
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
+  @Delete([':id', ':id/react'])
   @HttpCode(HttpStatus.OK)
   async removeReaction(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -87,12 +87,12 @@ export class ReactionsController {
   }
 
   /**
-   * GET /v1/reactions/:id
-   * GET /v1/react/:id
-   * Get reactions modal list for any item (post, article, visual, snippet) with tabs filtering (all, agree, love, applaud, insightful, disagree)
+   * GET /v1/reactions/:id (or /v1/reactions/:id/reacts)
+   * GET /v1/react/:id (or /v1/react/:id/reacts)
+   * Get reactions modal list for any item (post, article, visual, quote/snippet) with tabs filtering (all, agree, love, applaud, insightful, disagree)
    */
   @UseGuards(OptionalJwtAuthGuard)
-  @Get(':id')
+  @Get([':id', ':id/reacts'])
   async getReactions(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Query() query: ReactionsQueryDto,
