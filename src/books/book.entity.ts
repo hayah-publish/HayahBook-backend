@@ -46,6 +46,9 @@ export class Book {
   @Column({ name: 'reads_count', type: 'integer', default: 0 })
   readsCount: number;
 
+  @Column({ name: 'pages_count', type: 'integer', default: 500, nullable: true })
+  pagesCount: number | null;
+
   @OneToMany(() => Audiobook, (audiobook) => audiobook.book)
   audiobooks: Audiobook[];
 

@@ -22,6 +22,7 @@ import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { PostsService } from './posts.service';
 import { PostsQueryDto } from './dto/posts-query.dto';
 import { CreateVisualDto } from './dto/create-visual.dto';
+import { BookReelsQueryDto } from './dto/book-reels-query.dto';
 import { ReactPostDto } from './dto/react-post.dto';
 import { ReactionsQueryDto } from './dto/reactions-query.dto';
 import { ReportPostDto } from './dto/report-post.dto';
@@ -58,6 +59,21 @@ export class ReelsController {
     @Req() req?: AuthenticatedRequest,
   ) {
     return this.postsService.getReelsFeed(query, req?.user?.userId);
+  }
+
+  /**
+   * GET /v1/reels/book/:bookId
+   * Dedicated Book Reels view (Book details + Attached reels grid).
+   * Triggered when tapping the attached book on a reel (Matching design in screenshot).
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('book/:bookId')
+  async getBookReels(
+    @Param('bookId', new ParseUUIDPipe()) bookId: string,
+    @Query() query: BookReelsQueryDto,
+    @Req() req?: AuthenticatedRequest,
+  ) {
+    return this.postsService.getBookReels(bookId, query, req?.user?.userId);
   }
 
   /**

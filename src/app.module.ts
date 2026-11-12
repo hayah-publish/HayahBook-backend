@@ -39,6 +39,7 @@ import { AddContainVideoToPosts1763600000000 } from './database/migrations/17636
 import { CreateUserBookExcerptsTable1763700000000 } from './database/migrations/1763700000000-create-user-book-excerpts-table';
 import { RemoveColorFromUserBookExcerpts1763800000000 } from './database/migrations/1763800000000-remove-color-from-user-book-excerpts';
 import { AddExcerptIdToPosts1763900000000 } from './database/migrations/1763900000000-add-excerpt-id-to-posts';
+import { AddViewsAndPagesCount1764000000000 } from './database/migrations/1764000000000-add-views-and-pages-count';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { AddExcerptIdToPosts1763900000000 } from './database/migrations/17639000
               CreateUserBookExcerptsTable1763700000000,
               RemoveColorFromUserBookExcerpts1763800000000,
               AddExcerptIdToPosts1763900000000,
+              AddViewsAndPagesCount1764000000000,
             ],
             migrationsRun: true,
           };
@@ -121,6 +123,7 @@ import { AddExcerptIdToPosts1763900000000 } from './database/migrations/17639000
             CreateUserBookExcerptsTable1763700000000,
             RemoveColorFromUserBookExcerpts1763800000000,
             AddExcerptIdToPosts1763900000000,
+            AddViewsAndPagesCount1764000000000,
           ],
           migrationsRun: true,
         };

@@ -1767,6 +1767,87 @@ describe('PostsService public post formatting', () => {
           'Followed by Ahmed Murad and 4 others',
         );
       });
+
+      it('getBookReels returns book info card, companion audio, pages, and attached reels grid with author badge', async () => {
+        const mockBook = {
+          id: 'book-uuid-1',
+          title: 'الجلاد تحت جلدي',
+          author: 'صلاح علي',
+          category: 'Novel',
+          coverUrl: 'https://cdn.hayahbook.com/books/harun.jpg',
+          rating: 4.5,
+          readsCount: 5600,
+          pagesCount: 500,
+          audiobooks: [
+            {
+              id: 'audiobook-uuid-1',
+              title: 'الجلاد تحت جلدي',
+              duration: 19200, // 5 hours 20 mins
+            },
+          ],
+        };
+
+        (serviceWithActions as any).booksRepository = {
+          findOne: jest.fn().mockResolvedValue(mockBook),
+        };
+
+        const qb: any = {
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          addSelect: jest.fn().mockReturnThis(),
+          setParameter: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          addOrderBy: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getManyAndCount: jest.fn().mockResolvedValue([
+            [
+              {
+                id: 'reel-1',
+                content: 'فيديو رائع عن رواية الجلاد تحت جلدي',
+                videoUrl: 'https://cdn.hayahbook.com/reels/1.mp4',
+                coverImageUrl: 'https://cdn.hayahbook.com/reels/thumb1.jpg',
+                type: 'visual',
+                viewsCount: 12000,
+                likesCount: 55,
+                commentsCount: 80,
+                sharesCount: 22,
+                bookmarksCount: 15,
+                user: {
+                  id: 'author-user-1',
+                  name: 'صلاح علي',
+                  role: 'author',
+                },
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            ],
+            1,
+          ]),
+        };
+
+        mockPostsRepo.createQueryBuilder = jest.fn().mockReturnValue(qb);
+
+        const result = await serviceWithActions.getBookReels(
+          'book-uuid-1',
+          { sort: 'top', page: 1, limit: 10, lang: 'en' },
+          'user-1',
+        );
+
+        expect(result.book.title).toBe('الجلاد تحت جلدي');
+        expect(result.book.author).toBe('صلاح علي');
+        expect(result.book.readsCountFormatted).toBe('5.6 k');
+        expect(result.book.rating).toBe(4.5);
+        expect(result.book.reading.formatted).toBe('500 pages');
+        expect(result.book.listening.formatted).toBe('5 hr; 20 min');
+        expect(result.book.listening.available).toBe(true);
+
+        expect(result.reels).toHaveLength(1);
+        expect(result.reels[0].isAuthor).toBe(true);
+        expect(result.reels[0].authorBadge).toBe('The Author');
+        expect(result.reels[0].viewsCountFormatted).toBe('12K');
+      });
     });
   });
 });

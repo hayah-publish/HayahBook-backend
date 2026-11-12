@@ -13,6 +13,7 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  Optional,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { BooksQueryDto } from './dto/books-query.dto';
@@ -23,8 +24,11 @@ import { Book } from './book.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
 import { I18nService } from '../i18n/i18n.service';
+import { PostsService } from '../posts/posts.service';
+import { BookReelsQueryDto } from '../posts/dto/book-reels-query.dto';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -38,6 +42,8 @@ export class BooksController {
   constructor(
     private readonly booksService: BooksService,
     private readonly i18n: I18nService,
+    @Optional()
+    private readonly postsService?: PostsService,
   ) {}
 
   @Get()
@@ -159,6 +165,25 @@ export class BooksController {
       return list.map((item) => item.category);
     }
     return list;
+  }
+
+  /**
+   * GET /v1/books/:id/reels
+   * GET /v1/books/:id/videos
+   * Dedicated Book Reels view (Book details + Attached reels grid).
+   * Triggered when tapping the book attached to a reel (Matching the design in screenshot).
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get([':id/reels', ':id/videos'])
+  async getBookReels(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query() query: BookReelsQueryDto,
+    @Req() req?: any,
+  ) {
+    if (!this.postsService) {
+      throw new BadRequestException('PostsService is not configured');
+    }
+    return this.postsService.getBookReels(id, query, req?.user?.userId);
   }
 
   @Get(':id')

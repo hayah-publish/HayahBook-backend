@@ -4643,6 +4643,262 @@
                   }
                 },
                 {
+                  "name": "get-book-reels-alias - عرض تفاصيل الكتاب وريلز الكتاب عبر مسار الريلز (/v1/reels/book/:bookId)",
+                  "api": {
+                    "id": "get_book_reels_via_reels_alias_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/reels/book/{bookId}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "bookId",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الكتاب (UUID)",
+                          "example": "7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "sort",
+                          "type": "string",
+                          "required": false,
+                          "description": "ترتيب الريلز: top (الأعلى مشاهدة وتفاعلاً) أو latest (الأحدث)",
+                          "example": "top"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_book_reels_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {
+                            "book": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string",
+                                  "example": "الجلاد تحت جلدي"
+                                },
+                                "author": {
+                                  "type": "string",
+                                  "example": "صلاح علي"
+                                },
+                                "category": {
+                                  "type": "string",
+                                  "example": "Novel"
+                                },
+                                "categoryDisplayName": {
+                                  "type": "string",
+                                  "example": "رواية"
+                                },
+                                "coverUrl": {
+                                  "type": "string"
+                                },
+                                "readsCount": {
+                                  "type": "integer",
+                                  "example": 5600
+                                },
+                                "readsCountFormatted": {
+                                  "type": "string",
+                                  "example": "5.6 k"
+                                },
+                                "rating": {
+                                  "type": "number",
+                                  "example": 4.5
+                                },
+                                "ratingsCount": {
+                                  "type": "integer",
+                                  "example": 452
+                                },
+                                "pagesCount": {
+                                  "type": "integer",
+                                  "example": 500
+                                },
+                                "reading": {
+                                  "type": "object",
+                                  "properties": {
+                                    "pagesCount": {
+                                      "type": "integer",
+                                      "example": 500
+                                    },
+                                    "formatted": {
+                                      "type": "string",
+                                      "example": "500 pages"
+                                    },
+                                    "available": {
+                                      "type": "boolean",
+                                      "example": true
+                                    }
+                                  }
+                                },
+                                "listening": {
+                                  "type": "object",
+                                  "properties": {
+                                    "durationSeconds": {
+                                      "type": "integer",
+                                      "example": 19200
+                                    },
+                                    "formatted": {
+                                      "type": "string",
+                                      "example": "5 hr; 20 min"
+                                    },
+                                    "available": {
+                                      "type": "boolean",
+                                      "example": true
+                                    },
+                                    "audiobookId": {
+                                      "type": "string",
+                                      "example": "audiobook-uuid-1"
+                                    }
+                                  }
+                                },
+                                "isFavorite": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "isReading": {
+                                  "type": "boolean",
+                                  "example": false
+                                }
+                              }
+                            },
+                            "reels": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "content": {
+                                    "type": "string"
+                                  },
+                                  "videoUrl": {
+                                    "type": "string"
+                                  },
+                                  "thumbnailUrl": {
+                                    "type": "string"
+                                  },
+                                  "aspectRatio": {
+                                    "type": "string",
+                                    "example": "9:16"
+                                  },
+                                  "viewsCount": {
+                                    "type": "integer",
+                                    "example": 12000
+                                  },
+                                  "viewsCountFormatted": {
+                                    "type": "string",
+                                    "example": "12K"
+                                  },
+                                  "reactionsCount": {
+                                    "type": "object"
+                                  },
+                                  "commentsCount": {
+                                    "type": "integer",
+                                    "example": 80
+                                  },
+                                  "sharesCount": {
+                                    "type": "integer",
+                                    "example": 22
+                                  },
+                                  "bookmarksCount": {
+                                    "type": "integer",
+                                    "example": 15
+                                  },
+                                  "isAuthor": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "authorBadge": {
+                                    "type": "string",
+                                    "example": "The Author"
+                                  },
+                                  "publisher": {
+                                    "type": "object"
+                                  },
+                                  "createdAt": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "total": {
+                              "type": "integer",
+                              "example": 6
+                            },
+                            "page": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "example": 20
+                            },
+                            "totalPages": {
+                              "type": "integer",
+                              "example": 1
+                            }
+                          }
+                        },
+                        "itemSchema": {},
+                        "description": "بيانات تفاصيل الكتاب وبطاقات الريلز المرتبطة به مطابقة لشاشة التصميم المرفق (Book Reels)",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية (Arabic Book Reels Screen)",
+                        "responseId": "get_book_reels_200",
+                        "data": "{\n  \"book\": {\n    \"id\": \"7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d\",\n    \"title\": \"الجلاد تحت جلدي\",\n    \"author\": \"صلاح علي\",\n    \"authorId\": null,\n    \"category\": \"Novel\",\n    \"categoryDisplayName\": \"رواية\",\n    \"coverUrl\": \"https://cdn.hayahbook.com/books/harun-alrashid.jpg\",\n    \"readsCount\": 5600,\n    \"readsCountFormatted\": \"5.6 الف\",\n    \"rating\": 4.5,\n    \"ratingsCount\": 452,\n    \"pagesCount\": 500,\n    \"reading\": {\n      \"pagesCount\": 500,\n      \"formatted\": \"500 صفحة\",\n      \"available\": true\n    },\n    \"listening\": {\n      \"durationSeconds\": 19200,\n      \"formatted\": \"5 س و20 د\",\n      \"available\": true,\n      \"audiobookId\": \"5e140814-ef3a-4320-89ac-f1993c17a0de\"\n    },\n    \"isFavorite\": false,\n    \"isReading\": false\n  },\n  \"reels\": [\n    {\n      \"id\": \"reel-uuid-author-1\",\n      \"content\": \"فيديو ريلز خاص بالرواية يقدمه كاتب العمل\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/library-author-tour.mp4\",\n      \"thumbnailUrl\": \"https://cdn.hayahbook.com/reels/thumbs/library-shelf.jpg\",\n      \"aspectRatio\": \"9:16\",\n      \"viewsCount\": 12000,\n      \"viewsCountFormatted\": \"12 الف\",\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 30,\n        \"love\": 20,\n        \"applaud\": 5,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 15,\n      \"isAuthor\": true,\n      \"authorBadge\": \"الكاتب\",\n      \"publisher\": {\n        \"id\": \"author-user-uuid-1\",\n        \"name\": \"صلاح علي\",\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/salah-ali.jpg\",\n        \"role\": \"author\",\n        \"isVerified\": true\n      },\n      \"createdAt\": \"2026-11-12T08:00:00.000Z\",\n      \"updatedAt\": \"2026-11-12T08:00:00.000Z\"\n    },\n    {\n      \"id\": \"reel-uuid-reader-2\",\n      \"content\": \"مراجعة وتحليل عميق لأحداث رواية الجلاد تحت جلدي\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/lantern-room.mp4\",\n      \"thumbnailUrl\": \"https://cdn.hayahbook.com/reels/thumbs/lantern-room.jpg\",\n      \"aspectRatio\": \"9:16\",\n      \"viewsCount\": 12000,\n      \"viewsCountFormatted\": \"12 الف\",\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 35,\n        \"love\": 15,\n        \"applaud\": 5,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 10,\n      \"isAuthor\": false,\n      \"authorBadge\": null,\n      \"publisher\": {\n        \"id\": \"reader-user-uuid-2\",\n        \"name\": \"سارة أحمد\",\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/sara-ahmed.jpg\",\n        \"role\": \"user\",\n        \"isVerified\": true\n      },\n      \"createdAt\": \"2026-11-12T07:30:00.000Z\",\n      \"updatedAt\": \"2026-11-12T07:30:00.000Z\"\n    }\n  ],\n  \"total\": 6,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      },
+                      {
+                        "name": "Success - English (Book Reels Screen matching UI)",
+                        "responseId": "get_book_reels_200",
+                        "data": "{\n  \"book\": {\n    \"id\": \"7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d\",\n    \"title\": \"The Executioner Under My Skin\",\n    \"author\": \"Salah Ali\",\n    \"authorId\": null,\n    \"category\": \"Novel\",\n    \"categoryDisplayName\": \"Novel\",\n    \"coverUrl\": \"https://cdn.hayahbook.com/books/harun-alrashid.jpg\",\n    \"readsCount\": 5600,\n    \"readsCountFormatted\": \"5.6 k\",\n    \"rating\": 4.5,\n    \"ratingsCount\": 452,\n    \"pagesCount\": 500,\n    \"reading\": {\n      \"pagesCount\": 500,\n      \"formatted\": \"500 pages\",\n      \"available\": true\n    },\n    \"listening\": {\n      \"durationSeconds\": 19200,\n      \"formatted\": \"5 hr; 20 min\",\n      \"available\": true,\n      \"audiobookId\": \"5e140814-ef3a-4320-89ac-f1993c17a0de\"\n    },\n    \"isFavorite\": false,\n    \"isReading\": false\n  },\n  \"reels\": [\n    {\n      \"id\": \"reel-uuid-author-1\",\n      \"content\": \"Official author video commentary on the novel\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/library-author-tour.mp4\",\n      \"thumbnailUrl\": \"https://cdn.hayahbook.com/reels/thumbs/library-shelf.jpg\",\n      \"aspectRatio\": \"9:16\",\n      \"viewsCount\": 12000,\n      \"viewsCountFormatted\": \"12K\",\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 30,\n        \"love\": 20,\n        \"applaud\": 5,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 15,\n      \"isAuthor\": true,\n      \"authorBadge\": \"The Author\",\n      \"publisher\": {\n        \"id\": \"author-user-uuid-1\",\n        \"name\": \"Salah Ali\",\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/salah-ali.jpg\",\n        \"role\": \"author\",\n        \"isVerified\": true\n      },\n      \"createdAt\": \"2026-11-12T08:00:00.000Z\",\n      \"updatedAt\": \"2026-11-12T08:00:00.000Z\"\n    }\n  ],\n  \"total\": 6,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
+                  }
+                },
+                {
                   "name": "react-visual - التفاعل مع محتوى مرئي أو فيديو (agree, love, applaud, insightful, disagree)",
                   "api": {
                     "id": "47000116",
@@ -10593,6 +10849,280 @@
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
                     "name": "get-book-by-id - تفاصيل كتاب محدد"
+                  }
+                },
+                {
+                  "name": "get-book-reels - عرض تفاصيل الكتاب ومقاطع الريلز المرتبطة به عند النقر (Book Details & Attached Reels Grid)",
+                  "api": {
+                    "id": "get_book_reels_attached_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/books/{id}/reels",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الكتاب (UUID)",
+                          "example": "7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "sort",
+                          "type": "string",
+                          "required": false,
+                          "description": "ترتيب الريلز: top (الأعلى مشاهدة وتفاعلاً وأولوية الكاتب افتراضياً) أو latest (الأحدث)",
+                          "example": "top"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد مقاطع الريلز في الصفحة (افتراضي 20)",
+                          "example": 20
+                        },
+                        {
+                          "name": "lang",
+                          "type": "string",
+                          "required": false,
+                          "description": "لغة التنسيق (ar / en)",
+                          "example": "ar"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        },
+                        {
+                          "id": "header_auth",
+                          "name": "Authorization",
+                          "required": false,
+                          "description": "Bearer Token الخاص بالمستخدم (اختياري لمعرفة حالة المفضلة isFavorite)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_book_reels_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {
+                            "book": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string",
+                                  "example": "الجلاد تحت جلدي"
+                                },
+                                "author": {
+                                  "type": "string",
+                                  "example": "صلاح علي"
+                                },
+                                "category": {
+                                  "type": "string",
+                                  "example": "Novel"
+                                },
+                                "categoryDisplayName": {
+                                  "type": "string",
+                                  "example": "رواية"
+                                },
+                                "coverUrl": {
+                                  "type": "string"
+                                },
+                                "readsCount": {
+                                  "type": "integer",
+                                  "example": 5600
+                                },
+                                "readsCountFormatted": {
+                                  "type": "string",
+                                  "example": "5.6 k"
+                                },
+                                "rating": {
+                                  "type": "number",
+                                  "example": 4.5
+                                },
+                                "ratingsCount": {
+                                  "type": "integer",
+                                  "example": 452
+                                },
+                                "pagesCount": {
+                                  "type": "integer",
+                                  "example": 500
+                                },
+                                "reading": {
+                                  "type": "object",
+                                  "properties": {
+                                    "pagesCount": {
+                                      "type": "integer",
+                                      "example": 500
+                                    },
+                                    "formatted": {
+                                      "type": "string",
+                                      "example": "500 pages"
+                                    },
+                                    "available": {
+                                      "type": "boolean",
+                                      "example": true
+                                    }
+                                  }
+                                },
+                                "listening": {
+                                  "type": "object",
+                                  "properties": {
+                                    "durationSeconds": {
+                                      "type": "integer",
+                                      "example": 19200
+                                    },
+                                    "formatted": {
+                                      "type": "string",
+                                      "example": "5 hr; 20 min"
+                                    },
+                                    "available": {
+                                      "type": "boolean",
+                                      "example": true
+                                    },
+                                    "audiobookId": {
+                                      "type": "string",
+                                      "example": "audiobook-uuid-1"
+                                    }
+                                  }
+                                },
+                                "isFavorite": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "isReading": {
+                                  "type": "boolean",
+                                  "example": false
+                                }
+                              }
+                            },
+                            "reels": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "content": {
+                                    "type": "string"
+                                  },
+                                  "videoUrl": {
+                                    "type": "string"
+                                  },
+                                  "thumbnailUrl": {
+                                    "type": "string"
+                                  },
+                                  "aspectRatio": {
+                                    "type": "string",
+                                    "example": "9:16"
+                                  },
+                                  "viewsCount": {
+                                    "type": "integer",
+                                    "example": 12000
+                                  },
+                                  "viewsCountFormatted": {
+                                    "type": "string",
+                                    "example": "12K"
+                                  },
+                                  "reactionsCount": {
+                                    "type": "object"
+                                  },
+                                  "commentsCount": {
+                                    "type": "integer",
+                                    "example": 80
+                                  },
+                                  "sharesCount": {
+                                    "type": "integer",
+                                    "example": 22
+                                  },
+                                  "bookmarksCount": {
+                                    "type": "integer",
+                                    "example": 15
+                                  },
+                                  "isAuthor": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "authorBadge": {
+                                    "type": "string",
+                                    "example": "The Author"
+                                  },
+                                  "publisher": {
+                                    "type": "object"
+                                  },
+                                  "createdAt": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "total": {
+                              "type": "integer",
+                              "example": 6
+                            },
+                            "page": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "example": 20
+                            },
+                            "totalPages": {
+                              "type": "integer",
+                              "example": 1
+                            }
+                          }
+                        },
+                        "itemSchema": {},
+                        "description": "بيانات تفاصيل الكتاب وبطاقات الريلز المرتبطة به مطابقة لشاشة التصميم المرفق (Book Reels)",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية (Arabic Book Reels Screen)",
+                        "responseId": "get_book_reels_200",
+                        "data": "{\n  \"book\": {\n    \"id\": \"7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d\",\n    \"title\": \"الجلاد تحت جلدي\",\n    \"author\": \"صلاح علي\",\n    \"authorId\": null,\n    \"category\": \"Novel\",\n    \"categoryDisplayName\": \"رواية\",\n    \"coverUrl\": \"https://cdn.hayahbook.com/books/harun-alrashid.jpg\",\n    \"readsCount\": 5600,\n    \"readsCountFormatted\": \"5.6 الف\",\n    \"rating\": 4.5,\n    \"ratingsCount\": 452,\n    \"pagesCount\": 500,\n    \"reading\": {\n      \"pagesCount\": 500,\n      \"formatted\": \"500 صفحة\",\n      \"available\": true\n    },\n    \"listening\": {\n      \"durationSeconds\": 19200,\n      \"formatted\": \"5 س و20 د\",\n      \"available\": true,\n      \"audiobookId\": \"5e140814-ef3a-4320-89ac-f1993c17a0de\"\n    },\n    \"isFavorite\": false,\n    \"isReading\": false\n  },\n  \"reels\": [\n    {\n      \"id\": \"reel-uuid-author-1\",\n      \"content\": \"فيديو ريلز خاص بالرواية يقدمه كاتب العمل\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/library-author-tour.mp4\",\n      \"thumbnailUrl\": \"https://cdn.hayahbook.com/reels/thumbs/library-shelf.jpg\",\n      \"aspectRatio\": \"9:16\",\n      \"viewsCount\": 12000,\n      \"viewsCountFormatted\": \"12 الف\",\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 30,\n        \"love\": 20,\n        \"applaud\": 5,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 15,\n      \"isAuthor\": true,\n      \"authorBadge\": \"الكاتب\",\n      \"publisher\": {\n        \"id\": \"author-user-uuid-1\",\n        \"name\": \"صلاح علي\",\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/salah-ali.jpg\",\n        \"role\": \"author\",\n        \"isVerified\": true\n      },\n      \"createdAt\": \"2026-11-12T08:00:00.000Z\",\n      \"updatedAt\": \"2026-11-12T08:00:00.000Z\"\n    },\n    {\n      \"id\": \"reel-uuid-reader-2\",\n      \"content\": \"مراجعة وتحليل عميق لأحداث رواية الجلاد تحت جلدي\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/lantern-room.mp4\",\n      \"thumbnailUrl\": \"https://cdn.hayahbook.com/reels/thumbs/lantern-room.jpg\",\n      \"aspectRatio\": \"9:16\",\n      \"viewsCount\": 12000,\n      \"viewsCountFormatted\": \"12 الف\",\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 35,\n        \"love\": 15,\n        \"applaud\": 5,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 10,\n      \"isAuthor\": false,\n      \"authorBadge\": null,\n      \"publisher\": {\n        \"id\": \"reader-user-uuid-2\",\n        \"name\": \"سارة أحمد\",\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/sara-ahmed.jpg\",\n        \"role\": \"user\",\n        \"isVerified\": true\n      },\n      \"createdAt\": \"2026-11-12T07:30:00.000Z\",\n      \"updatedAt\": \"2026-11-12T07:30:00.000Z\"\n    }\n  ],\n  \"total\": 6,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      },
+                      {
+                        "name": "Success - English (Book Reels Screen matching UI)",
+                        "responseId": "get_book_reels_200",
+                        "data": "{\n  \"book\": {\n    \"id\": \"7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d\",\n    \"title\": \"The Executioner Under My Skin\",\n    \"author\": \"Salah Ali\",\n    \"authorId\": null,\n    \"category\": \"Novel\",\n    \"categoryDisplayName\": \"Novel\",\n    \"coverUrl\": \"https://cdn.hayahbook.com/books/harun-alrashid.jpg\",\n    \"readsCount\": 5600,\n    \"readsCountFormatted\": \"5.6 k\",\n    \"rating\": 4.5,\n    \"ratingsCount\": 452,\n    \"pagesCount\": 500,\n    \"reading\": {\n      \"pagesCount\": 500,\n      \"formatted\": \"500 pages\",\n      \"available\": true\n    },\n    \"listening\": {\n      \"durationSeconds\": 19200,\n      \"formatted\": \"5 hr; 20 min\",\n      \"available\": true,\n      \"audiobookId\": \"5e140814-ef3a-4320-89ac-f1993c17a0de\"\n    },\n    \"isFavorite\": false,\n    \"isReading\": false\n  },\n  \"reels\": [\n    {\n      \"id\": \"reel-uuid-author-1\",\n      \"content\": \"Official author video commentary on the novel\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/library-author-tour.mp4\",\n      \"thumbnailUrl\": \"https://cdn.hayahbook.com/reels/thumbs/library-shelf.jpg\",\n      \"aspectRatio\": \"9:16\",\n      \"viewsCount\": 12000,\n      \"viewsCountFormatted\": \"12K\",\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 30,\n        \"love\": 20,\n        \"applaud\": 5,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 15,\n      \"isAuthor\": true,\n      \"authorBadge\": \"The Author\",\n      \"publisher\": {\n        \"id\": \"author-user-uuid-1\",\n        \"name\": \"Salah Ali\",\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/salah-ali.jpg\",\n        \"role\": \"author\",\n        \"isVerified\": true\n      },\n      \"createdAt\": \"2026-11-12T08:00:00.000Z\",\n      \"updatedAt\": \"2026-11-12T08:00:00.000Z\"\n    }\n  ],\n  \"total\": 6,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
                   }
                 },
                 {

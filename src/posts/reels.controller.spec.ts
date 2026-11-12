@@ -62,6 +62,14 @@ describe('ReelsController', () => {
       toggleComments: jest.fn().mockResolvedValue({ success: true, commentsDisabled: false }),
       reportPost: jest.fn().mockResolvedValue({ success: true }),
       remove: jest.fn().mockResolvedValue({ success: true, message: 'Deleted' }),
+      getBookReels: jest.fn().mockResolvedValue({
+        book: { id: 'book-uuid-1', title: 'الجلاد تحت جلدي' },
+        reels: [mockReel],
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -132,6 +140,13 @@ describe('ReelsController', () => {
     const res = await controller.deleteReel(mockUserReq, 'reel-uuid-1');
     expect(postsService.remove).toHaveBeenCalledWith('reel-uuid-1', 'user-uuid-1', false, 'post');
     expect(res.success).toBe(true);
+  });
+
+  it('GET /v1/reels/book/:bookId returns book details and attached reels', async () => {
+    const res = await controller.getBookReels('book-uuid-1', { sort: 'top' }, mockUserReq);
+    expect(postsService.getBookReels).toHaveBeenCalledWith('book-uuid-1', { sort: 'top' }, 'user-uuid-1');
+    expect(res.book.title).toBe('الجلاد تحت جلدي');
+    expect(res.reels).toHaveLength(1);
   });
 });
 
