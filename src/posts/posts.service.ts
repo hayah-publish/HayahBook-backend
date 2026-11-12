@@ -30,6 +30,7 @@ import { UserBlock } from '../users/user-block.entity';
 import { UserBookmark } from '../bookmarks/bookmark.entity';
 import { Book } from '../books/book.entity';
 import { Audiobook } from '../books/audiobook.entity';
+import { UserBookExcerpt } from '../books/user-book-excerpt.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -121,7 +122,7 @@ export interface FormattedPostLink {
 
 export interface FormattedPost {
   id: string;
-  type: 'post' | 'article';
+  type: 'post' | 'article' | 'snippet';
   contentFormat?: string;
   title?: string | null;
   coverImageUrl?: string | null;
@@ -130,6 +131,14 @@ export interface FormattedPost {
   categoryDetails?: any;
   agreeToTerms?: boolean;
   content: string;
+  quote?: string | null;
+  excerpt?: {
+    id: string;
+    content: string;
+    chapter: string | null;
+    pageNumber: number | null;
+    cfiRange: string | null;
+  } | null;
   images: string[];
   videoUrl: string | null;
   containVideo: boolean;
@@ -195,6 +204,9 @@ export class PostsService {
     @Optional()
     @InjectRepository(UserBookmark)
     private readonly bookmarkRepo?: Repository<UserBookmark>,
+    @Optional()
+    @InjectRepository(UserBookExcerpt)
+    private readonly excerptsRepository?: Repository<UserBookExcerpt>,
     @Optional()
     private readonly configService?: ConfigService,
   ) {}
@@ -1142,6 +1154,87 @@ export class PostsService {
   }
 
   /**
+   * Create and publish a snippet (مقتطف منشور للعامة في الملف الشخصي)
+   * Supports:
+   * 1. Publishing from an existing private excerpt via `excerptId`
+   * 2. Publishing directly with `quote` and optional `bookId`
+   * 3. Optional user commentary / note (`content`)
+   * 4. Toggle `showBookDetails` (default true)
+   */
+  async createSnippet(
+    userId: string,
+    dto: {
+      excerptId?: string;
+      bookId?: string;
+      content?: string;
+      quote?: string;
+      showBookDetails?: boolean;
+    },
+  ): Promise<{ message: string; data: FormattedPost }> {
+    let bookId = dto.bookId || null;
+    let quoteText = dto.quote?.trim() || '';
+    let excerptEntity: UserBookExcerpt | null = null;
+
+    if (dto.excerptId) {
+      if (this.excerptsRepository) {
+        excerptEntity = await this.excerptsRepository.findOne({
+          where: { id: dto.excerptId },
+          relations: { book: true },
+        });
+      }
+      if (!excerptEntity) {
+        throw new NotFoundException(
+          this.i18n?.t ? this.i18n.t('excerpts.not_found') : 'Excerpt not found',
+        );
+      }
+      if (excerptEntity.userId !== userId) {
+        throw new ForbiddenException(
+          this.i18n?.t ? this.i18n.t('aliases.not_owned') : 'Forbidden',
+        );
+      }
+      bookId = excerptEntity.bookId;
+      if (!quoteText) quoteText = excerptEntity.content;
+    }
+
+    const finalContent = dto.content?.trim() || quoteText;
+    if (!finalContent && !quoteText) {
+      throw new BadRequestException(
+        this.i18n?.t ? this.i18n.t('snippets.quote_required') : 'Snippet quote is required',
+      );
+    }
+
+    let resolvedBook: Book | null = null;
+    const showBook = dto.showBookDetails !== false;
+    if (showBook && bookId) {
+      resolvedBook = await this.booksRepository.findOne({ where: { id: bookId } });
+    }
+
+    const post = this.postsRepository.create({
+      userId,
+      type: 'snippet',
+      content: finalContent,
+      contentFormat: 'plain',
+      bookId: showBook ? bookId : null,
+      excerptId: excerptEntity?.id || null,
+      category: 'المقتطفات',
+    });
+
+    const saved = await this.postsRepository.save(post);
+
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    saved.user = user!;
+    saved.book = resolvedBook;
+    saved.excerpt = excerptEntity;
+
+    const formatted = await this.formatPost(saved, undefined, null, userId);
+
+    return {
+      message: this.i18n?.t ? this.i18n.t('snippets.published') : 'تم نشر المقتطف في ملفك الشخصي بنجاح',
+      data: formatted,
+    };
+  }
+
+  /**
    * Normalize input tab string from English or Arabic into standard canonical tab key
    */
   normalizeFeedType(
@@ -1333,7 +1426,8 @@ export class PostsService {
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.book', 'book')
-      .leftJoinAndSelect('post.audiobook', 'audiobook');
+      .leftJoinAndSelect('post.audiobook', 'audiobook')
+      .leftJoinAndSelect('post.excerpt', 'excerpt');
 
     const tab = this.normalizeFeedType(query.type);
     if (tab !== 'all') {
@@ -1550,6 +1644,7 @@ export class PostsService {
           user: true,
           book: true,
           audiobook: true,
+          excerpt: true,
         },
       });
     } catch {
@@ -1568,6 +1663,7 @@ export class PostsService {
             .leftJoinAndSelect('post.user', 'user')
             .leftJoinAndSelect('post.book', 'book')
             .leftJoinAndSelect('post.audiobook', 'audiobook')
+            .leftJoinAndSelect('post.excerpt', 'excerpt')
             .where('post.id::text LIKE :prefix', {
               prefix: `${match[1].toLowerCase()}%`,
             })
@@ -2070,6 +2166,20 @@ export class PostsService {
       currentLang === 'en' ? 'en' : 'ar',
     );
 
+    const formattedExcerpt = post.excerpt
+      ? {
+          id: post.excerpt.id,
+          content: post.excerpt.content,
+          chapter: post.excerpt.chapter ?? null,
+          pageNumber: post.excerpt.pageNumber ?? null,
+          cfiRange: post.excerpt.cfiRange ?? null,
+        }
+      : null;
+
+    const formattedQuote =
+      post.excerpt?.content ||
+      (post.type === 'snippet' ? post.content : null);
+
     const formatted: FormattedPost = {
       id: post.id,
       type: post.type,
@@ -2085,6 +2195,8 @@ export class PostsService {
           }
         : {}),
       content: post.content,
+      quote: formattedQuote,
+      excerpt: formattedExcerpt,
       images: post.images || [],
       videoUrl: post.videoUrl,
       containVideo: Boolean(

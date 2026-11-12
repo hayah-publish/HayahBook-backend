@@ -10,9 +10,11 @@ import { UserBlock } from '../users/user-block.entity';
 import { UserBookmark } from '../bookmarks/bookmark.entity';
 import { Book } from '../books/book.entity';
 import { Audiobook } from '../books/audiobook.entity';
+import { UserBookExcerpt } from '../books/user-book-excerpt.entity';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { ArticlesController } from './articles.controller';
+import { SnippetsController } from './snippets.controller';
 import { ReactionsController } from './reactions.controller';
 import { UploadModule } from '../upload/upload.module';
 import { I18nModule } from '../i18n/i18n.module';
@@ -31,12 +33,18 @@ import { InterestsModule } from '../interests/interests.module';
       UserBookmark,
       Book,
       Audiobook,
+      UserBookExcerpt,
     ]),
     UploadModule,
     I18nModule,
     InterestsModule,
   ],
-  controllers: [PostsController, ArticlesController, ReactionsController],
+  controllers: [
+    PostsController,
+    ArticlesController,
+    SnippetsController,
+    ReactionsController,
+  ],
   providers: [PostsService],
   exports: [PostsService],
 })

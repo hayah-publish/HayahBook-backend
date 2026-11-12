@@ -321,4 +321,7 @@ export const en = {
   'excerpts.deleted': 'Excerpt deleted successfully',
   'excerpts.not_found': 'Excerpt not found',
   'excerpts.content_required': 'Excerpt content is required',
+  'snippets.published': 'Snippet published to your profile successfully',
+  'snippets.quote_required': 'Snippet quote is required',
+  'snippets.deleted': 'Published snippet deleted successfully',
 };

@@ -310,4 +310,7 @@ export const ar = {
   'excerpts.deleted': 'تم حذف المقتطف بنجاح',
   'excerpts.not_found': 'المقتطف غير موجود',
   'excerpts.content_required': 'نص المقتطف مطلوب ولا يمكن أن يكون فارغاً',
+  'snippets.published': 'تم نشر المقتطف في ملفك الشخصي بنجاح',
+  'snippets.quote_required': 'نص المقتطف إلزامي للنشر',
+  'snippets.deleted': 'تم حذف المقتطف المنشور بنجاح',
 };

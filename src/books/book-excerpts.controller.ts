@@ -16,8 +16,10 @@ import {
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BookExcerptsService } from './book-excerpts.service';
+import { PostsService } from '../posts/posts.service';
 import { CreateExcerptDto } from './dto/create-excerpt.dto';
 import { UpdateExcerptDto } from './dto/update-excerpt.dto';
+import { ShareExcerptDto } from './dto/share-excerpt.dto';
 import { ExcerptsQueryDto } from './dto/excerpts-query.dto';
 
 interface AuthenticatedRequest extends Request {
@@ -31,7 +33,28 @@ interface AuthenticatedRequest extends Request {
 @Controller('books')
 @UseGuards(JwtAuthGuard)
 export class BookExcerptsController {
-  constructor(private readonly excerptsService: BookExcerptsService) {}
+  constructor(
+    private readonly excerptsService: BookExcerptsService,
+    private readonly postsService: PostsService,
+  ) {}
+
+  /**
+   * POST /v1/books/excerpts/:id/share (or /v1/books/quotes/:id/share)
+   * Share an excerpt to the user's public profile as a snippet.
+   */
+  @Post(['excerpts/:id/share', 'quotes/:id/share'])
+  @HttpCode(HttpStatus.CREATED)
+  async shareExcerptToProfile(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: ShareExcerptDto,
+  ) {
+    return this.postsService.createSnippet(req.user.userId, {
+      excerptId: id,
+      content: dto.content,
+      showBookDetails: dto.showBookDetails,
+    });
+  }
 
   /**
    * GET /v1/books/excerpts/my (or /v1/books/quotes/my)
@@ -132,7 +155,24 @@ export class BookExcerptsController {
 @Controller(['excerpts', 'quotes'])
 @UseGuards(JwtAuthGuard)
 export class DirectExcerptsController {
-  constructor(private readonly excerptsService: BookExcerptsService) {}
+  constructor(
+    private readonly excerptsService: BookExcerptsService,
+    private readonly postsService: PostsService,
+  ) {}
+
+  @Post(':id/share')
+  @HttpCode(HttpStatus.CREATED)
+  async shareExcerptToProfile(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: ShareExcerptDto,
+  ) {
+    return this.postsService.createSnippet(req.user.userId, {
+      excerptId: id,
+      content: dto.content,
+      showBookDetails: dto.showBookDetails,
+    });
+  }
 
   @Get('my')
   async getMyBooksWithExcerpts(

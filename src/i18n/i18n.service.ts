@@ -532,6 +532,9 @@ const VALIDATION_MESSAGES_AR: Record<string, string> = {
   'Avatar URL must be a string': 'رابط الصورة الرمزية يجب أن يكون نصاً',
   'Notes must be a string': 'الملاحظات يجب أن تكون نصاً',
   'Reset token must be a string': 'رمز إعادة التعيين يجب أن يكون نصاً',
+  'excerptId must be a valid UUID': 'معرف المقتطف يجب أن يكون UUID صالح',
+  'quote must be a string': 'نص المقتطف يجب أن يكون نصاً',
+  'quote cannot exceed 5000 characters': 'نص المقتطف لا يمكن أن يتجاوز 5000 حرف',
 };
 
 const PROPERTY_NAMES_AR: Record<string, string> = {
@@ -593,6 +596,8 @@ const PROPERTY_NAMES_AR: Record<string, string> = {
   pageNumber: 'رقم الصفحة',
   color: 'لون التمييز',
   cfiRange: 'موضع النص',
+  excerptId: 'معرف المقتطف',
+  quote: 'نص المقتطف',
   nickname: 'الاسم المستعار',
   avatarUrl: 'رابط الصورة الرمزية',
   isDefault: 'الافتراضي',

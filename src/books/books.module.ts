@@ -14,10 +14,12 @@ import { UserBook } from './user-book.entity';
 import { UserBookExcerpt } from './user-book-excerpt.entity';
 import { User } from '../users/user.entity';
 import { AdminGuard } from '../auth/admin.guard';
+import { PostsModule } from '../posts/posts.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Book, Audiobook, UserBook, User, UserBookExcerpt]),
+    PostsModule,
   ],
   controllers: [
     BooksController,

@@ -12,10 +12,11 @@ import {
 import { User } from '../users/user.entity';
 import { Book } from '../books/book.entity';
 import { Audiobook } from '../books/audiobook.entity';
+import { UserBookExcerpt } from '../books/user-book-excerpt.entity';
 import type { PostReactionsCount } from './post-reaction.entity';
 import type { Comment } from '../comments/comment.entity';
 
-export type PostType = 'post' | 'article';
+export type PostType = 'post' | 'article' | 'snippet';
 
 @Entity('posts')
 @Index(['userId', 'createdAt'])
@@ -74,6 +75,13 @@ export class Post {
   @ManyToOne(() => Audiobook, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'audiobook_id' })
   audiobook: Audiobook | null;
+
+  @Column({ name: 'excerpt_id', type: 'uuid', nullable: true })
+  excerptId: string | null;
+
+  @ManyToOne(() => UserBookExcerpt, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'excerpt_id' })
+  excerpt: UserBookExcerpt | null;
 
   @Column({ name: 'category', type: 'varchar', length: 100, nullable: true })
   category: string | null;

@@ -3109,6 +3109,259 @@
                     "inheritPreProcessors": {},
                     "name": "report-post - تقديم بلاغ عن منشور أو مقال"
                   }
+                },
+                {
+                  "name": "get-snippets - استرجاع وتصفح المقتطفات المنشورة للعامة (مرتبة حسب تاريخ الإضافة وفلترة userId)",
+                  "api": {
+                    "id": "47000109",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/snippets",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "userId",
+                          "type": "string",
+                          "required": false,
+                          "description": "معرف المستخدم (UUID) لفلترة المقتطفات الخاصة بملفه الشخصي (تبويب المقتطفات)",
+                          "example": "6f955425-2969-431d-b2f5-2a10c6c8a9eb"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر في الصفحة (افتراضي 20)",
+                          "example": 20
+                        },
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث نصي في المقتطفات والتعليقات"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000109_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000109_200",
+                        "data": "{\"data\":[{\"id\":\"f9e8d7c6-b5a4-4321-9876-fedcba098765\",\"type\":\"snippet\",\"contentFormat\":\"plain\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"quote\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"excerpt\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"chapter\":\"الفصل الأول: العهد المكي\",\"pageNumber\":45,\"cfiRange\":\"epubcfi(/6/4[chap01]!/4/2/10/1:0)\"},\"images\":[],\"videoUrl\":null,\"containVideo\":false,\"link\":null,\"links\":[],\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"عادات التعافي\",\"author\":\"محمود علي\",\"narrator\":null,\"category\":\"تطوير الذات\",\"coverUrl\":\"https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&q=80\",\"rating\":4.8,\"views\":1250,\"readsCount\":340,\"listensCount\":0,\"type\":\"ebook\",\"hasEbook\":true,\"hasAudio\":false,\"availableFormats\":[\"ebook\"]},\"publisher\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"mahomoud ali\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/user-default.jpg\",\"role\":\"user\",\"isFollowing\":false},\"mentions\":[],\"likesCount\":55,\"reactionsCount\":{\"total\":55,\"agree\":55,\"love\":0,\"applaud\":0,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\"],\"userReaction\":null,\"isOwner\":true,\"isSaved\":false,\"isFollowingAuthor\":false,\"commentsDisabled\":false,\"shareUrl\":\"https://hayahbook.com/posts/f9e8d7c6-b5a4-4321-9876-fedcba098765\",\"permissions\":{\"canEdit\":true,\"canDelete\":true,\"canShare\":true,\"canSave\":true,\"canReport\":false,\"canBlock\":false,\"canViewLess\":false,\"canToggleComments\":true},\"menuActions\":[{\"key\":\"copy_link\",\"title\":\"Copy Link\",\"titleAr\":\"نسخ الرابط\",\"titleEn\":\"Copy Link\",\"icon\":\"link\",\"actionType\":\"client_clipboard\",\"shareUrl\":\"https://hayahbook.com/posts/f9e8d7c6-b5a4-4321-9876-fedcba098765\"}],\"commentsCount\":80,\"sharesCount\":22,\"bookmarksCount\":5,\"createdAt\":\"2026-11-12T03:00:00.000Z\",\"updatedAt\":\"2026-11-12T03:00:00.000Z\"}],\"total\":1,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "تغذية المقتطفات المنشورة للعامة مرتبة تنازلياً حسب تاريخ الإضافة (أحدث أولاً)، تدعم فلترة حساب مستخدم محدد لعرض مقتطفاته في شاشة ملفه الشخصي مع كافة التفاعلات والتعليقات.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-snippets - استرجاع وتصفح المقتطفات المنشورة للعامة (مرتبة حسب تاريخ الإضافة وفلترة userId)"
+                  }
+                },
+                {
+                  "name": "add-snippet - نشر مقتطف جديد في الملف الشخصي للعامة (type: snippet)",
+                  "api": {
+                    "id": "47000110",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/snippets",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000110_201",
+                        "code": 201,
+                        "name": "Created",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000110_201",
+                        "data": "{\"message\":\"تم نشر المقتطف في ملفك الشخصي بنجاح\",\"data\":{\"id\":\"f9e8d7c6-b5a4-4321-9876-fedcba098765\",\"type\":\"snippet\",\"contentFormat\":\"plain\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"quote\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"excerpt\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"chapter\":\"الفصل الأول: العهد المكي\",\"pageNumber\":45,\"cfiRange\":\"epubcfi(/6/4[chap01]!/4/2/10/1:0)\"},\"images\":[],\"videoUrl\":null,\"containVideo\":false,\"link\":null,\"links\":[],\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"عادات التعافي\",\"author\":\"محمود علي\",\"narrator\":null,\"category\":\"تطوير الذات\",\"coverUrl\":\"https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&q=80\",\"rating\":4.8,\"views\":1250,\"readsCount\":340,\"listensCount\":0,\"type\":\"ebook\",\"hasEbook\":true,\"hasAudio\":false,\"availableFormats\":[\"ebook\"]},\"publisher\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"mahomoud ali\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/user-default.jpg\",\"role\":\"user\",\"isFollowing\":false},\"mentions\":[],\"likesCount\":55,\"reactionsCount\":{\"total\":55,\"agree\":55,\"love\":0,\"applaud\":0,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\"],\"userReaction\":null,\"isOwner\":true,\"isSaved\":false,\"isFollowingAuthor\":false,\"commentsDisabled\":false,\"shareUrl\":\"https://hayahbook.com/posts/f9e8d7c6-b5a4-4321-9876-fedcba098765\",\"permissions\":{\"canEdit\":true,\"canDelete\":true,\"canShare\":true,\"canSave\":true,\"canReport\":false,\"canBlock\":false,\"canViewLess\":false,\"canToggleComments\":true},\"menuActions\":[{\"key\":\"copy_link\",\"title\":\"Copy Link\",\"titleAr\":\"نسخ الرابط\",\"titleEn\":\"Copy Link\",\"icon\":\"link\",\"actionType\":\"client_clipboard\",\"shareUrl\":\"https://hayahbook.com/posts/f9e8d7c6-b5a4-4321-9876-fedcba098765\"}],\"commentsCount\":80,\"sharesCount\":22,\"bookmarksCount\":5,\"createdAt\":\"2026-11-12T03:00:00.000Z\",\"updatedAt\":\"2026-11-12T03:00:00.000Z\"}}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "application/json",
+                      "parameters": [],
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "quote": {
+                            "type": "string",
+                            "description": "نص الاقتباس من الكتاب (إلزامي إذا لم يمرر excerptId)"
+                          },
+                          "content": {
+                            "type": "string",
+                            "description": "فكرة أو تعليق المستخدم المرافق للاقتباس (اختياري)"
+                          },
+                          "bookId": {
+                            "type": "string",
+                            "description": "معرف الكتاب المقتبس منه (UUID)"
+                          },
+                          "excerptId": {
+                            "type": "string",
+                            "description": "معرف مقتطف محفوظ مسبقاً (UUID)"
+                          },
+                          "showBookDetails": {
+                            "type": "boolean",
+                            "description": "إظهار بيانات وغلاف الكتاب (افتراضي: true)"
+                          }
+                        }
+                      },
+                      "required": true,
+                      "mediaType": "",
+                      "examples": [
+                        {
+                          "mediaType": "application/json",
+                          "name": "نشر مقتطف جديد بكتاب وتعليق",
+                          "value": "{\n  \"bookId\": \"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\n  \"quote\": \"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\n  \"content\": \"عبارة بليغة جداً تلامس الواقع بعمق...\",\n  \"showBookDetails\": true\n}"
+                        }
+                      ],
+                      "oasExtensions": ""
+                    },
+                    "description": "نشر مقتطف جديد للعامة في الملف الشخصي مع تفعيل نظام التفاعل، التعليقات، والمشاركة وحفظ المنشورات.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "add-snippet - نشر مقتطف جديد في الملف الشخصي للعامة (type: snippet)"
+                  }
+                },
+                {
+                  "name": "delete-snippet - حذف مقتطف منشور من الملف الشخصي",
+                  "api": {
+                    "id": "47000111",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/snippets/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "id": "path_snippetId",
+                          "name": "id",
+                          "required": true,
+                          "description": "معرف المقتطف المنشور (UUID)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "f9e8d7c6-b5a4-4321-9876-fedcba098765"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000111_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000111_200",
+                        "data": "{\"success\":true,\"message\":\"تم حذف المنشور بنجاح\"}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "حذف مقتطف منشور من الملف الشخصي، محمي بملكية الناشر أو صلاحية الأدمن.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "delete-snippet - حذف مقتطف منشور من الملف الشخصي"
+                  }
                 }
               ]
             },
@@ -7366,6 +7619,99 @@
                     "tags": [],
                     "status": "developing",
                     "name": "delete-book-excerpt - حذف مقتطف محدد"
+                  }
+                },
+                {
+                  "name": "share-book-excerpt - مشاركة ونشر المقتطف في الملف الشخصي للعامة (type: snippet)",
+                  "api": {
+                    "id": "47000108",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/books/excerpts/{id}/share",
+                    "parameters": {
+                      "path": [
+                        {
+                          "id": "path_excerptId",
+                          "name": "id",
+                          "required": true,
+                          "description": "معرف المقتطف الخاص بالمستخدم (UUID)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "e4f8bb61-4fa3-433e-bfa3-82ef5be023b8"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000108_201",
+                        "code": 201,
+                        "name": "Created",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000108_201",
+                        "data": "{\"message\":\"تم نشر المقتطف في ملفك الشخصي بنجاح\",\"data\":{\"id\":\"f9e8d7c6-b5a4-4321-9876-fedcba098765\",\"type\":\"snippet\",\"contentFormat\":\"plain\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"quote\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"excerpt\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"chapter\":\"الفصل الأول: العهد المكي\",\"pageNumber\":45,\"cfiRange\":\"epubcfi(/6/4[chap01]!/4/2/10/1:0)\"},\"images\":[],\"videoUrl\":null,\"containVideo\":false,\"link\":null,\"links\":[],\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"عادات التعافي\",\"author\":\"محمود علي\",\"narrator\":null,\"category\":\"تطوير الذات\",\"coverUrl\":\"https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&q=80\",\"rating\":4.8,\"views\":1250,\"readsCount\":340,\"listensCount\":0,\"type\":\"ebook\",\"hasEbook\":true,\"hasAudio\":false,\"availableFormats\":[\"ebook\"]},\"publisher\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"mahomoud ali\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/user-default.jpg\",\"role\":\"user\",\"isFollowing\":false},\"mentions\":[],\"likesCount\":55,\"reactionsCount\":{\"total\":55,\"agree\":55,\"love\":0,\"applaud\":0,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\"],\"userReaction\":null,\"isOwner\":true,\"isSaved\":false,\"isFollowingAuthor\":false,\"commentsDisabled\":false,\"shareUrl\":\"https://hayahbook.com/posts/f9e8d7c6-b5a4-4321-9876-fedcba098765\",\"permissions\":{\"canEdit\":true,\"canDelete\":true,\"canShare\":true,\"canSave\":true,\"canReport\":false,\"canBlock\":false,\"canViewLess\":false,\"canToggleComments\":true},\"menuActions\":[{\"key\":\"copy_link\",\"title\":\"Copy Link\",\"titleAr\":\"نسخ الرابط\",\"titleEn\":\"Copy Link\",\"icon\":\"link\",\"actionType\":\"client_clipboard\",\"shareUrl\":\"https://hayahbook.com/posts/f9e8d7c6-b5a4-4321-9876-fedcba098765\"}],\"commentsCount\":80,\"sharesCount\":22,\"bookmarksCount\":5,\"createdAt\":\"2026-11-12T03:00:00.000Z\",\"updatedAt\":\"2026-11-12T03:00:00.000Z\"}}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "application/json",
+                      "parameters": [],
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "content": {
+                            "type": "string",
+                            "description": "فكرة أو تعليق المستخدم المرافق للمقتطف (اختياري)"
+                          },
+                          "showBookDetails": {
+                            "type": "boolean",
+                            "description": "إظهار الكتاب وبياناته (افتراضي: true)"
+                          }
+                        }
+                      },
+                      "required": false,
+                      "mediaType": "",
+                      "examples": [
+                        {
+                          "mediaType": "application/json",
+                          "name": "مشاركة مقتطف مع تعليق شخصي",
+                          "value": "{\n  \"content\": \"من أروع وأصدق ما قرأت في هذا الكتاب الملهم!\",\n  \"showBookDetails\": true\n}"
+                        }
+                      ],
+                      "oasExtensions": ""
+                    },
+                    "description": "مشاركة مقتطف من كتاب ونشره في الملف الشخصي للمستخدم، ليظهر في تبويب المقتطفات للعامة وتفعيل نظام التفاعل والتعليقات بالكامل مع مفتاح type: snippet.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "share-book-excerpt - مشاركة ونشر المقتطف في الملف الشخصي للعامة (type: snippet)"
                   }
                 }
               ]

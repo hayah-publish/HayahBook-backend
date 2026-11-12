@@ -4,6 +4,7 @@ import {
   DirectExcerptsController,
 } from './book-excerpts.controller';
 import { BookExcerptsService } from './book-excerpts.service';
+import { PostsService } from '../posts/posts.service';
 
 describe('BookExcerptsController & DirectExcerptsController', () => {
   let controller: BookExcerptsController;
@@ -47,6 +48,13 @@ describe('BookExcerptsController & DirectExcerptsController', () => {
     }),
   };
 
+  const mockPostsService = {
+    createSnippet: jest.fn().mockResolvedValue({
+      message: 'تم نشر المقتطف في ملفك الشخصي بنجاح',
+      data: { id: 'post-1', type: 'snippet', content: 'نص مقتطف' },
+    }),
+  };
+
   const req = { user: { userId: 'user-1', email: 'test@example.com', role: 'user' } } as any;
 
   beforeEach(async () => {
@@ -56,6 +64,10 @@ describe('BookExcerptsController & DirectExcerptsController', () => {
         {
           provide: BookExcerptsService,
           useValue: mockService,
+        },
+        {
+          provide: PostsService,
+          useValue: mockPostsService,
         },
       ],
     }).compile();
@@ -132,11 +144,34 @@ describe('BookExcerptsController & DirectExcerptsController', () => {
         '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
       );
     });
+
+    it('shares an excerpt to user profile as a snippet', async () => {
+      const res = await controller.shareExcerptToProfile(
+        req,
+        '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
+        { content: 'ملاحظة شخصية' },
+      );
+      expect(res.data).toBeDefined();
+      expect(mockPostsService.createSnippet).toHaveBeenCalledWith('user-1', {
+        excerptId: '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
+        content: 'ملاحظة شخصية',
+        showBookDetails: undefined,
+      });
+    });
   });
 
   describe('DirectExcerptsController', () => {
     it('direct controller handles getMyBooksWithExcerpts', async () => {
       const res = await directController.getMyBooksWithExcerpts(req);
+      expect(res.data).toBeDefined();
+    });
+
+    it('direct controller handles shareExcerptToProfile', async () => {
+      const res = await directController.shareExcerptToProfile(
+        req,
+        '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
+        { content: 'تعليق مقتطف' },
+      );
       expect(res.data).toBeDefined();
     });
 

@@ -27,3 +27,4 @@ export class RemoveColorFromUserBookExcerpts1763800000000 implements MigrationIn
     }
   }
 }
+

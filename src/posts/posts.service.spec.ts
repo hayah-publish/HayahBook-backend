@@ -1439,5 +1439,40 @@ describe('PostsService public post formatting', () => {
       );
       expect(withUploadedVideo.data.containVideo).toBe(true);
     });
+
+    it('creates a snippet post from excerpt with type: snippet', async () => {
+      const mockExcerptRepo = {
+        findOne: jest.fn().mockResolvedValue({
+          id: 'excerpt-uuid-1',
+          userId: 'user-1',
+          bookId: 'book-1',
+          content: 'أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً',
+          chapter: 'الفصل الأول',
+          pageNumber: 27,
+          cfiRange: null,
+        }),
+      };
+      (serviceWithActions as any).excerptsRepository = mockExcerptRepo;
+
+      const res = await serviceWithActions.createSnippet('user-1', {
+        excerptId: 'excerpt-uuid-1',
+        content: 'ملاحظة شخصية جميلة',
+      });
+
+      expect(res.data.type).toBe('snippet');
+      expect(res.data.content).toBe('ملاحظة شخصية جميلة');
+      expect(res.data.quote).toBe('أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً');
+      expect(res.message).toBe('snippets.published');
+    });
+
+    it('creates a snippet directly with quote and bookId', async () => {
+      const res = await serviceWithActions.createSnippet('user-1', {
+        quote: 'لا ترتقي لمستوى أهدافك بل تهبط لمستوى أنظمتك',
+        bookId: 'book-1',
+      });
+
+      expect(res.data.type).toBe('snippet');
+      expect(res.data.quote).toBe('لا ترتقي لمستوى أهدافك بل تهبط لمستوى أنظمتك');
+    });
   });
 });

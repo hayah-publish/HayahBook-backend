@@ -38,6 +38,7 @@ import { AliasNicknameFormatAndLengthConstraint1763500000000 } from './database/
 import { AddContainVideoToPosts1763600000000 } from './database/migrations/1763600000000-add-contain-video-to-posts';
 import { CreateUserBookExcerptsTable1763700000000 } from './database/migrations/1763700000000-create-user-book-excerpts-table';
 import { RemoveColorFromUserBookExcerpts1763800000000 } from './database/migrations/1763800000000-remove-color-from-user-book-excerpts';
+import { AddExcerptIdToPosts1763900000000 } from './database/migrations/1763900000000-add-excerpt-id-to-posts';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { RemoveColorFromUserBookExcerpts1763800000000 } from './database/migrati
               AddContainVideoToPosts1763600000000,
               CreateUserBookExcerptsTable1763700000000,
               RemoveColorFromUserBookExcerpts1763800000000,
+              AddExcerptIdToPosts1763900000000,
             ],
             migrationsRun: true,
           };
@@ -118,6 +120,7 @@ import { RemoveColorFromUserBookExcerpts1763800000000 } from './database/migrati
             AddContainVideoToPosts1763600000000,
             CreateUserBookExcerptsTable1763700000000,
             RemoveColorFromUserBookExcerpts1763800000000,
+            AddExcerptIdToPosts1763900000000,
           ],
           migrationsRun: true,
         };
