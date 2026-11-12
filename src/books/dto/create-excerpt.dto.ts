@@ -34,12 +34,6 @@ export class CreateExcerptDto {
 
   @IsOptional()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
-  @IsString({ message: 'color must be a string' })
-  @MaxLength(30, { message: 'color cannot exceed 30 characters' })
-  color?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString({ message: 'cfiRange must be a string' })
   @MaxLength(255, { message: 'cfiRange cannot exceed 255 characters' })
   cfiRange?: string;

@@ -69,7 +69,7 @@ export class BookExcerptsController {
 
   /**
    * PATCH /v1/books/excerpts/:id (or /v1/books/quotes/:id)
-   * Update an excerpt (note, color, pageNumber, chapter, content).
+   * Update an excerpt (note, pageNumber, chapter, content, cfiRange).
    */
   @Patch(['excerpts/:id', 'quotes/:id'])
   @HttpCode(HttpStatus.OK)

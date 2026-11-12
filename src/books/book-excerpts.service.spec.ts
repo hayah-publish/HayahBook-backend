@@ -23,7 +23,6 @@ describe('BookExcerptsService - Private Book Excerpts & Highlights', () => {
     note: 'حبيت الجملة دي اووي',
     chapter: 'الفصل الثالث',
     pageNumber: 42,
-    color: '#FF7A00',
     cfiRange: 'epubcfi(/6/14[chap03]!/4/2/12/1:0)',
     createdAt: new Date('2026-11-12T00:00:00.000Z'),
     updatedAt: new Date('2026-11-12T00:00:00.000Z'),
@@ -64,7 +63,6 @@ describe('BookExcerptsService - Private Book Excerpts & Highlights', () => {
         note: 'ملاحظة شخصية',
         chapter: 'الفصل الثالث',
         pageNumber: 42,
-        color: '#FF7A00',
       });
 
       expect(mockBookRepo.findOne).toHaveBeenCalledWith({ where: { id: 'book-1' } });
@@ -75,7 +73,6 @@ describe('BookExcerptsService - Private Book Excerpts & Highlights', () => {
         note: 'ملاحظة شخصية',
         chapter: 'الفصل الثالث',
         pageNumber: 42,
-        color: '#FF7A00',
         cfiRange: null,
       });
       expect(mockExcerptRepo.save).toHaveBeenCalled();
@@ -182,13 +179,11 @@ describe('BookExcerptsService - Private Book Excerpts & Highlights', () => {
 
       const res = await service.updateExcerpt('user-1', 'excerpt-1', {
         note: 'ملاحظة معدلة جديدة',
-        color: '#2196F3',
       });
 
       expect(mockExcerptRepo.save).toHaveBeenCalled();
       expect(res.message).toBe('تم تعديل المقتطف بنجاح');
       expect(existing.note).toBe('ملاحظة معدلة جديدة');
-      expect(existing.color).toBe('#2196F3');
     });
 
     it('updateExcerpt throws NotFoundException if caller is not owner', async () => {

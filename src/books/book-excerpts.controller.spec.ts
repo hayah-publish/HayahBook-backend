@@ -149,7 +149,7 @@ describe('BookExcerptsController & DirectExcerptsController', () => {
       const res = await directController.updateExcerpt(
         req,
         '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
-        { color: '#4CAF50' },
+        { note: 'ملاحظة محدثة' },
       );
       expect(res.data).toBeDefined();
     });

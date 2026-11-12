@@ -45,9 +45,6 @@ export class UserBookExcerpt {
   @Column({ name: 'page_number', type: 'integer', nullable: true })
   pageNumber: number | null;
 
-  @Column({ type: 'varchar', length: 30, default: '#FF7A00' })
-  color: string;
-
   @Column({ name: 'cfi_range', type: 'varchar', length: 255, nullable: true })
   cfiRange: string | null;
 

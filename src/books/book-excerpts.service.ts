@@ -19,7 +19,6 @@ export interface FormattedExcerpt {
   note: string | null;
   chapter: string | null;
   pageNumber: number | null;
-  color: string;
   cfiRange: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -55,7 +54,6 @@ export class BookExcerptsService {
       note: dto.note || null,
       chapter: dto.chapter || null,
       pageNumber: dto.pageNumber || null,
-      color: dto.color || '#FF7A00',
       cfiRange: dto.cfiRange || null,
     });
 
@@ -271,7 +269,6 @@ export class BookExcerptsService {
     if (dto.note !== undefined) excerpt.note = dto.note || null;
     if (dto.chapter !== undefined) excerpt.chapter = dto.chapter || null;
     if (dto.pageNumber !== undefined) excerpt.pageNumber = dto.pageNumber || null;
-    if (dto.color !== undefined) excerpt.color = dto.color;
     if (dto.cfiRange !== undefined) excerpt.cfiRange = dto.cfiRange || null;
 
     const saved = await this.excerptRepo.save(excerpt);
@@ -314,7 +311,6 @@ export class BookExcerptsService {
       note: entity.note ?? null,
       chapter: entity.chapter ?? null,
       pageNumber: entity.pageNumber ?? null,
-      color: entity.color || '#FF7A00',
       cfiRange: entity.cfiRange ?? null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
