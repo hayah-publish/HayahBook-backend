@@ -16,15 +16,20 @@ export class AuthRateLimitMiddleware implements NestMiddleware {
         .toLowerCase()
         .replace(/^\/v\d+(?=\/)/, '')
         .replace(/\/+$/, '') || '/';
-    const shareMatch = path.match(
-      /^\/(?:posts|articles)\/([0-9a-f-]+)\/share$/i,
-    );
+    const shareMatch =
+      path.match(
+        /^\/(posts|articles|quotes|reels|visuals|snippets)\/([0-9a-f-]+)\/share$/i,
+      ) ||
+      path.match(
+        /^\/(books\/(?:excerpts|quotes)|excerpts)\/([0-9a-f-]+)\/share$/i,
+      );
     if (shareMatch && req.method === 'POST') {
       const identity = req.ip || req.socket.remoteAddress || 'unknown';
+      const resource = `${shareMatch[1]}:${shareMatch[2]}`;
       const [perPostAllowed, perIpAllowed] = await Promise.all([
         this.limits.consume(
           'share-identity',
-          identity + ':' + shareMatch[1],
+          identity + ':' + resource,
           5,
           60_000,
         ),

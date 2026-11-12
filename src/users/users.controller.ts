@@ -17,6 +17,7 @@ import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { I18nService } from '../i18n/i18n.service';
+import { FollowStateDto } from './dto/follow-state.dto';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -83,7 +84,7 @@ export class UsersController {
   async followUser(
     @Req() req: AuthenticatedRequest,
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body?: { follow?: boolean },
+    @Body() body?: FollowStateDto,
   ) {
     const result = await this.usersService.toggleFollowUser(
       req.user!.userId,

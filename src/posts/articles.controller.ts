@@ -28,6 +28,7 @@ import { ReactPostDto } from './dto/react-post.dto';
 import { ReactionsQueryDto } from './dto/reactions-query.dto';
 import { UploadFile } from '../upload/upload-file.interface';
 import { InterestsService } from '../interests/interests.service';
+import { mimeLimitedMemoryStorage } from '../upload/mime-limited-memory.storage';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -61,6 +62,7 @@ export class ArticlesController {
   @Post()
   @UseInterceptors(
     AnyFilesInterceptor({
+      storage: mimeLimitedMemoryStorage,
       limits: {
         fileSize: 500 * 1024 * 1024,
         files: 12,
@@ -126,9 +128,10 @@ export class ArticlesController {
   @Patch(':id')
   @UseInterceptors(
     AnyFilesInterceptor({
+      storage: mimeLimitedMemoryStorage,
       limits: {
         fileSize: 500 * 1024 * 1024,
-        files: 20,
+        files: 11,
       },
     }),
   )
@@ -278,4 +281,3 @@ export class ArticlesController {
     );
   }
 }
-

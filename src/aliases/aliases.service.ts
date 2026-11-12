@@ -627,30 +627,23 @@ export class AliasesService {
       throw new ForbiddenException(this.i18n.t('aliases.not_owned'));
     }
 
-    // 30-day edit cooldown rule
-    const COOLDOWN_DAYS = 30;
-    const COOLDOWN_MS = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
-    if (existing.lastModifiedAt) {
-      const timeSinceLastEdit =
-        Date.now() - new Date(existing.lastModifiedAt).getTime();
-      if (timeSinceLastEdit < COOLDOWN_MS) {
-        const remainingMs = COOLDOWN_MS - timeSinceLastEdit;
-        const daysRemaining = Math.max(
-          1,
-          Math.ceil(remainingMs / (24 * 60 * 60 * 1000)),
-        );
-        const nextAllowedDate = new Date(
-          new Date(existing.lastModifiedAt).getTime() + COOLDOWN_MS,
-        );
-        const dateString = nextAllowedDate.toISOString().split('T')[0];
+    const assertAliasEditable = (alias: UserAlias) => {
+      if (!alias.lastModifiedAt) return;
+      const cooldownMs = 30 * 24 * 60 * 60 * 1000;
+      const elapsed = Date.now() - new Date(alias.lastModifiedAt).getTime();
+      if (elapsed < cooldownMs) {
+        const days = Math.max(1, Math.ceil((cooldownMs - elapsed) / 86400000));
+        const date = new Date(
+          new Date(alias.lastModifiedAt).getTime() + cooldownMs,
+        ).toISOString().split('T')[0];
         throw new BadRequestException(
-          this.i18n.t('aliases.cooldown_active', undefined, {
-            days: daysRemaining,
-            date: dateString,
-          }),
+          this.i18n.t('aliases.cooldown_active', undefined, { days, date }),
         );
       }
-    }
+    };
+
+    // 30-day edit cooldown rule
+    assertAliasEditable(existing);
     if (
       !file &&
       dto.avatarUrl?.trim() &&
@@ -674,6 +667,7 @@ export class AliasesService {
         });
         if (!alias)
           throw new NotFoundException(this.i18n.t('aliases.not_found'));
+        assertAliasEditable(alias);
         if (dto.nickname !== undefined) {
           const normalizedNickname = dto.nickname.trim();
           const validation = validateNicknameFormat(

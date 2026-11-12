@@ -1064,117 +1064,81 @@ export class CommentsService {
     reactionsCount: PostReactionsCount;
     topReactions: ReactionType[];
   }> {
-    const comment = await this.commentsRepo.findOne({
-      where: { id: commentId },
-      relations: { post: true },
-    });
-    if (!comment) {
-      throw new NotFoundException(this.i18n.t('comments.not_found'));
-    }
-    await this.assertNoBlockBetween(userId, comment.post?.userId || '');
-
     const targetType = this.normalizeReactionType(reactionInput);
     if (!targetType) {
       throw new BadRequestException(this.i18n.t('reactions.invalid_type'));
     }
 
-    const existing = await this.commentReactionsRepo.findOne({
-      where: { commentId, userId },
-    });
-
-    const rawCounts: any = comment.reactionsCount || {};
-    const counts: PostReactionsCount = {
-      total: Number(rawCounts.total) || comment.likesCount || 0,
-      agree: Number(rawCounts.agree) || 0,
-      love: Number(rawCounts.love) || 0,
-      applaud: Number(rawCounts.applaud) || 0,
-      insightful: Number(rawCounts.insightful) || 0,
-      disagree: Number(rawCounts.disagree) || 0,
+    const executeTx = async <T>(cb: (manager: any) => Promise<T>): Promise<T> => {
+      if (this.dataSource && typeof this.dataSource.transaction === 'function') {
+        return this.dataSource.transaction(cb);
+      }
+      const fallbackManager = {
+        getRepository: (entity: any) => {
+          if (entity === Comment) return this.commentsRepo;
+          if (entity === CommentReaction) return this.commentReactionsRepo;
+          if (entity === UserAlias) return this.aliasRepo || { increment: () => Promise.resolve(), decrement: () => Promise.resolve() };
+          return this.commentsRepo;
+        },
+      };
+      return cb(fallbackManager);
     };
 
-    let action: 'added' | 'updated' | 'removed';
-    let userReaction: ReactionType | null = null;
-    let messageKey = 'reactions.added';
-    const oldType = existing?.reactionType;
-
-    if (!existing) {
-      // 1. Add reaction
-      action = 'added';
-      userReaction = targetType;
-      messageKey = 'reactions.added';
-
-      const entity = this.commentReactionsRepo.create({
-        userId,
-        commentId,
-        reactionType: targetType,
+    const { action, userReaction, counts } = await executeTx(async (manager) => {
+      const comments = manager.getRepository(Comment);
+      const reactions = manager.getRepository(CommentReaction);
+      const comment = await comments.findOne({
+        where: { id: commentId },
+        relations: { post: true },
+        lock: { mode: 'pessimistic_write' },
       });
-      await this.commentReactionsRepo.save(entity);
+      if (!comment) throw new NotFoundException(this.i18n.t('comments.not_found'));
+      await this.assertNoBlockBetween(userId, comment.post?.userId || '');
+      if (comment.userId) await this.assertNoBlockBetween(userId, comment.userId);
 
-      counts[targetType] = (counts[targetType] || 0) + 1;
-      counts.total = (counts.total || 0) + 1;
-    } else if (existing.reactionType === targetType) {
-      // 2. Clicked again -> Toggle OFF (Remove)
-      action = 'removed';
-      userReaction = null;
-      messageKey = 'reactions.removed';
-
-      await this.commentReactionsRepo.delete({ id: existing.id });
-
-      counts[targetType] = Math.max(0, (counts[targetType] || 1) - 1);
-      counts.total = Math.max(0, (counts.total || 1) - 1);
-    } else {
-      // 3. Different reaction clicked -> Switch / Update
-      action = 'updated';
-      userReaction = targetType;
-      messageKey = 'reactions.updated';
-
-      existing.reactionType = targetType;
-      await this.commentReactionsRepo.save(existing);
-
-      if (oldType) {
-        counts[oldType] = Math.max(0, (counts[oldType] || 1) - 1);
+      const existing = await reactions.findOne({ where: { commentId, userId } });
+      const raw: any = comment.reactionsCount || {};
+      const counts: PostReactionsCount = {
+        total: Number(raw.total) || comment.likesCount || 0,
+        agree: Number(raw.agree) || 0,
+        love: Number(raw.love) || 0,
+        applaud: Number(raw.applaud) || 0,
+        insightful: Number(raw.insightful) || 0,
+        disagree: Number(raw.disagree) || 0,
+      };
+      let action: 'added' | 'updated' | 'removed';
+      let userReaction: ReactionType | null;
+      const oldType = existing?.reactionType;
+      if (!existing) {
+        action = 'added'; userReaction = targetType;
+        await reactions.save(reactions.create({ userId, commentId, reactionType: targetType }));
+        counts[targetType]++; counts.total++;
+      } else if (existing.reactionType === targetType) {
+        action = 'removed'; userReaction = null;
+        await reactions.delete({ id: existing.id });
+        counts[targetType] = Math.max(0, counts[targetType] - 1); counts.total = Math.max(0, counts.total - 1);
+      } else {
+        action = 'updated'; userReaction = targetType;
+        existing.reactionType = targetType; await reactions.save(existing);
+        if (oldType) counts[oldType as ReactionType] = Math.max(0, counts[oldType as ReactionType] - 1);
+        counts[targetType]++;
       }
-      counts[targetType] = (counts[targetType] || 0) + 1;
-    }
-
-    comment.reactionsCount = counts;
-    comment.likesCount = counts.total;
-    await this.commentsRepo.save(comment);
-
-    if (comment.aliasId) {
-      const aliasesRepo =
-        this.aliasRepo || this.dataSource?.getRepository(UserAlias);
-      if (aliasesRepo) {
-        if (action === 'added' && targetType === 'agree') {
-          await aliasesRepo.increment(
-            { id: comment.aliasId },
-            'agreedCount',
-            1,
-          );
-        } else if (action === 'removed' && targetType === 'agree') {
-          await aliasesRepo.decrement(
-            { id: comment.aliasId },
-            'agreedCount',
-            1,
-          );
+      comment.reactionsCount = counts; comment.likesCount = counts.total;
+      await comments.save(comment);
+      if (comment.aliasId) {
+        const aliasRepo = manager.getRepository(UserAlias);
+        if (action === 'removed' && targetType === 'agree') {
+          await aliasRepo.decrement({ id: comment.aliasId }, 'agreedCount', 1);
+        } else if (action === 'added' && targetType === 'agree') {
+          await aliasRepo.increment({ id: comment.aliasId }, 'agreedCount', 1);
         } else if (action === 'updated') {
-          if (oldType === 'agree') {
-            await aliasesRepo.decrement(
-              { id: comment.aliasId },
-              'agreedCount',
-              1,
-            );
-          }
-          if (targetType === 'agree') {
-            await aliasesRepo.increment(
-              { id: comment.aliasId },
-              'agreedCount',
-              1,
-            );
-          }
+          if (oldType === 'agree') await aliasRepo.decrement({ id: comment.aliasId }, 'agreedCount', 1);
+          if (targetType === 'agree') await aliasRepo.increment({ id: comment.aliasId }, 'agreedCount', 1);
         }
       }
-    }
+      return { action, userReaction, counts, comment };
+    });
+    const messageKey = `reactions.${action}`;
 
     const reactionKeys: ReactionType[] = [
       'agree',
@@ -1210,23 +1174,29 @@ export class CommentsService {
     reactionsCount: PostReactionsCount;
     topReactions: ReactionType[];
   }> {
-    const comment = await this.commentsRepo.findOne({
-      where: { id: commentId },
-      relations: { post: true },
-    });
-    if (!comment) {
-      throw new NotFoundException(this.i18n.t('comments.not_found'));
-    }
-    if (comment.userId) {
-      await this.assertNoBlockBetween(userId, comment.userId);
-    }
-    if (comment.post?.userId) {
-      await this.assertNoBlockBetween(userId, comment.post.userId);
-    }
+    const executeTx = async <T>(cb: (manager: any) => Promise<T>): Promise<T> => {
+      if (this.dataSource && typeof this.dataSource.transaction === 'function') {
+        return this.dataSource.transaction(cb);
+      }
+      const fallbackManager = {
+        getRepository: (entity: any) => {
+          if (entity === Comment) return this.commentsRepo;
+          if (entity === CommentReaction) return this.commentReactionsRepo;
+          if (entity === UserAlias) return this.aliasRepo || { increment: () => Promise.resolve(), decrement: () => Promise.resolve() };
+          return this.commentsRepo;
+        },
+      };
+      return cb(fallbackManager);
+    };
 
-    const existing = await this.commentReactionsRepo.findOne({
-      where: { commentId, userId },
-    });
+    const result = await executeTx(async (manager) => {
+      const comments = manager.getRepository(Comment);
+      const reactions = manager.getRepository(CommentReaction);
+      const comment = await comments.findOne({ where: { id: commentId }, relations: { post: true }, lock: { mode: 'pessimistic_write' } });
+      if (!comment) throw new NotFoundException(this.i18n.t('comments.not_found'));
+      if (comment.userId) await this.assertNoBlockBetween(userId, comment.userId);
+      if (comment.post?.userId) await this.assertNoBlockBetween(userId, comment.post.userId);
+      const existing = await reactions.findOne({ where: { commentId, userId } });
 
     const rawCounts: any = comment.reactionsCount || {};
     const counts: PostReactionsCount = {
@@ -1240,26 +1210,21 @@ export class CommentsService {
 
     if (existing) {
       const oldType = existing.reactionType;
-      await this.commentReactionsRepo.delete({ id: existing.id });
-      counts[oldType] = Math.max(0, (counts[oldType] || 1) - 1);
+      await reactions.delete({ id: existing.id });
+      counts[oldType as ReactionType] = Math.max(0, (counts[oldType as ReactionType] || 1) - 1);
       counts.total = Math.max(0, (counts.total || 1) - 1);
 
       comment.reactionsCount = counts;
       comment.likesCount = counts.total;
-      await this.commentsRepo.save(comment);
+      await comments.save(comment);
 
       if (oldType === 'agree' && comment.aliasId) {
-        const aliasesRepo =
-          this.aliasRepo || this.dataSource?.getRepository(UserAlias);
-        if (aliasesRepo) {
-          await aliasesRepo.decrement(
-            { id: comment.aliasId },
-            'agreedCount',
-            1,
-          );
-        }
+        await manager.getRepository(UserAlias).decrement({ id: comment.aliasId }, 'agreedCount', 1);
       }
     }
+    return { comment, counts };
+    });
+    const { counts } = result;
 
     const reactionKeys: ReactionType[] = [
       'agree',

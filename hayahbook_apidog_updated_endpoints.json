@@ -1452,6 +1452,381 @@
                     "inheritPreProcessors": {},
                     "name": "delete-account - حذف الحساب نهائياً"
                   }
+                },
+                {
+                  "name": "change-password - تغيير كلمة المرور للمستخدم المسجل",
+                  "api": {
+                    "id": "auth_change_password_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/auth/change-password",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "currentPassword": {
+                            "type": "string",
+                            "example": "P@ssw0rd2026"
+                          },
+                          "newPassword": {
+                            "type": "string",
+                            "example": "NewStrongP@ss2027!"
+                          },
+                          "confirmPassword": {
+                            "type": "string",
+                            "example": "NewStrongP@ss2027!"
+                          }
+                        },
+                        "required": [
+                          "currentPassword",
+                          "newPassword",
+                          "confirmPassword"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "auth_change_password_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تغيير كلمة المرور بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية",
+                        "responseId": "auth_change_password_200",
+                        "data": "{\"message\":\"تم تغيير كلمة المرور بنجاح\"}"
+                      },
+                      {
+                        "name": "Success - English",
+                        "responseId": "auth_change_password_200",
+                        "data": "{\"message\":\"Password has been changed successfully\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "change-email - تغيير البريد الإلكتروني مع التحقق",
+                  "api": {
+                    "id": "auth_change_email_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/auth/change-email",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "newEmail": {
+                            "type": "string",
+                            "example": "new.reader@example.com"
+                          },
+                          "password": {
+                            "type": "string",
+                            "example": "P@ssw0rd2026"
+                          }
+                        },
+                        "required": [
+                          "newEmail",
+                          "password"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "auth_change_email_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم إرسال رمز التحقق إلى بريدك الجديد",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية",
+                        "responseId": "auth_change_email_200",
+                        "data": "{\"message\":\"تم إرسال رمز التحقق إلى بريدك الإلكتروني الجديد\"}"
+                      },
+                      {
+                        "name": "Success - English",
+                        "responseId": "auth_change_email_200",
+                        "data": "{\"message\":\"Verification code sent to your new email\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "update-phone - تحديث رقم الهاتف والرمز الدولي",
+                  "api": {
+                    "id": "auth_update_phone_01",
+                    "method": "patch",
+                    "path": "http://localhost:3000/v1/auth/phone",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "phone": {
+                            "type": "string",
+                            "example": "+201012345678"
+                          }
+                        },
+                        "required": [
+                          "phone"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "auth_update_phone_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تحديث رقم الهاتف بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية",
+                        "responseId": "auth_update_phone_200",
+                        "data": "{\"message\":\"تم تحديث رقم الهاتف بنجاح\",\"phone\":\"+201012345678\"}"
+                      },
+                      {
+                        "name": "Success - English",
+                        "responseId": "auth_update_phone_200",
+                        "data": "{\"message\":\"Phone number updated successfully\",\"phone\":\"+201012345678\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "upload-avatar - رفع وتعيين الصورة الشخصية للمستخدم",
+                  "api": {
+                    "id": "auth_upload_avatar_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/auth/avatar",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "multipart",
+                      "parameters": [
+                        {
+                          "name": "avatar",
+                          "type": "file",
+                          "required": true,
+                          "description": "ملف الصورة الشخصية (JPG / PNG / WebP حتى 5MB)"
+                        }
+                      ]
+                    },
+                    "responses": [
+                      {
+                        "id": "auth_upload_avatar_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم رفع الصورة وتحديث الملف الشخصي",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية",
+                        "responseId": "auth_upload_avatar_200",
+                        "data": "{\"message\":\"تم تحديث الصورة الشخصية بنجاح\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/user-avatar.jpg\"}"
+                      },
+                      {
+                        "name": "Success - English",
+                        "responseId": "auth_upload_avatar_200",
+                        "data": "{\"message\":\"Profile avatar updated successfully\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/user-avatar.jpg\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "complete-profile - استكمال بيانات الملف الشخصي بعد التسجيل",
+                  "api": {
+                    "id": "auth_complete_profile_01",
+                    "method": "patch",
+                    "path": "http://localhost:3000/v1/auth/complete-profile",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "محمود علي"
+                          },
+                          "bio": {
+                            "type": "string",
+                            "example": "قارئ شغوف بالأدب والفلسفة والتاريخ"
+                          },
+                          "birthDate": {
+                            "type": "string",
+                            "example": "1995-06-15"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "male"
+                          }
+                        }
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "auth_complete_profile_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم استكمال الملف الشخصي بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية",
+                        "responseId": "auth_complete_profile_200",
+                        "data": "{\"message\":\"تم استكمال الملف الشخصي بنجاح\",\"profile\":{\"id\":\"u1\",\"name\":\"محمود علي\",\"bio\":\"قارئ شغوف...\"}}"
+                      },
+                      {
+                        "name": "Success - English",
+                        "responseId": "auth_complete_profile_200",
+                        "data": "{\"message\":\"Profile completed successfully\",\"profile\":{\"id\":\"u1\",\"name\":\"Mahmoud Ali\",\"bio\":\"Avid reader...\"}}"
+                      }
+                    ]
+                  }
                 }
               ]
             },
@@ -4513,6 +4888,2038 @@
                     "status": "developing",
                     "name": "get-visual-reactions - استرجاع المتفاعلين مع المحتوى المرئي (مع تبويبات الفلترة)"
                   }
+                },
+                {
+                  "name": "get-my-snippets - استرجاع مقتطفاتي المنشورة في ملفي الشخصي",
+                  "api": {
+                    "id": "get_my_snippets_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/snippets/my",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد المقتطفات (افتراضي 20)",
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_my_snippets_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "قائمة مقتطفات المستخدم الحالي مرتبة حسب تاريخ الإضافة",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية",
+                        "responseId": "get_my_snippets_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"snippet-1\",\n      \"type\": \"snippet\",\n      \"content\": \"كان الصباح هادئاً بشكل غريب، كأن المدينة تحبس أنفاسها...\",\n      \"book\": {\n        \"id\": \"b1\",\n        \"title\": \"عادات التعافي\",\n        \"author\": \"د. عادل صادق\",\n        \"coverUrl\": \"https://cdn.hayahbook.com/books/recovery.jpg\"\n      },\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 30,\n        \"love\": 20,\n        \"applaud\": 5\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 15,\n      \"socialProof\": {\n        \"text\": \"علق هو وآخرون\",\n        \"count\": 4,\n        \"followers\": []\n      },\n      \"createdAt\": \"2026-11-12T08:00:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-user-snippets - استرجاع مقتطفات مستخدم أو كاتب محدد",
+                  "api": {
+                    "id": "get_user_snippets_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/snippets/user/{userId}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "userId",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المستخدم (UUID)",
+                          "example": "6f955425-2969-431d-b2f5-2a10c6c8a9eb"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر",
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_user_snippets_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "قائمة المقتطفات المنشورة للمستخدم المحدد",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_user_snippets_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"snippet-2\",\n      \"type\": \"snippet\",\n      \"content\": \"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\n      \"book\": {\n        \"id\": \"b1\",\n        \"title\": \"عادات التعافي\",\n        \"author\": \"د. عادل صادق\"\n      },\n      \"reactionsCount\": {\n        \"total\": 55,\n        \"agree\": 40,\n        \"love\": 15\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"createdAt\": \"2026-11-12T09:00:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-snippet-by-id - استرجاع تفاصيل مقتطف محدد",
+                  "api": {
+                    "id": "get_snippet_by_id_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/snippets/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_snippet_by_id_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تفاصيل المقتطف كاملاً مع التفاعلات والتعليقات والكتاب المرفق",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_snippet_by_id_200",
+                        "data": "{\n  \"id\": \"snippet-1\",\n  \"type\": \"snippet\",\n  \"contentFormat\": \"plain\",\n  \"content\": \"كان الصباح هادئاً بشكل غريب...\",\n  \"book\": {\n    \"id\": \"b1\",\n    \"title\": \"عادات التعافي\",\n    \"author\": \"د. عادل صادق\",\n    \"coverUrl\": \"https://cdn.hayahbook.com/books/recovery.jpg\"\n  },\n  \"reactionsCount\": {\n    \"total\": 55,\n    \"agree\": 30,\n    \"love\": 20,\n    \"applaud\": 5\n  },\n  \"commentsCount\": 80,\n  \"sharesCount\": 22,\n  \"bookmarksCount\": 15,\n  \"createdAt\": \"2026-11-12T08:00:00.000Z\"\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "react-snippet - التفاعل مع مقتطف منشور",
+                  "api": {
+                    "id": "react_snippet_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/snippets/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reaction": {
+                            "type": "string",
+                            "enum": [
+                              "agree",
+                              "love",
+                              "applaud",
+                              "insightful",
+                              "disagree"
+                            ],
+                            "example": "agree"
+                          }
+                        },
+                        "required": [
+                          "reaction"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "react_snippet_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تسجيل التفاعل بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "react_snippet_200",
+                        "data": "{\"success\":true,\"reaction\":\"agree\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "remove-snippet-reaction - إلغاء التفاعل عن مقتطف منشور",
+                  "api": {
+                    "id": "remove_snippet_reaction_01",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/snippets/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "remove_snippet_reaction_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم حذف التفاعل بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "remove_snippet_reaction_200",
+                        "data": "{\"success\":true}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-snippet-reactions - قائمة المتفاعلين مع المقتطف المنشور",
+                  "api": {
+                    "id": "get_snippet_reactions_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/snippets/{id}/reacts",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "reaction",
+                          "type": "string",
+                          "required": false,
+                          "description": "فلترة حسب نوع التفاعل (all / agree / love / applaud / insightful / disagree)",
+                          "example": "all"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_snippet_reactions_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "قائمة المستخدمين المتفاعلين",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_snippet_reactions_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"r1\",\n      \"reaction\": \"agree\",\n      \"user\": {\n        \"id\": \"u1\",\n        \"name\": \"أحمد مراد\",\n        \"profileUrl\": null\n      }\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-visual-by-id - استرجاع تفاصيل محتوى مرئي أو فيديو محدد",
+                  "api": {
+                    "id": "get_visual_by_id_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/visuals/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_visual_by_id_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تفاصيل الفيديو أو الريلز",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_visual_by_id_200",
+                        "data": "{\n  \"id\": \"v1\",\n  \"type\": \"visual\",\n  \"content\": \"فيديو ممتع عن القراءة السريعة\",\n  \"videoUrl\": \"https://cdn.hayahbook.com/videos/speed-reading.mp4\",\n  \"containVideo\": true,\n  \"aspectRatio\": \"9:16\",\n  \"reactionsCount\": {\n    \"total\": 35,\n    \"agree\": 20,\n    \"love\": 10,\n    \"applaud\": 5\n  },\n  \"commentsCount\": 15,\n  \"sharesCount\": 8,\n  \"bookmarksCount\": 4\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-reel-by-id - استرجاع تفاصيل ريلز محدد عبر المسار المباشر (/v1/reels/:id)",
+                  "api": {
+                    "id": "get_reel_by_id_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/reels/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_reel_by_id_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تفاصيل الريلز مع الدليل الاجتماعي والكتاب المرفق",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_reel_by_id_200",
+                        "data": "{\n  \"id\": \"e8a931a2-3f11-4796-bb21-c4d32a9e2f5b\",\n  \"type\": \"visual\",\n  \"content\": \"جولة سريعة في أعماق المكتبة التراثية\",\n  \"videoUrl\": \"https://cdn.hayahbook.com/reels/library-tour-heritage.mp4\",\n  \"aspectRatio\": \"9:16\",\n  \"socialProof\": {\n    \"text\": \"متابع من قِبل أحمد مراد و4 آخرين\",\n    \"count\": 5,\n    \"followers\": []\n  },\n  \"reactionsCount\": {\n    \"total\": 12000,\n    \"agree\": 7500,\n    \"love\": 3800,\n    \"applaud\": 700\n  },\n  \"commentsCount\": 80,\n  \"sharesCount\": 22,\n  \"bookmarksCount\": 45\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "share-snippet - مشاركة المقتطف برابط ويب مشفر",
+                  "api": {
+                    "id": "share_snippet_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/snippets/{id}/share",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "share_snippet_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم إنشاء رابط المشاركة",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "share_snippet_200",
+                        "data": "{\"success\":true,\"shareUrl\":\"https://hayahbook.com/snippets/s1\",\"sharesCount\":23}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "toggle-snippet-comments - تعطيل / تفعيل التعليقات على المقتطف المنشور",
+                  "api": {
+                    "id": "toggle_snippet_comments_01",
+                    "method": "patch",
+                    "path": "http://localhost:3000/v1/snippets/{id}/toggle-comments",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "commentsDisabled": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "toggle_snippet_comments_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تحديث حالة التعليقات على المقتطف",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "toggle_snippet_comments_200",
+                        "data": "{\"success\":true,\"commentsDisabled\":true}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "report-snippet - الإبلاغ عن مقتطف منشور",
+                  "api": {
+                    "id": "report_snippet_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/snippets/{id}/report",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reasonId": {
+                            "type": "string",
+                            "example": "d3b07384-d113-4024-9b88-1c448dc39001"
+                          },
+                          "details": {
+                            "type": "string",
+                            "example": "محتوى مخالف"
+                          }
+                        },
+                        "required": [
+                          "reasonId"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "report_snippet_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تقديم البلاغ بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "report_snippet_200",
+                        "data": "{\"success\":true,\"message\":\"تم إرسال البلاغ بنجاح\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-snippet-menu - قائمة خيارات المقتطف (3-dots Menu)",
+                  "api": {
+                    "id": "get_snippet_menu_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/snippets/{id}/menu",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المقتطف (UUID)"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "lang",
+                          "type": "string",
+                          "required": false,
+                          "example": "ar"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_snippet_menu_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "عناصر القائمة المنبثقة (تعديل، حذف، مشاركة، تعطيل التعليقات، إبلاغ)",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_snippet_menu_200",
+                        "data": "{\n  \"menuActions\": [\n    {\n      \"action\": \"share\",\n      \"label\": \"مشاركة المقتطف\",\n      \"icon\": \"share\",\n      \"isDestructive\": false\n    },\n    {\n      \"action\": \"disable_comments\",\n      \"label\": \"تعطيل التعليقات\",\n      \"icon\": \"message-off\",\n      \"isDestructive\": false\n    },\n    {\n      \"action\": \"delete\",\n      \"label\": \"حذف المقتطف\",\n      \"icon\": \"trash\",\n      \"isDestructive\": true\n    }\n  ]\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-quote-menu - قائمة خيارات الاقتباس (3-dots Menu)",
+                  "api": {
+                    "id": "get_quote_menu_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/quotes/{id}/menu",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "lang",
+                          "type": "string",
+                          "required": false,
+                          "example": "ar"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_quote_menu_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "عناصر القائمة المنبثقة للاقتباس",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_quote_menu_200",
+                        "data": "{\n  \"menuActions\": [\n    {\n      \"action\": \"share\",\n      \"label\": \"مشاركة الاقتباس\",\n      \"icon\": \"share\",\n      \"isDestructive\": false\n    },\n    {\n      \"action\": \"report\",\n      \"label\": \"إبلاغ عن اقتباس\",\n      \"icon\": \"flag\",\n      \"isDestructive\": false\n    }\n  ]\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "share-quote - مشاركة الاقتباس برابط مشفر",
+                  "api": {
+                    "id": "share_quote_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/quotes/{id}/share",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "share_quote_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "رابط المشاركة",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "share_quote_200",
+                        "data": "{\"success\":true,\"shareUrl\":\"https://hayahbook.com/quotes/q1\",\"sharesCount\":23}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "toggle-quote-comments - تعطيل / تفعيل التعليقات على الاقتباس",
+                  "api": {
+                    "id": "toggle_quote_comments_01",
+                    "method": "patch",
+                    "path": "http://localhost:3000/v1/quotes/{id}/toggle-comments",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "commentsDisabled": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "toggle_quote_comments_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تحديث حالة التعليقات",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "toggle_quote_comments_200",
+                        "data": "{\"success\":true,\"commentsDisabled\":true}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "report-quote - تقديم بلاغ عن اقتباس",
+                  "api": {
+                    "id": "report_quote_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/quotes/{id}/report",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reasonId": {
+                            "type": "string",
+                            "example": "d3b07384-d113-4024-9b88-1c448dc39001"
+                          },
+                          "details": {
+                            "type": "string",
+                            "example": "اقتباس مسيء"
+                          }
+                        },
+                        "required": [
+                          "reasonId"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "report_quote_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تقديم البلاغ بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "report_quote_200",
+                        "data": "{\"success\":true,\"message\":\"تم إرسال البلاغ بنجاح\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "delete-quote - حذف اقتباس منشور (الناشر أو الأدمن)",
+                  "api": {
+                    "id": "delete_quote_01",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/quotes/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "delete_quote_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم حذف الاقتباس بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "delete_quote_200",
+                        "data": "{\"success\":true,\"message\":\"تم حذف الاقتباس بنجاح\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-visual-menu - قائمة خيارات المحتوى المرئي (3-dots Menu)",
+                  "api": {
+                    "id": "get_visual_menu_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/visuals/{id}/menu",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "lang",
+                          "type": "string",
+                          "required": false,
+                          "example": "ar"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_visual_menu_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "عناصر القائمة المنبثقة للفيديو أو الريلز",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_visual_menu_200",
+                        "data": "{\n  \"menuActions\": [\n    {\n      \"action\": \"share\",\n      \"label\": \"مشاركة الفيديو\",\n      \"icon\": \"share\",\n      \"isDestructive\": false\n    },\n    {\n      \"action\": \"report\",\n      \"label\": \"إبلاغ عن محتوى مرئي\",\n      \"icon\": \"flag\",\n      \"isDestructive\": false\n    }\n  ]\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "share-visual - مشاركة محتوى مرئي أو فيديو برابط مشفر",
+                  "api": {
+                    "id": "share_visual_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/visuals/{id}/share",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "share_visual_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم إنشاء رابط المشاركة",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "share_visual_200",
+                        "data": "{\"success\":true,\"shareUrl\":\"https://hayahbook.com/visuals/v1\",\"sharesCount\":9}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "toggle-visual-comments - تعطيل / تفعيل التعليقات على محتوى مرئي",
+                  "api": {
+                    "id": "toggle_visual_comments_01",
+                    "method": "patch",
+                    "path": "http://localhost:3000/v1/visuals/{id}/toggle-comments",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "commentsDisabled": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "toggle_visual_comments_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تحديث حالة التعليقات",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "toggle_visual_comments_200",
+                        "data": "{\"success\":true,\"commentsDisabled\":true}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "report-visual - تقديم بلاغ عن محتوى مرئي",
+                  "api": {
+                    "id": "report_visual_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/visuals/{id}/report",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reasonId": {
+                            "type": "string",
+                            "example": "d3b07384-d113-4024-9b88-1c448dc39001"
+                          },
+                          "details": {
+                            "type": "string",
+                            "example": "فيديو غير ملائم"
+                          }
+                        },
+                        "required": [
+                          "reasonId"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "report_visual_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تقديم البلاغ بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "report_visual_200",
+                        "data": "{\"success\":true,\"message\":\"تم إرسال البلاغ بنجاح\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "delete-visual - حذف محتوى مرئي أو فيديو (الناشر أو الأدمن)",
+                  "api": {
+                    "id": "delete_visual_01",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/visuals/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المحتوى المرئي (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "delete_visual_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم حذف الفيديو بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "delete_visual_200",
+                        "data": "{\"success\":true,\"message\":\"تم حذف المحتوى المرئي بنجاح\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "publish-reel-direct - نشر ريلز جديد عبر المسار المباشر (/v1/reels)",
+                  "api": {
+                    "id": "publish_reel_direct_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/reels",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "multipart",
+                      "parameters": [
+                        {
+                          "name": "content",
+                          "type": "string",
+                          "required": false,
+                          "description": "نص ووصف الريلز مع دعم الروابط والمنشن",
+                          "example": "جولة سريعة في أعماق المكتبة التراثية"
+                        },
+                        {
+                          "name": "aspectRatio",
+                          "type": "string",
+                          "required": false,
+                          "description": "أبعاد الفيديو الرأسية 9:16",
+                          "example": "9:16"
+                        },
+                        {
+                          "name": "bookId",
+                          "type": "string",
+                          "required": false,
+                          "description": "كتاب واحد فقط مشار إليه بالريلز (UUID)",
+                          "example": "7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d"
+                        },
+                        {
+                          "name": "mentions",
+                          "type": "string",
+                          "required": false,
+                          "description": "مصفوفة معرفات المستخدمين المشار إليهم كـ JSON String",
+                          "example": "[\"user-uuid-1\"]"
+                        },
+                        {
+                          "name": "video",
+                          "type": "file",
+                          "required": false,
+                          "description": "ملف الفيديو (MP4 / MOV حتى 500MB)"
+                        },
+                        {
+                          "name": "videoUrl",
+                          "type": "string",
+                          "required": false,
+                          "description": "رابط الفيديو المباشر في حال تم رفعه مسبقاً",
+                          "example": "https://cdn.hayahbook.com/reels/tour.mp4"
+                        }
+                      ]
+                    },
+                    "responses": [
+                      {
+                        "id": "publish_reel_direct_200",
+                        "code": 201,
+                        "name": "Created",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم نشر الريلز بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "publish_reel_direct_200",
+                        "data": "{\n  \"message\": \"تم نشر الريلز بنجاح\",\n  \"data\": {\n    \"id\": \"reel-1\",\n    \"type\": \"visual\",\n    \"containVideo\": true,\n    \"content\": \"جولة سريعة في أعماق المكتبة التراثية\",\n    \"videoUrl\": \"https://cdn.hayahbook.com/reels/tour.mp4\",\n    \"aspectRatio\": \"9:16\",\n    \"createdAt\": \"2026-11-12T09:00:00.000Z\"\n  }\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "react-reel - التفاعل مع ريلز عبر المسار المباشر (/v1/reels/:id/react)",
+                  "api": {
+                    "id": "react_reel_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/reels/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reaction": {
+                            "type": "string",
+                            "enum": [
+                              "agree",
+                              "love",
+                              "applaud",
+                              "insightful",
+                              "disagree"
+                            ],
+                            "example": "love"
+                          }
+                        },
+                        "required": [
+                          "reaction"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "react_reel_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم التفاعل مع الريلز",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "react_reel_200",
+                        "data": "{\"success\":true,\"reaction\":\"love\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "remove-reel-reaction - إلغاء التفاعل عن ريلز (/v1/reels/:id/react)",
+                  "api": {
+                    "id": "remove_reel_reaction_01",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/reels/{id}/react",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "remove_reel_reaction_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم حذف التفاعل",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "remove_reel_reaction_200",
+                        "data": "{\"success\":true}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-reel-reactions - قائمة المتفاعلين مع ريلز (/v1/reels/:id/reacts)",
+                  "api": {
+                    "id": "get_reel_reactions_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/reels/{id}/reacts",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [
+                        {
+                          "name": "reaction",
+                          "type": "string",
+                          "required": false,
+                          "description": "فلترة حسب التفاعل (all / agree / love ...)",
+                          "example": "all"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_reel_reactions_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "قائمة المتفاعلين مع الريلز",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_reel_reactions_200",
+                        "data": "{\"data\":[{\"id\":\"r1\",\"reaction\":\"love\",\"user\":{\"id\":\"u1\",\"name\":\"أحمد مراد\"}}],\"total\":1,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "share-reel - مشاركة ريلز (/v1/reels/:id/share)",
+                  "api": {
+                    "id": "share_reel_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/reels/{id}/share",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "share_reel_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "رابط المشاركة وزيادة عداد المشاركات",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "share_reel_200",
+                        "data": "{\"success\":true,\"shareUrl\":\"https://hayahbook.com/reels/r1\",\"sharesCount\":23}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "toggle-reel-comments - تعطيل / تفعيل التعليقات على ريلز (/v1/reels/:id/toggle-comments)",
+                  "api": {
+                    "id": "toggle_reel_comments_01",
+                    "method": "patch",
+                    "path": "http://localhost:3000/v1/reels/{id}/toggle-comments",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "commentsDisabled": {
+                            "type": "boolean",
+                            "example": false
+                          }
+                        }
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "toggle_reel_comments_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تحديث حالة التعليقات على الريلز",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "toggle_reel_comments_200",
+                        "data": "{\"success\":true,\"commentsDisabled\":false}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "report-reel - تقديم بلاغ عن ريلز (/v1/reels/:id/report)",
+                  "api": {
+                    "id": "report_reel_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/reels/{id}/report",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "reasonId": {
+                            "type": "string",
+                            "example": "d3b07384-d113-4024-9b88-1c448dc39001"
+                          },
+                          "details": {
+                            "type": "string",
+                            "example": "ريلز غير ملائم"
+                          }
+                        },
+                        "required": [
+                          "reasonId"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "report_reel_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تقديم البلاغ بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "report_reel_200",
+                        "data": "{\"success\":true,\"message\":\"تم إرسال البلاغ بنجاح\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "delete-reel - حذف ريلز (/v1/reels/:id)",
+                  "api": {
+                    "id": "delete_reel_01",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/reels/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الريلز (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "delete_reel_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم حذف الريلز بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "delete_reel_200",
+                        "data": "{\"success\":true,\"message\":\"تم حذف الريلز بنجاح\"}"
+                      }
+                    ]
+                  }
                 }
               ]
             },
@@ -6166,6 +8573,143 @@
                     "status": "developing",
                     "name": "remove-reaction - إلغاء التفاعل عن المنشور أو المقال أو الاقتباس أو المحتوى المرئي"
                   }
+                },
+                {
+                  "name": "get-following-feed - تصفح المنشورات والمحتوى للحسابات التي أتابعها فقط",
+                  "api": {
+                    "id": "home_following_feed_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/home/following",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "type",
+                          "type": "string",
+                          "required": false,
+                          "description": "نوع المحتوى (all / images / visuals / quotes / snippets)",
+                          "example": "all"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 20
+                        },
+                        {
+                          "name": "containVideo",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "فلترة الفيديوهات فقط",
+                          "example": false
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "home_following_feed_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "خلاصة المنشورات للحسابات التي يتابعها المستخدم فقط",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "home_following_feed_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"p1\",\n      \"type\": \"post\",\n      \"content\": \"منشور رائع من كاتب أتابعه...\",\n      \"user\": {\n        \"id\": \"u1\",\n        \"name\": \"أحمد مراد\",\n        \"isFollowingAuthor\": true\n      }\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-home-counts - إحصائيات وعدادات تبويبات الصفحة الرئيسية",
+                  "api": {
+                    "id": "home_counts_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/home/counts",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "following",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "حساب الإحصائيات للمتابعين فقط (true / false)",
+                          "example": false
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "home_counts_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "عدد المنشورات المتوفرة في كل تبويب من التبويبات الخمسة",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "home_counts_200",
+                        "data": "{\n  \"all\": 120,\n  \"images\": 45,\n  \"visuals\": 30,\n  \"quotes\": 25,\n  \"snippets\": 20\n}"
+                      }
+                    ]
+                  }
                 }
               ]
             },
@@ -7196,6 +9740,180 @@
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
                     "name": "get-comment-sort-options - خيارات ترتيب التعليقات"
+                  }
+                },
+                {
+                  "name": "pin-comment - تثبيت أو إلغاء تثبيت التعليق في أعلى القائمة (صاحب المنشور)",
+                  "api": {
+                    "id": "pin_comment_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/comments/{id}/pin",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف التعليق (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "pin_comment_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تثبيت أو إلغاء تثبيت التعليق بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "pin_comment_200",
+                        "data": "{\"success\":true,\"isPinned\":true,\"message\":\"تم تثبيت التعليق\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "hide-comment - إخفاء أو إظهار التعليق عن العامة",
+                  "api": {
+                    "id": "hide_comment_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/comments/{id}/hide",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف التعليق (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "hide_comment_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم إخفاء التعليق بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "hide_comment_200",
+                        "data": "{\"success\":true,\"isHidden\":true,\"message\":\"تم إخفاء التعليق\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "mute-comment-user - كتم صاحب التعليق ومنعه من التعليق مجدداً",
+                  "api": {
+                    "id": "mute_comment_user_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/comments/{id}/mute",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف التعليق (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "mute_comment_user_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم كتم المستخدم بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "mute_comment_user_200",
+                        "data": "{\"success\":true,\"message\":\"تم كتم المستخدم بنجاح\"}"
+                      }
+                    ]
                   }
                 }
               ]
@@ -9026,6 +11744,193 @@
                     "status": "developing",
                     "name": "share-book-excerpt - مشاركة ونشر المقتطف في الملف الشخصي للعامة (type: snippet)"
                   }
+                },
+                {
+                  "name": "remove-reading-status - إزالة وحذف حالة القراءة لكتاب محدد",
+                  "api": {
+                    "id": "remove_reading_status_01",
+                    "method": "delete",
+                    "path": "http://localhost:3000/v1/books/{id}/reading-status",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الكتاب (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "remove_reading_status_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تمت إزالة الكتاب من قائمة القراءة",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "remove_reading_status_200",
+                        "data": "{\"message\":\"تمت إزالة حالة القراءة بنجاح\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-latest-audiobooks - أحدث الكتب الصوتية المضافة",
+                  "api": {
+                    "id": "get_latest_audiobooks_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/audiobooks/latest",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 10
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_latest_audiobooks_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "قائمة أحدث الكتب الصوتية",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_latest_audiobooks_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"ab1\",\n      \"title\": \"الأيام\",\n      \"narrator\": \"طه حسين\",\n      \"duration\": 3600,\n      \"coverUrl\": \"https://cdn.hayahbook.com/audio/al-ayyam.jpg\"\n    }\n  ]\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "search-audiobooks - البحث المباشر في الكتب الصوتية",
+                  "api": {
+                    "id": "search_audiobooks_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/audiobooks/search",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "query",
+                          "type": "string",
+                          "required": true,
+                          "description": "كلمة البحث",
+                          "example": "تاريخ"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "search_audiobooks_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "نتائج البحث في الكتب الصوتية",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "search_audiobooks_200",
+                        "data": "{\"data\":[],\"total\":0,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ]
+                  }
                 }
               ]
             },
@@ -9286,6 +12191,115 @@
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
                     "name": "get-bookmarks - استرجاع المحفوظات الخاصة بي"
+                  }
+                },
+                {
+                  "name": "get-bookmarks-counts - إحصائيات وعدد المحفوظات حسب نوع المحتوى",
+                  "api": {
+                    "id": "get_bookmarks_counts_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/bookmarks/counts",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_bookmarks_counts_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "توزيع عناصر الحفظ حسب التبويبات",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_bookmarks_counts_200",
+                        "data": "{\"all\":35,\"posts\":15,\"articles\":8,\"visuals\":6,\"quotes\":4,\"snippets\":2}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "check-bookmark-status - فحص فوري لحالة حفظ عنصر محدد (Saved Check)",
+                  "api": {
+                    "id": "check_bookmark_status_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/bookmarks/check/{postId}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "postId",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المنشور أو العنصر (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "check_bookmark_status_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "حالة الحفظ للعنصر",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "check_bookmark_status_200",
+                        "data": "{\"isSaved\":true,\"postId\":\"post-uuid-1\"}"
+                      }
+                    ]
                   }
                 }
               ]
@@ -10490,6 +13504,258 @@
                     "inheritPostProcessors": {},
                     "inheritPreProcessors": {},
                     "name": "get-creator-by-id - تفاصيل صانع محتوى"
+                  }
+                },
+                {
+                  "name": "get-suggested-authors - قائمة المؤلفين والكتّاب المقترحين للمتابعة",
+                  "api": {
+                    "id": "get_suggested_authors_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/authors/suggested",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 10
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_suggested_authors_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "اقتراحات مؤلفين بناء على الاهتمامات والتفاعل",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_suggested_authors_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"a1\",\n      \"name\": \"أحمد مراد\",\n      \"role\": \"author\",\n      \"isVerified\": true,\n      \"followersCount\": 45000,\n      \"profileUrl\": \"https://cdn.hayahbook.com/avatars/ahmed-murad.jpg\"\n    }\n  ]\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "get-following-authors - قائمة المؤلفين الذين أتابعهم حالياً",
+                  "api": {
+                    "id": "get_following_authors_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/authors/following",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_following_authors_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "المؤلفون المتابعون",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "get_following_authors_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"a1\",\n      \"name\": \"أحمد مراد\",\n      \"role\": \"author\",\n      \"isVerified\": true,\n      \"profileUrl\": \"https://cdn.hayahbook.com/avatars/ahmed-murad.jpg\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "follow-multiple-authors - متابعة جماعية لمجموعة مؤلفين دفعة واحدة (Batch Follow)",
+                  "api": {
+                    "id": "follow_multiple_authors_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/authors/follow-multiple",
+                    "parameters": {
+                      "path": [],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "requestBody": {
+                      "type": "json",
+                      "jsonSchema": {
+                        "type": "object",
+                        "properties": {
+                          "authorIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "example": [
+                              "uuid-1",
+                              "uuid-2"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "authorIds"
+                        ]
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "follow_multiple_authors_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تمت متابعة المؤلفين بنجاح",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "follow_multiple_authors_200",
+                        "data": "{\"success\":true,\"count\":2,\"message\":\"تمت متابعة 2 من المؤلفين\"}"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "toggle-follow-author - متابعة أو إلغاء متابعة مؤلف محدد بنظام Toggle",
+                  "api": {
+                    "id": "toggle_follow_author_01",
+                    "method": "post",
+                    "path": "http://localhost:3000/v1/authors/{id}/toggle-follow",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف المؤلف (UUID)"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "toggle_follow_author_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object"
+                        },
+                        "itemSchema": {},
+                        "description": "تم تحديث حالة المتابعة للمؤلف",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "toggle_follow_author_200",
+                        "data": "{\"isFollowing\":true,\"message\":\"تمت المتابعة بنجاح\"}"
+                      }
+                    ]
                   }
                 }
               ]

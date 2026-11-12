@@ -51,11 +51,11 @@ export function sanitizeMarkdown(content?: string | null): string {
   );
   sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
 
-  // Strip inline event handlers like onload, onerror, onclick, etc. from HTML tags
-  sanitized = sanitized.replace(
-    /\s+on[a-zA-Z]+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi,
-    ' ',
-  );
+  // Raw HTML is not part of the article format. Escaping opening angle brackets
+  // keeps Markdown punctuation such as blockquote markers intact while making
+  // every remaining HTML tag inert, including tags and attributes outside any
+  // handwritten allow/block list.
+  sanitized = sanitized.replace(/</g, '&lt;');
 
   const linkRegex = /\[([^\]]*)\]\(\s*((?:[^()\s]+|\([^()\s]*\))*)\s*\)/g;
   sanitized = sanitized.replace(

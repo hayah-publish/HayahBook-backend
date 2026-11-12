@@ -97,11 +97,12 @@ describe('Word Count Limits & Markdown Formatting (Articles 501-5000, Posts max 
       expect(sanitized).toContain('- عنصر قائمة');
     });
 
-    it('strips inline event handlers like onload and onerror', () => {
+    it('escapes raw HTML so inline event handlers cannot execute', () => {
       const input = '<img src="cover.jpg" onerror="alert(1)">';
       const sanitized = sanitizeMarkdown(input);
-      expect(sanitized).not.toContain('onerror');
-      expect(sanitized).toContain('<img src="cover.jpg" >');
+      expect(sanitized).toContain('&lt;img');
+      expect(sanitized).toContain('onerror');
+      expect(sanitized).not.toContain('<img');
     });
 
     it('neutralizes unsafe javascript: and data: links in markdown', () => {

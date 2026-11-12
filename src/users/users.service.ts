@@ -296,10 +296,14 @@ export class UsersService implements OnModuleInit {
       updateData.showBirthday = data.showBirthday;
 
     if (Object.keys(updateData).length > 0) {
-      await this.usersRepository.update(id, updateData);
+      await this.dataSource.transaction(async (manager) => {
+      const users = manager.getRepository(User);
+      const authors = manager.getRepository(Author);
+      const creators = manager.getRepository(Creator);
+      await users.update(id, updateData);
 
       // Keep authors table synchronized if user is an author
-      const authorExists = await this.authorsRepository.findOne({
+      const authorExists = await authors.findOne({
         where: { id },
       });
       if (authorExists) {
@@ -329,12 +333,12 @@ export class UsersService implements OnModuleInit {
         if (updateData.followersCount !== undefined)
           authorUpdate.followersCount = updateData.followersCount;
         if (Object.keys(authorUpdate).length > 0) {
-          await this.authorsRepository.update(id, authorUpdate);
+          await authors.update(id, authorUpdate);
         }
       }
 
       // Keep creators table synchronized if user is a creator
-      const creatorExists = await this.creatorsRepository.findOne({
+      const creatorExists = await creators.findOne({
         where: { id },
       });
       if (creatorExists) {
@@ -364,9 +368,10 @@ export class UsersService implements OnModuleInit {
         if (updateData.followersCount !== undefined)
           creatorUpdate.followersCount = updateData.followersCount;
         if (Object.keys(creatorUpdate).length > 0) {
-          await this.creatorsRepository.update(id, creatorUpdate);
+          await creators.update(id, creatorUpdate);
         }
       }
+      });
     }
     const user = await this.findById(id);
     return user!;
@@ -380,12 +385,11 @@ export class UsersService implements OnModuleInit {
 
   async updateEmail(id: string, newEmail: string): Promise<User> {
     const normalized = newEmail.toLowerCase().trim();
-    await this.usersRepository.update(id, {
-      email: normalized,
-      emailVerified: true,
+    await this.dataSource.transaction(async (manager) => {
+      await manager.getRepository(User).update(id, { email: normalized, emailVerified: true });
+      await manager.getRepository(Author).update(id, { email: normalized });
+      await manager.getRepository(Creator).update(id, { email: normalized });
     });
-    await this.authorsRepository.update(id, { email: normalized });
-    await this.creatorsRepository.update(id, { email: normalized });
     const user = await this.findById(id);
     return user!;
   }
@@ -395,17 +399,11 @@ export class UsersService implements OnModuleInit {
     countryCode: string,
     phone: string,
   ): Promise<User> {
-    await this.usersRepository.update(id, {
-      countryCode: countryCode.trim(),
-      phone: phone.trim(),
-    });
-    await this.authorsRepository.update(id, {
-      countryCode: countryCode.trim(),
-      phone: phone.trim(),
-    });
-    await this.creatorsRepository.update(id, {
-      countryCode: countryCode.trim(),
-      phone: phone.trim(),
+    await this.dataSource.transaction(async (manager) => {
+      const update = { countryCode: countryCode.trim(), phone: phone.trim() };
+      await manager.getRepository(User).update(id, update);
+      await manager.getRepository(Author).update(id, update);
+      await manager.getRepository(Creator).update(id, update);
     });
     const user = await this.findById(id);
     return user!;

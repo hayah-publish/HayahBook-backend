@@ -26,6 +26,7 @@ import { ReactPostDto } from './dto/react-post.dto';
 import { ReactionsQueryDto } from './dto/reactions-query.dto';
 import { ReportPostDto } from './dto/report-post.dto';
 import { UploadFile } from '../upload/upload-file.interface';
+import { mimeLimitedMemoryStorage } from '../upload/mime-limited-memory.storage';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -73,9 +74,10 @@ export class ReelsController {
   @Post()
   @UseInterceptors(
     AnyFilesInterceptor({
+      storage: mimeLimitedMemoryStorage,
       limits: {
         fileSize: 500 * 1024 * 1024,
-        files: 5,
+        files: 1,
       },
     }),
   )
