@@ -6,12 +6,14 @@ export const ar = {
   'common.not_found': 'العنصر المطلوب غير موجود',
   'common.bad_request': 'طلب غير صالح',
   'common.rate_limit': 'يرجى الانتظار دقيقة واحدة قبل طلب رمز تحقق جديد',
+  'common.too_many_requests': 'عدد الطلبات كبير جداً. يرجى المحاولة مرة أخرى لاحقاً.',
 
   // Language
   'language.updated': 'تم ضبط لغة التطبيق بنجاح',
   'language.invalid': 'اللغة غير مدعومة. اللغات المدعومة هي: ar, en',
 
   // Auth
+  'auth.unauthorized': 'غير مصرح بالوصول',
   'auth.signup_success': 'تم إنشاء الحساب بنجاح',
   'auth.signup_email_verified': 'تم تأكيد البريد الإلكتروني بنجاح',
   'auth.login_success': 'تم تسجيل الدخول بنجاح',
@@ -212,6 +214,7 @@ export const ar = {
   'bookmarks.not_found': 'العنصر المطلوب غير موجود',
 
   // Reactions (التفاعلات)
+  'reactions.target_id_required': 'معرّف العنصر مطلوب (id أو postId أو targetId)',
   'reactions.added': 'تم التفاعل بنجاح',
   'reactions.updated': 'تم تعديل التفاعل بنجاح',
   'reactions.removed': 'تمت إزالة التفاعل بنجاح',
@@ -224,6 +227,12 @@ export const ar = {
   'reactions.disagree': 'اعترض',
 
   // Comments (التعليقات)
+  'comments.alias_id_required':
+    'معرف الاسم المستعار مطلوب عند اختيار الاسم المستعار',
+  'comments.alias_invalid_or_not_owned':
+    'الاسم المستعار غير صالح أو لا ينتمي لهذا الحساب',
+  'comments.anonymous_reader': 'مستخدم مجهول',
+  'comments.anonymous_reader_with_num': 'مستخدم مجهول - {num}',
   'comments.created': 'تم نشر التعليق بنجاح',
   'comments.reply_created': 'تم نشر الرد بنجاح',
   'comments.updated': 'تم تعديل التعليق بنجاح',
@@ -253,6 +262,7 @@ export const ar = {
   // Report Reasons (أسباب الإبلاغ)
   'reports.title': 'الإبلاغ عن تعليق',
   'reports.subtitle': 'لماذا تبلغ عن هذا التعليق؟ بلاغك سري ومجهول الهوية.',
+  'reports.block_title': 'حظر',
   'reports.submitted': 'تم إرسال البلاغ بنجاح وسيتم مراجعته',
   'reports.already_reported':
     'لقد قمت بالإبلاغ عن هذا التعليق مسبقاً وسيتم مراجعته',
@@ -286,4 +296,18 @@ export const ar = {
   'aliases.nickname_required': 'الاسم المستعار مطلوب',
   'aliases.not_found': 'الاسم المستعار غير موجود',
   'aliases.max_limit_reached': 'يمكنك إنشاء 5 أسماء مستعارة بحد أقصى',
+  'aliases.deleted_alias': 'اسم مستعار محذوف',
+  'aliases.avatar_invalid': 'رابط الصورة الرمزية غير صالح',
+  'aliases.already_has_alias':
+    'لديك بالفعل اسم مستعار مفعّل. لا يمكنك إنشاء أكثر من اسم مستعار واحد، ولكن يمكنك تعديل اسمك المستعار الحالي.',
+  'aliases.not_owned': 'ليس لديك صلاحية لتعديل هذا الاسم المستعار',
+  'aliases.cooldown_active':
+    'لا يمكنك تعديل الاسم المستعار أو الصورة إلا بعد مرور 30 يوماً من آخر تعديل. يمكنك التعديل مجدداً بعد {days} يوم (بتاريخ {date}).',
+
+  // Excerpts (المقتطفات والتمييزات)
+  'excerpts.created': 'تم حفظ المقتطف بنجاح',
+  'excerpts.updated': 'تم تعديل المقتطف بنجاح',
+  'excerpts.deleted': 'تم حذف المقتطف بنجاح',
+  'excerpts.not_found': 'المقتطف غير موجود',
+  'excerpts.content_required': 'نص المقتطف مطلوب ولا يمكن أن يكون فارغاً',
 };

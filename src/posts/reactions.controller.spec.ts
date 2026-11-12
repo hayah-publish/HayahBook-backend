@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { ReactionsController } from './reactions.controller';
 import { PostsService } from './posts.service';
+import { I18nService } from '../i18n/i18n.service';
 
 describe('ReactionsController', () => {
   let controller: ReactionsController;
@@ -47,6 +48,12 @@ describe('ReactionsController', () => {
         {
           provide: PostsService,
           useValue: postsService,
+        },
+        {
+          provide: I18nService,
+          useValue: {
+            t: jest.fn((k: string) => k),
+          },
         },
       ],
     }).compile();

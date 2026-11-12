@@ -1,10 +1,14 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware, Optional } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 import { AuthRateLimitService } from './auth-rate-limit.service';
+import { I18nService } from '../i18n/i18n.service';
 
 @Injectable()
 export class AuthRateLimitMiddleware implements NestMiddleware {
-  constructor(private readonly limits: AuthRateLimitService) {}
+  constructor(
+    private readonly limits: AuthRateLimitService,
+    @Optional() private readonly i18n?: I18nService,
+  ) {}
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
     const path =
@@ -34,7 +38,9 @@ export class AuthRateLimitMiddleware implements NestMiddleware {
       if (perPostAllowed && perIpAllowed) return next();
       res.status(429).json({
         statusCode: 429,
-        message: 'Too many requests. Try again later.',
+        message:
+          this.i18n?.t?.('common.too_many_requests') ||
+          'Too many requests. Try again later.',
       });
       return;
     }
@@ -102,7 +108,9 @@ export class AuthRateLimitMiddleware implements NestMiddleware {
     }
     res.status(429).json({
       statusCode: 429,
-      message: 'Too many requests. Try again later.',
+      message:
+        this.i18n?.t?.('common.too_many_requests') ||
+        'Too many requests. Try again later.',
     });
   }
 }

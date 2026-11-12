@@ -45,6 +45,10 @@ describe('BookExcerptsService - Private Book Excerpts & Highlights', () => {
     mockI18n = {
       t: jest.fn((key: string) => {
         if (key === 'books.not_found') return 'الكتاب غير موجود';
+        if (key === 'excerpts.created') return 'تم حفظ المقتطف بنجاح';
+        if (key === 'excerpts.updated') return 'تم تعديل المقتطف بنجاح';
+        if (key === 'excerpts.deleted') return 'تم حذف المقتطف بنجاح';
+        if (key === 'excerpts.not_found') return 'المقتطف غير موجود';
         return key;
       }),
       getCurrentLanguage: jest.fn().mockReturnValue('ar'),

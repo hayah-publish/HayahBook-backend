@@ -615,9 +615,7 @@ export class CommentsService {
     if (identityType === 'alias') {
       if (!dto.aliasId) {
         throw new BadRequestException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? 'aliasId is required when identityType is alias'
-            : 'معرف الاسم المستعار مطلوب عند اختيار الاسم المستعار',
+          this.i18n.t('comments.alias_id_required'),
         );
       }
       const aliasesRepo =
@@ -629,9 +627,7 @@ export class CommentsService {
       }
       if (!aliasEntity) {
         throw new ForbiddenException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? 'Invalid alias or alias does not belong to you'
-            : 'الاسم المستعار غير صالح أو لا ينتمي لهذا الحساب',
+          this.i18n.t('comments.alias_invalid_or_not_owned'),
         );
       }
       aliasId = aliasEntity.id;
@@ -759,9 +755,7 @@ export class CommentsService {
     if (identityType === 'alias') {
       if (!dto.aliasId) {
         throw new BadRequestException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? 'aliasId is required when identityType is alias'
-            : 'معرف الاسم المستعار مطلوب عند اختيار الاسم المستعار',
+          this.i18n.t('comments.alias_id_required'),
         );
       }
       const aliasesRepo =
@@ -773,9 +767,7 @@ export class CommentsService {
       }
       if (!aliasEntity) {
         throw new ForbiddenException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? 'Invalid alias or alias does not belong to you'
-            : 'الاسم المستعار غير صالح أو لا ينتمي لهذا الحساب',
+          this.i18n.t('comments.alias_invalid_or_not_owned'),
         );
       }
       aliasId = aliasEntity.id;

@@ -6,12 +6,14 @@ export const en = {
   'common.not_found': 'Requested resource was not found',
   'common.bad_request': 'Bad request',
   'common.rate_limit': 'Please wait one minute before requesting a new code',
+  'common.too_many_requests': 'Too many requests. Please try again later.',
 
   // Language
   'language.updated': 'App language updated successfully',
   'language.invalid': 'Language not supported. Supported languages are: ar, en',
 
   // Auth
+  'auth.unauthorized': 'Unauthorized',
   'auth.signup_success': 'Account created successfully',
   'auth.signup_email_verified': 'Email verified successfully',
   'auth.login_success': 'Logged in successfully',
@@ -220,6 +222,8 @@ export const en = {
   'bookmarks.not_found': 'Item not found',
 
   // Reactions
+  'reactions.target_id_required':
+    'Target ID is required (id, postId, or targetId)',
   'reactions.added': 'Reaction added successfully',
   'reactions.updated': 'Reaction updated successfully',
   'reactions.removed': 'Reaction removed successfully',
@@ -232,6 +236,12 @@ export const en = {
   'reactions.disagree': 'Disagree',
 
   // Comments
+  'comments.alias_id_required':
+    'aliasId is required when identityType is alias',
+  'comments.alias_invalid_or_not_owned':
+    'Invalid alias or alias does not belong to you',
+  'comments.anonymous_reader': 'Anonymous Reader',
+  'comments.anonymous_reader_with_num': 'Anonymous Reader - {num}',
   'comments.created': 'Comment published successfully',
   'comments.reply_created': 'Reply published successfully',
   'comments.updated': 'Comment updated successfully',
@@ -263,6 +273,7 @@ export const en = {
   'reports.title': 'Report comment',
   'reports.subtitle':
     'Why are you reporting this comment? Your report is anonymous.',
+  'reports.block_title': 'Block',
   'reports.submitted': 'Report submitted successfully and will be reviewed',
   'reports.already_reported':
     'You have already reported this comment and it is under review',
@@ -296,4 +307,18 @@ export const en = {
   'aliases.nickname_required': 'Nickname is required',
   'aliases.not_found': 'Alias not found',
   'aliases.max_limit_reached': 'You can create a maximum of 5 aliases',
+  'aliases.deleted_alias': 'Deleted alias',
+  'aliases.avatar_invalid': 'Invalid avatar URL',
+  'aliases.already_has_alias':
+    'You already have an active alias. Each user can only have one alias, but you can edit your current alias.',
+  'aliases.not_owned': 'You do not own this alias',
+  'aliases.cooldown_active':
+    'You can only edit your alias once every 30 days. You can edit again in {days} day(s) on {date}.',
+
+  // Excerpts
+  'excerpts.created': 'Excerpt saved successfully',
+  'excerpts.updated': 'Excerpt updated successfully',
+  'excerpts.deleted': 'Excerpt deleted successfully',
+  'excerpts.not_found': 'Excerpt not found',
+  'excerpts.content_required': 'Excerpt content is required',
 };

@@ -250,11 +250,7 @@ export class AliasesService {
       dto.avatarUrl?.trim() &&
       !this.isAllowedAliasAvatarUrl(userId, dto.avatarUrl)
     ) {
-      throw new BadRequestException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Invalid avatar URL'
-          : 'رابط الصورة الرمزية غير صالح',
-      );
+      throw new BadRequestException(this.i18n.t('aliases.avatar_invalid'));
     }
     let avatarUrl = dto.avatarUrl?.trim() || PRESET_AVATARS[0].avatarUrl;
     if (file) {
@@ -270,9 +266,7 @@ export class AliasesService {
         const existingAlias = await aliases.findOne({ where: { userId } });
         if (existingAlias) {
           throw new ConflictException(
-            this.i18n.getCurrentLanguage?.() === 'en'
-              ? 'You already have an active alias. Each user can only have one alias, but you can edit your current alias.'
-              : 'لديك بالفعل اسم مستعار مفعّل. لا يمكنك إنشاء أكثر من اسم مستعار واحد، ولكن يمكنك تعديل اسمك المستعار الحالي.',
+            this.i18n.t('aliases.already_has_alias'),
           );
         }
 
@@ -306,9 +300,7 @@ export class AliasesService {
       if (uploadedUrl) await this.uploadService.deleteFileByUrl(uploadedUrl);
       if (this.isUserAliasUniqueViolation(error)) {
         throw new ConflictException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? 'You already have an active alias. Each user can only have one alias, but you can edit your current alias.'
-            : 'لديك بالفعل اسم مستعار مفعّل. لا يمكنك إنشاء أكثر من اسم مستعار واحد، ولكن يمكنك تعديل اسمك المستعار الحالي.',
+          this.i18n.t('aliases.already_has_alias'),
         );
       }
       if (this.isNicknameUniqueViolation(error)) {
@@ -387,11 +379,7 @@ export class AliasesService {
   async getAliasProfile(aliasId: string): Promise<any> {
     const alias = await this.aliasRepo.findOne({ where: { id: aliasId } });
     if (!alias) {
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Alias not found'
-          : 'الاسم المستعار غير موجود',
-      );
+      throw new NotFoundException(this.i18n.t('aliases.not_found'));
     }
 
     // Increment search/view count
@@ -437,11 +425,7 @@ export class AliasesService {
   async getAliasComments(aliasId: string, page = 1, limit = 20) {
     const alias = await this.aliasRepo.findOne({ where: { id: aliasId } });
     if (!alias) {
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Alias not found'
-          : 'الاسم المستعار غير موجود',
-      );
+      throw new NotFoundException(this.i18n.t('aliases.not_found'));
     }
 
     const safePage = Math.max(1, Number(page) || 1);
@@ -505,11 +489,7 @@ export class AliasesService {
   async getAliasBookReviews(aliasId: string, page = 1, limit = 20) {
     const alias = await this.aliasRepo.findOne({ where: { id: aliasId } });
     if (!alias) {
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Alias not found'
-          : 'الاسم المستعار غير موجود',
-      );
+      throw new NotFoundException(this.i18n.t('aliases.not_found'));
     }
 
     const safePage = Math.max(1, Number(page) || 1);
@@ -574,11 +554,7 @@ export class AliasesService {
   async getAliasBookRatings(aliasId: string, page = 1, limit = 20) {
     const alias = await this.aliasRepo.findOne({ where: { id: aliasId } });
     if (!alias) {
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Alias not found'
-          : 'الاسم المستعار غير موجود',
-      );
+      throw new NotFoundException(this.i18n.t('aliases.not_found'));
     }
 
     const safePage = Math.max(1, Number(page) || 1);
@@ -647,16 +623,8 @@ export class AliasesService {
     if (!existing) {
       const exists = await this.aliasRepo.exists({ where: { id: aliasId } });
       if (!exists)
-        throw new NotFoundException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? 'Alias not found'
-            : 'الاسم المستعار غير موجود',
-        );
-      throw new ForbiddenException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'You do not own this alias'
-          : 'ليس لديك صلاحية لتعديل هذا الاسم المستعار',
-      );
+        throw new NotFoundException(this.i18n.t('aliases.not_found'));
+      throw new ForbiddenException(this.i18n.t('aliases.not_owned'));
     }
 
     // 30-day edit cooldown rule
@@ -676,9 +644,10 @@ export class AliasesService {
         );
         const dateString = nextAllowedDate.toISOString().split('T')[0];
         throw new BadRequestException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? `You can only edit your alias once every 30 days. You can edit again in ${daysRemaining} day(s) on ${dateString}.`
-            : `لا يمكنك تعديل الاسم المستعار أو الصورة إلا بعد مرور 30 يوماً من آخر تعديل. يمكنك التعديل مجدداً بعد ${daysRemaining} يوم (بتاريخ ${dateString}).`,
+          this.i18n.t('aliases.cooldown_active', undefined, {
+            days: daysRemaining,
+            date: dateString,
+          }),
         );
       }
     }
@@ -687,11 +656,7 @@ export class AliasesService {
       dto.avatarUrl?.trim() &&
       !this.isAllowedAliasAvatarUrl(userId, dto.avatarUrl)
     ) {
-      throw new BadRequestException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Invalid avatar URL'
-          : 'رابط الصورة الرمزية غير صالح',
-      );
+      throw new BadRequestException(this.i18n.t('aliases.avatar_invalid'));
     }
     const previousAvatar = existing.avatarUrl;
     const uploadedUrl = file
@@ -708,11 +673,7 @@ export class AliasesService {
           lock: { mode: 'pessimistic_write' },
         });
         if (!alias)
-          throw new NotFoundException(
-            this.i18n.getCurrentLanguage?.() === 'en'
-              ? 'Alias not found'
-              : 'الاسم المستعار غير موجود',
-          );
+          throw new NotFoundException(this.i18n.t('aliases.not_found'));
         if (dto.nickname !== undefined) {
           const normalizedNickname = dto.nickname.trim();
           const validation = validateNicknameFormat(
@@ -767,9 +728,7 @@ export class AliasesService {
       if (uploadedUrl) await this.uploadService.deleteFileByUrl(uploadedUrl);
       if (this.isUserAliasUniqueViolation(error)) {
         throw new ConflictException(
-          this.i18n.getCurrentLanguage?.() === 'en'
-            ? 'You already have an active alias. Each user can only have one alias, but you can edit your current alias.'
-            : 'لديك بالفعل اسم مستعار مفعّل. لا يمكنك إنشاء أكثر من اسم مستعار واحد، ولكن يمكنك تعديل اسمك المستعار الحالي.',
+          this.i18n.t('aliases.already_has_alias'),
         );
       }
       if (this.isNicknameUniqueViolation(error)) {

@@ -62,10 +62,7 @@ export class BookExcerptsService {
     const saved = await this.excerptRepo.save(excerpt);
 
     return {
-      message:
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Excerpt saved successfully'
-          : 'تم حفظ المقتطف بنجاح',
+      message: this.i18n.t('excerpts.created'),
       data: this.formatExcerpt(saved),
     };
   }
@@ -238,11 +235,7 @@ export class BookExcerptsService {
     });
 
     if (!excerpt || excerpt.userId !== userId) {
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Excerpt not found'
-          : 'المقتطف غير موجود',
-      );
+      throw new NotFoundException(this.i18n.t('excerpts.not_found'));
     }
 
     return {
@@ -271,11 +264,7 @@ export class BookExcerptsService {
     });
 
     if (!excerpt || excerpt.userId !== userId) {
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Excerpt not found'
-          : 'المقتطف غير موجود',
-      );
+      throw new NotFoundException(this.i18n.t('excerpts.not_found'));
     }
 
     if (dto.content !== undefined) excerpt.content = dto.content;
@@ -288,10 +277,7 @@ export class BookExcerptsService {
     const saved = await this.excerptRepo.save(excerpt);
 
     return {
-      message:
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Excerpt updated successfully'
-          : 'تم تعديل المقتطف بنجاح',
+      message: this.i18n.t('excerpts.updated'),
       data: this.formatExcerpt(saved),
     };
   }
@@ -308,20 +294,13 @@ export class BookExcerptsService {
     });
 
     if (!excerpt || excerpt.userId !== userId) {
-      throw new NotFoundException(
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Excerpt not found'
-          : 'المقتطف غير موجود',
-      );
+      throw new NotFoundException(this.i18n.t('excerpts.not_found'));
     }
 
     await this.excerptRepo.remove(excerpt);
 
     return {
-      message:
-        this.i18n.getCurrentLanguage?.() === 'en'
-          ? 'Excerpt deleted successfully'
-          : 'تم حذف المقتطف بنجاح',
+      message: this.i18n.t('excerpts.deleted'),
       success: true,
     };
   }

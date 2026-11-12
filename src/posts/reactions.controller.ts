@@ -19,6 +19,8 @@ import { ReactPostDto } from './dto/react-post.dto';
 import { ReactionsQueryDto } from './dto/reactions-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
+import { I18nService } from '../i18n/i18n.service';
+
 interface AuthenticatedRequest extends Request {
   user?: {
     userId: string;
@@ -28,7 +30,10 @@ interface AuthenticatedRequest extends Request {
 }
 @Controller(['reactions', 'react'])
 export class ReactionsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly i18n: I18nService,
+  ) {}
 
   /**
    * POST /v1/reactions/:id
@@ -59,7 +64,9 @@ export class ReactionsController {
   ) {
     const targetId = dto.id || dto.postId || dto.targetId;
     if (!targetId) {
-      throw new BadRequestException('Target ID is required (id, postId, or targetId)');
+      throw new BadRequestException(
+        this.i18n.t('reactions.target_id_required'),
+      );
     }
     return this.postsService.reactToPost(req!.user!.userId, targetId, dto.reaction);
   }
