@@ -34,10 +34,10 @@ describe('QuotesController', () => {
 
   const mockCategories = {
     data: [
-      { id: 'f1a2b3c4-d5e6-47f8-a9b0-c1d2e3f4a5b6', name: 'رومانسي', nameAr: 'رومانسي', nameEn: 'Romantic' },
-      { id: 'a2b3c4d5-e6f7-48a9-b0c1-d2e3f4a5b6c7', name: 'نفسي', nameAr: 'نفسي', nameEn: 'Psychological' },
-      { id: 'b3c4d5e6-f7a8-49b0-c1d2-e3f4a5b6c7d8', name: 'تحفيزي', nameAr: 'تحفيزي', nameEn: 'Motivation' },
-      { id: 'c4d5e6f7-a8b9-40c1-d2e3-f4a5b6c7d8e9', name: 'حزين', nameAr: 'حزين', nameEn: 'Sadness' },
+      { id: 'f1a2b3c4-d5e6-47f8-a9b0-c1d2e3f4a5b6', displayName: 'رومانسي', name: 'رومانسي', nameAr: 'رومانسي', nameEn: 'Romantic', name_ar: 'رومانسي', name_en: 'Romantic' },
+      { id: 'a2b3c4d5-e6f7-48a9-b0c1-d2e3f4a5b6c7', displayName: 'نفسي', name: 'نفسي', nameAr: 'نفسي', nameEn: 'Psychological', name_ar: 'نفسي', name_en: 'Psychological' },
+      { id: 'b3c4d5e6-f7a8-49b0-c1d2-e3f4a5b6c7d8', displayName: 'تحفيزي', name: 'تحفيزي', nameAr: 'تحفيزي', nameEn: 'Motivation', name_ar: 'تحفيزي', name_en: 'Motivation' },
+      { id: 'c4d5e6f7-a8b9-40c1-d2e3-f4a5b6c7d8e9', displayName: 'حزين', name: 'حزين', nameAr: 'حزين', nameEn: 'Sadness', name_ar: 'حزين', name_en: 'Sadness' },
     ],
   };
 

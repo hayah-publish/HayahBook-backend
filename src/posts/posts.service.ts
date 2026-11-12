@@ -1294,22 +1294,34 @@ export class PostsService {
   }
 
   /**
-   * Get all available quote categories with localized labels
+   * Get all available quote categories with localized labels (displayName style)
    */
   getQuoteCategories(lang?: string): {
     data: Array<{
       id: string;
+      displayName: string;
+      name_ar: string;
+      name_en: string;
       name: string;
       nameAr: string;
       nameEn: string;
+      category: string;
+      category_ar: string;
+      category_en: string;
     }>;
   } {
     const currentLang = lang || (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
     const data = PostsService.QUOTE_CATEGORIES_MAP.map((c) => ({
       id: c.id,
+      displayName: currentLang === 'en' ? c.name_en : c.name_ar,
+      name_ar: c.name_ar,
+      name_en: c.name_en,
       name: currentLang === 'en' ? c.name_en : c.name_ar,
       nameAr: c.name_ar,
       nameEn: c.name_en,
+      category: currentLang === 'en' ? 'Quotes' : 'الاقتباسات',
+      category_ar: 'الاقتباسات',
+      category_en: 'Quotes',
     }));
     return { data };
   }
@@ -1322,7 +1334,18 @@ export class PostsService {
     query: PostsQueryDto,
     currentUserId?: string,
   ): Promise<{
-    categories: Array<{ id: string; name: string; nameAr: string; nameEn: string }>;
+    categories: Array<{
+      id: string;
+      displayName: string;
+      name_ar: string;
+      name_en: string;
+      name: string;
+      nameAr: string;
+      nameEn: string;
+      category: string;
+      category_ar: string;
+      category_en: string;
+    }>;
     data: FormattedPost[];
     total: number;
     page: number;
@@ -1344,9 +1367,15 @@ export class PostsService {
     const currentLang = this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar';
     const categories = PostsService.QUOTE_CATEGORIES_MAP.map((c) => ({
       id: c.id,
+      displayName: currentLang === 'en' ? c.name_en : c.name_ar,
+      name_ar: c.name_ar,
+      name_en: c.name_en,
       name: currentLang === 'en' ? c.name_en : c.name_ar,
       nameAr: c.name_ar,
       nameEn: c.name_en,
+      category: currentLang === 'en' ? 'Quotes' : 'الاقتباسات',
+      category_ar: 'الاقتباسات',
+      category_en: 'Quotes',
     }));
 
     return {

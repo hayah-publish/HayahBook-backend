@@ -51,11 +51,16 @@ export class QuotesController {
 
   /**
    * GET /v1/quotes/categories
-   * Get all available quote categories with localized labels and UUIDs.
+   * Get all available quote categories with localized labels and UUIDs (displayName style).
    */
   @Get('categories')
-  async getQuoteCategories(@Query('lang') lang?: string) {
-    return this.postsService.getQuoteCategories(lang);
+  async getQuoteCategories(
+    @Query('lang') lang?: string,
+    @Req() req?: Request,
+  ) {
+    const headerLang = req?.headers?.['accept-language']?.toString().toLowerCase();
+    const resolvedLang = lang || (headerLang?.startsWith('en') ? 'en' : 'ar');
+    return this.postsService.getQuoteCategories(resolvedLang);
   }
 
   /**

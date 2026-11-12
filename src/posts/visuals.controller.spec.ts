@@ -114,3 +114,4 @@ describe('VisualsController', () => {
     expect(res.success).toBe(true);
   });
 });
+
