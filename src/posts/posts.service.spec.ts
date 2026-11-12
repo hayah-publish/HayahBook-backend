@@ -1699,6 +1699,74 @@ describe('PostsService public post formatting', () => {
         expect(res.data.book).toBeDefined();
         expect(res.message).toBe('visuals.published');
       });
+
+      it('getReelsFeed strictly queries post.type = visual with videoUrl and orders by reel_score with social proof', async () => {
+        const qb: any = {
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          addSelect: jest.fn().mockReturnThis(),
+          setParameters: jest.fn().mockReturnThis(),
+          getParameters: jest.fn().mockReturnValue({}),
+          orderBy: jest.fn().mockReturnThis(),
+          addOrderBy: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getManyAndCount: jest.fn().mockResolvedValue([
+            [
+              {
+                id: 'reel-1',
+                type: 'visual',
+                userId: 'creator-1',
+                content: 'فيديو ريلز رائع',
+                videoUrl: 'https://cdn.hayahbook.com/reels/1.mp4',
+                createdAt: new Date(),
+                likesCount: 12000,
+                commentsCount: 80,
+                sharesCount: 22,
+                bookmarksCount: 45,
+                containVideo: true,
+                user: { id: 'creator-1', name: 'Sara Ahmed', role: 'author' },
+              },
+            ],
+            1,
+          ]),
+        };
+
+        mockPostsRepo.createQueryBuilder = jest.fn().mockReturnValue(qb);
+
+        serviceWithActions.getMutualFollowersProof = jest.fn().mockResolvedValue(
+          new Map([
+            [
+              'creator-1',
+              {
+                text: 'Followed by Ahmed Murad and 4 others',
+                count: 5,
+                followers: [{ id: 'user-2', name: 'Ahmed Murad', profileUrl: null }],
+              },
+            ],
+          ]),
+        );
+
+        const result = await serviceWithActions.getReelsFeed(
+          { page: 1, limit: 10 },
+          'viewer-1',
+        );
+
+        expect(qb.where).toHaveBeenCalledWith(
+          "post.type = 'visual' AND post.videoUrl IS NOT NULL AND post.videoUrl != ''",
+        );
+        expect(qb.addSelect).toHaveBeenCalledWith(
+          expect.stringContaining('COALESCE(post.likes_count, 0) * 3'),
+          'reel_score',
+        );
+        expect(qb.orderBy).toHaveBeenCalledWith('reel_score', 'DESC');
+        expect(result.data).toHaveLength(1);
+        expect(result.data[0].type).toBe('visual');
+        expect(result.data[0].socialProof?.text).toBe(
+          'Followed by Ahmed Murad and 4 others',
+        );
+      });
     });
   });
 });

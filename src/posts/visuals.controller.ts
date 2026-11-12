@@ -35,7 +35,7 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-@Controller(['visuals', 'reels'])
+@Controller('visuals')
 export class VisualsController {
   constructor(private readonly postsService: PostsService) {}
 
@@ -69,8 +69,22 @@ export class VisualsController {
   }
 
   /**
+   * GET /v1/visuals/reels
+   * Dedicated Reels feed with smart recommendation algorithm (Interests + Engagement + Followed accounts + Recency).
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('reels')
+  async getReels(
+    @Query() query: PostsQueryDto,
+    @Req() req?: AuthenticatedRequest,
+  ) {
+    return this.postsService.getReelsFeed(query, req?.user?.userId);
+  }
+
+  /**
    * GET /v1/visuals
-   * Paginated feed of visual posts and videos.
+   * Paginated feed of visual posts and videos (Videos tab).
+   * Supports ?type=reels or ?tab=reels to switch to the smart Reels algorithm.
    */
   @UseGuards(OptionalJwtAuthGuard)
   @Get()
@@ -78,6 +92,9 @@ export class VisualsController {
     @Query() query: PostsQueryDto,
     @Req() req?: AuthenticatedRequest,
   ) {
+    if (query.tab === 'reels' || query.type === 'reels') {
+      return this.postsService.getReelsFeed(query, req?.user?.userId);
+    }
     return this.postsService.findAll(
       Object.assign(query, { type: 'visuals' as const }),
       req?.user?.userId,

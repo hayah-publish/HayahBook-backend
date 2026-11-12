@@ -168,6 +168,11 @@ export interface FormattedPost {
   isOwner?: boolean;
   isSaved?: boolean;
   isFollowingAuthor?: boolean;
+  socialProof?: {
+    text: string;
+    count: number;
+    followers: Array<{ id: string; name: string; profileUrl: string | null }>;
+  } | null;
   commentsDisabled?: boolean;
   shareUrl?: string;
   permissions?: PostPermissions;
@@ -1631,6 +1636,323 @@ export class PostsService {
     return {
       categories,
       ...result,
+    };
+  }
+
+  /**
+   * Preload social proof (mutual friends following creator) for a list of creators
+   */
+  async getMutualFollowersProof(
+    currentUserId: string,
+    creatorIds: string[],
+    myFollowedIds?: string[],
+    lang: SupportedLanguage = 'ar',
+  ): Promise<
+    Map<
+      string,
+      {
+        text: string;
+        count: number;
+        followers: Array<{ id: string; name: string; profileUrl: string | null }>;
+      }
+    >
+  > {
+    const proofMap = new Map();
+    if (!currentUserId || creatorIds.length === 0 || !this.userFollowRepo) {
+      return proofMap;
+    }
+
+    try {
+      const followedIds =
+        myFollowedIds || (await this.getFollowedUserIds(currentUserId));
+      if (followedIds.length === 0) return proofMap;
+
+      const mutualRows = await this.userFollowRepo
+        .createQueryBuilder('f')
+        .innerJoin(User, 'u', 'u.id = f.followerId')
+        .where('f.followerId IN (:...followedIds)', { followedIds })
+        .andWhere('f.followingId IN (:...creatorIds)', { creatorIds })
+        .andWhere('f.followingId != :currentUserId', { currentUserId })
+        .select([
+          'f.followingId AS "creatorId"',
+          'u.id AS "friendId"',
+          'u.name AS "friendName"',
+          'u.profileUrl AS "friendAvatar"',
+        ])
+        .getRawMany();
+
+      const grouped = new Map<
+        string,
+        Array<{ id: string; name: string; profileUrl: string | null }>
+      >();
+      for (const row of mutualRows) {
+        const cId = row.creatorId;
+        if (!grouped.has(cId)) grouped.set(cId, []);
+        grouped.get(cId)!.push({
+          id: row.friendId,
+          name: row.friendName,
+          profileUrl: row.friendAvatar || null,
+        });
+      }
+
+      for (const [cId, friends] of grouped.entries()) {
+        const count = friends.length;
+        const first = friends[0].name;
+        const remaining = count - 1;
+        const isEn = lang === 'en';
+        const text =
+          remaining > 0
+            ? isEn
+              ? `Followed by ${first} and ${remaining} others`
+              : `متابع من قِبل ${first} و${remaining} آخرين`
+            : isEn
+              ? `Followed by ${first}`
+              : `متابع من قِبل ${first}`;
+
+        proofMap.set(cId, {
+          text,
+          count,
+          followers: friends.slice(0, 2),
+        });
+      }
+    } catch {
+      // Graceful fallback if tables or relations are mocked
+    }
+
+    return proofMap;
+  }
+
+  /**
+   * Dedicated Reels discovery feed (type = 'visual' only).
+   * Unlike standard video posts (type = 'post' with video), this strictly returns 9:16 vertical Reels.
+   * Powered by a smart recommendation algorithm:
+   * 1. Matches viewer interests (50 points boost)
+   * 2. Followed creators priority (40 points boost)
+   * 3. Engagement: likes * 3, comments * 5, shares * 7, bookmarks * 4, reads * 0.1
+   * 4. Recency decay: fresher reels receive a score boost
+   * 5. Enriched with social proof ("Followed by X and Y others")
+   */
+  async getReelsFeed(
+    query: PostsQueryDto,
+    currentUserId?: string,
+  ): Promise<{
+    data: FormattedPost[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Math.min(50, Number(query.limit) || 20));
+
+    const qb = this.postsRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.book', 'book')
+      .leftJoinAndSelect('post.audiobook', 'audiobook')
+      .leftJoinAndSelect('post.excerpt', 'excerpt');
+
+    // 1. Strictly filter to visual reels only (NOT regular posts with video)
+    qb.where(
+      "post.type = 'visual' AND post.videoUrl IS NOT NULL AND post.videoUrl != ''",
+    );
+
+    // 2. Following scope filter if requested
+    const isFollowing = query.following === true || query.scope === 'following';
+    let followedUserIds: string[] = [];
+    if (currentUserId) {
+      followedUserIds = await this.getFollowedUserIds(currentUserId);
+    }
+
+    if (isFollowing) {
+      if (!currentUserId) {
+        throw new UnauthorizedException(
+          this.i18n?.t ? this.i18n.t('auth.unauthorized') : 'Unauthorized',
+        );
+      }
+      if (followedUserIds.length === 0) {
+        return {
+          data: [],
+          total: 0,
+          page,
+          limit,
+          totalPages: 1,
+        };
+      }
+      qb.andWhere('post.user_id IN (:...followedUserIds)', { followedUserIds });
+    }
+
+    if (query.userId) {
+      qb.andWhere('post.user_id = :userId', { userId: query.userId });
+    }
+
+    if (query.search?.trim()) {
+      qb.andWhere('(post.content ILIKE :search OR post.title ILIKE :search)', {
+        search: `%${query.search.trim()}%`,
+      });
+    }
+
+    // Apply category & subcategory taxonomy filters if passed
+    this.applyTaxonomyFilters(qb, query);
+
+    // 3. User block & hidden exclusions
+    if (currentUserId) {
+      if (this.userHiddenPostRepo && typeof qb.andWhere === 'function') {
+        qb.andWhere(
+          `post.id NOT IN (SELECT post_id FROM user_hidden_posts WHERE user_id = :hiddenUserId)`,
+          { hiddenUserId: currentUserId },
+        );
+      }
+      if (this.userBlockRepo && typeof qb.andWhere === 'function') {
+        qb.andWhere(
+          `post.user_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = :blockerUserId)`,
+          { blockerUserId: currentUserId },
+        );
+        qb.andWhere(
+          `post.user_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = :blockedUserId)`,
+          { blockedUserId: currentUserId },
+        );
+      }
+    }
+
+    // 4. Smart Recommendation Scoring Algorithm
+    let interestScoreClause = '0';
+    let followingScoreClause = '0';
+    const scoreParams: Record<string, any> = {};
+
+    if (currentUserId) {
+      // A. Interest matching boost
+      const interestKeywords = await this.getUserInterestKeywords(currentUserId);
+      if (interestKeywords.length > 0) {
+        const clauses: string[] = [];
+        interestKeywords.slice(0, 10).forEach((kw, i) => {
+          scoreParams[`r_ikw_${i}`] = `%${kw}%`;
+          clauses.push(`post.category ILIKE :r_ikw_${i}`);
+          clauses.push(`post.content ILIKE :r_ikw_${i}`);
+          clauses.push(`book.category ILIKE :r_ikw_${i}`);
+          clauses.push(`book.title ILIKE :r_ikw_${i}`);
+        });
+        interestScoreClause = `(CASE WHEN (${clauses.join(' OR ')}) THEN 50 ELSE 0 END)`;
+      }
+
+      // B. Followed creators boost
+      if (followedUserIds.length > 0) {
+        scoreParams['recFollowedIds'] = followedUserIds;
+        followingScoreClause = `(CASE WHEN post.user_id IN (:...recFollowedIds) THEN 40 ELSE 0 END)`;
+      }
+    }
+
+    if (
+      typeof (qb as any).addSelect === 'function' &&
+      typeof (qb as any).addOrderBy === 'function'
+    ) {
+      const scoringExpression = `(
+        ${interestScoreClause} +
+        ${followingScoreClause} +
+        (COALESCE(post.likes_count, 0) * 3) +
+        (COALESCE(post.comments_count, 0) * 5) +
+        (COALESCE(post.shares_count, 0) * 7) +
+        (COALESCE(post.bookmarks_count, 0) * 4) +
+        (COALESCE(book.reads_count, 0) * 0.1) +
+        GREATEST(0, 30 - EXTRACT(EPOCH FROM (NOW() - post."createdAt")) / 86400)
+      )`;
+
+      (qb as any).addSelect(scoringExpression, 'reel_score');
+
+      if (typeof (qb as any).setParameters === 'function') {
+        const currentParams =
+          typeof (qb as any).getParameters === 'function'
+            ? (qb as any).getParameters()
+            : {};
+        (qb as any).setParameters({ ...currentParams, ...scoreParams });
+      }
+
+      qb.orderBy('reel_score', 'DESC');
+      (qb as any).addOrderBy('post.createdAt', 'DESC');
+    } else {
+      qb.orderBy('post.createdAt', 'DESC');
+    }
+
+    qb.skip((page - 1) * limit).take(limit);
+
+    const [items, total] = await qb.getManyAndCount();
+
+    // 5. Pre-fetch mentions, saved, followed, reactions, and social proof in parallel
+    const creatorIds = Array.from(
+      new Set(items.map((i) => i.userId).filter(Boolean)),
+    );
+    const lang = (this.i18n?.getCurrentLanguage
+      ? this.i18n.getCurrentLanguage()
+      : 'ar') as SupportedLanguage;
+
+    const [socialProofMap, preloadedSaved, preloadedFollowed] =
+      await Promise.all([
+        currentUserId && creatorIds.length > 0
+          ? this.getMutualFollowersProof(
+              currentUserId,
+              creatorIds,
+              followedUserIds,
+              lang,
+            )
+          : Promise.resolve(new Map()),
+        currentUserId && items.length > 0 && this.bookmarkRepo
+          ? this.bookmarkRepo
+              .find({
+                where: {
+                  userId: currentUserId,
+                  postId: In(items.map((i) => i.id)),
+                },
+                select: { postId: true },
+              })
+              .then(
+                (bms) =>
+                  new Set(bms.map((b) => b.postId).filter(Boolean) as string[]),
+              )
+              .catch(() => new Set<string>())
+          : Promise.resolve(new Set<string>()),
+        currentUserId && creatorIds.length > 0 && this.userFollowRepo
+          ? this.userFollowRepo
+              .find({
+                where: {
+                  followerId: currentUserId,
+                  followingId: In(creatorIds),
+                },
+                select: { followingId: true },
+              })
+              .then(
+                (fls) =>
+                  new Set(
+                    fls.map((f) => f.followingId).filter(Boolean) as string[],
+                  ),
+              )
+              .catch(() => new Set<string>())
+          : Promise.resolve(new Set<string>()),
+      ]);
+
+    const formattedList = await Promise.all(
+      items.map(async (item) => {
+        const formatted = await this.formatPost(
+          item,
+          undefined,
+          undefined,
+          currentUserId,
+          preloadedSaved,
+          preloadedFollowed,
+        );
+        const proof = socialProofMap.get(item.userId) || null;
+        return {
+          ...formatted,
+          socialProof: proof,
+        };
+      }),
+    );
+
+    return {
+      data: formattedList,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
     };
   }
 

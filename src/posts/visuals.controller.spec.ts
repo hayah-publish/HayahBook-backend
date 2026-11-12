@@ -58,6 +58,13 @@ describe('VisualsController', () => {
         message: 'تم نشر الريلز بنجاح',
         data: mockVisualData,
       }),
+      getReelsFeed: jest.fn().mockResolvedValue({
+        data: [{ ...mockVisualData, socialProof: { text: 'Followed by Ahmed Murad', count: 1, followers: [] } }],
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -130,6 +137,24 @@ describe('VisualsController', () => {
     expect(postsService.createVisual).toHaveBeenCalledWith('user-uuid-1', dto, undefined);
     expect(res.message).toBe('تم نشر الريلز بنجاح');
     expect(res.data.type).toBe('visual');
+  });
+
+  it('GET /v1/visuals/reels returns smart reels feed', async () => {
+    const res = await controller.getReels({ page: 1, limit: 10 }, mockUserReq);
+    expect(postsService.getReelsFeed).toHaveBeenCalledWith(
+      { page: 1, limit: 10 },
+      'user-uuid-1',
+    );
+    expect(res.data[0].socialProof).toBeDefined();
+  });
+
+  it('GET /v1/visuals with tab=reels switches to getReelsFeed', async () => {
+    const res = await controller.getVisuals({ tab: 'reels', page: 1 }, mockUserReq);
+    expect(postsService.getReelsFeed).toHaveBeenCalledWith(
+      expect.objectContaining({ tab: 'reels' }),
+      'user-uuid-1',
+    );
+    expect(res.data[0].socialProof).toBeDefined();
   });
 });
 

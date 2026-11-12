@@ -4083,6 +4083,191 @@
                   }
                 },
                 {
+                  "name": "get-reels - عرض وتصفح الريلز فقط بالخوارزمية الذكية (Smart Reels Feed مع خوارزمية الترشيح والـ Social Proof)",
+                  "api": {
+                    "id": "get_smart_reels_feed_01",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/reels",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر في الصفحة (افتراضي 20، الحد الأقصى 50)",
+                          "example": 20
+                        },
+                        {
+                          "name": "following",
+                          "type": "boolean",
+                          "required": false,
+                          "description": "فلترة الريلز لحسابات صناع المحتوى التي يتابعها المستخدم فقط (true / false)",
+                          "example": false
+                        },
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث نصي في وصف ومحتوى وعناوين الريلز أو الكتب المرتبطة",
+                          "example": "مكتبة"
+                        },
+                        {
+                          "name": "tab",
+                          "type": "string",
+                          "required": false,
+                          "description": "تبويب الواجهة (reels افتراضياً لدعم التبديل بين Videos و Reels)",
+                          "example": "reels"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "لغة النصوص والـ Social Proof (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        },
+                        {
+                          "id": "header_auth",
+                          "name": "Authorization",
+                          "required": false,
+                          "description": "Bearer Token الخاص بالمستخدم (اختياري، يتيح تخصيص الخوارزمية حسب الاهتمامات والمتابعين)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "get_smart_reels_feed_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "example": "visual"
+                                  },
+                                  "contentFormat": {
+                                    "type": "string",
+                                    "example": "plain"
+                                  },
+                                  "content": {
+                                    "type": "string"
+                                  },
+                                  "videoUrl": {
+                                    "type": "string"
+                                  },
+                                  "containVideo": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "aspectRatio": {
+                                    "type": "string",
+                                    "example": "9:16"
+                                  },
+                                  "user": {
+                                    "type": "object"
+                                  },
+                                  "book": {
+                                    "type": "object"
+                                  },
+                                  "socialProof": {
+                                    "type": "object",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string",
+                                        "example": "Followed by Ahmed Murad and 4 others"
+                                      },
+                                      "count": {
+                                        "type": "integer",
+                                        "example": 5
+                                      },
+                                      "followers": {
+                                        "type": "array"
+                                      }
+                                    }
+                                  },
+                                  "reactionsCount": {
+                                    "type": "object"
+                                  },
+                                  "commentsCount": {
+                                    "type": "integer"
+                                  },
+                                  "sharesCount": {
+                                    "type": "integer"
+                                  },
+                                  "bookmarksCount": {
+                                    "type": "integer"
+                                  },
+                                  "isFollowingAuthor": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "page": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "totalPages": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "itemSchema": {},
+                        "description": "قائمة الريلز العمودية 9:16 مرتبة بالخوارزمية الذكية مع تفاصيل الناشر والكتاب والتفاعل والأصدقاء المشتركين (Social Proof)",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success - العربية (Arabic Smart Reels Feed)",
+                        "responseId": "get_smart_reels_feed_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"e8a931a2-3f11-4796-bb21-c4d32a9e2f5b\",\n      \"type\": \"visual\",\n      \"contentFormat\": \"plain\",\n      \"content\": \"جولة سريعة في أعماق المكتبة التراثية واكتشاف أندر المخطوطات القديمة...\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/library-tour-heritage.mp4\",\n      \"containVideo\": true,\n      \"images\": [],\n      \"links\": [],\n      \"aspectRatio\": \"9:16\",\n      \"category\": \"المرئيات\",\n      \"user\": {\n        \"id\": \"f5e4d3c2-b1a0-49e8-8765-4321fedcba98\",\n        \"name\": \"Sara Ahmed\",\n        \"email\": null,\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/sara-ahmed.jpg\",\n        \"role\": \"author\",\n        \"isVerified\": true\n      },\n      \"book\": {\n        \"id\": \"7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d\",\n        \"title\": \"حب الغرام\",\n        \"author\": \"نجيب محفوظ\",\n        \"coverUrl\": \"https://cdn.hayahbook.com/books/hob-algharam.jpg\",\n        \"category\": \"روايات رومانسية\",\n        \"readsCount\": 1420\n      },\n      \"audiobook\": null,\n      \"excerpt\": null,\n      \"reactionsCount\": {\n        \"total\": 12000,\n        \"agree\": 7500,\n        \"love\": 3800,\n        \"applaud\": 700,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 45,\n      \"userReaction\": null,\n      \"isOwner\": false,\n      \"isSaved\": false,\n      \"isFollowingAuthor\": false,\n      \"socialProof\": {\n        \"text\": \"متابع من قِبل أحمد مراد و4 آخرين\",\n        \"count\": 5,\n        \"followers\": [\n          {\n            \"id\": \"11223344-5566-7788-9900-aabbccddeeff\",\n            \"name\": \"أحمد مراد\",\n            \"profileUrl\": \"https://cdn.hayahbook.com/avatars/ahmed-murad.jpg\"\n          }\n        ]\n      },\n      \"commentsDisabled\": false,\n      \"shareUrl\": \"https://hayahbook.com/reels/e8a931a2-3f11-4796-bb21-c4d32a9e2f5b\",\n      \"permissions\": {\n        \"canEdit\": false,\n        \"canDelete\": false,\n        \"canComment\": true,\n        \"canShare\": true\n      },\n      \"createdAt\": \"2026-11-12T08:30:00.000Z\",\n      \"updatedAt\": \"2026-11-12T08:30:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      },
+                      {
+                        "name": "Success - English (Smart Reels Feed with Social Proof)",
+                        "responseId": "get_smart_reels_feed_200",
+                        "data": "{\n  \"data\": [\n    {\n      \"id\": \"e8a931a2-3f11-4796-bb21-c4d32a9e2f5b\",\n      \"type\": \"visual\",\n      \"contentFormat\": \"plain\",\n      \"content\": \"Quick tour inside the heritage library exploring rare historic manuscripts...\",\n      \"videoUrl\": \"https://cdn.hayahbook.com/reels/library-tour-heritage.mp4\",\n      \"containVideo\": true,\n      \"images\": [],\n      \"links\": [],\n      \"aspectRatio\": \"9:16\",\n      \"category\": \"Visuals\",\n      \"user\": {\n        \"id\": \"f5e4d3c2-b1a0-49e8-8765-4321fedcba98\",\n        \"name\": \"Sara Ahmed\",\n        \"email\": null,\n        \"profileUrl\": \"https://cdn.hayahbook.com/avatars/sara-ahmed.jpg\",\n        \"role\": \"author\",\n        \"isVerified\": true\n      },\n      \"book\": {\n        \"id\": \"7a8b9c0d-1e2f-4a5b-8c9d-0e1f2a3b4c5d\",\n        \"title\": \"Love of Romance\",\n        \"author\": \"Naguib Mahfouz\",\n        \"coverUrl\": \"https://cdn.hayahbook.com/books/hob-algharam.jpg\",\n        \"category\": \"Romantic Novels\",\n        \"readsCount\": 1420\n      },\n      \"audiobook\": null,\n      \"excerpt\": null,\n      \"reactionsCount\": {\n        \"total\": 12000,\n        \"agree\": 7500,\n        \"love\": 3800,\n        \"applaud\": 700,\n        \"insightful\": 0,\n        \"disagree\": 0\n      },\n      \"commentsCount\": 80,\n      \"sharesCount\": 22,\n      \"bookmarksCount\": 45,\n      \"userReaction\": null,\n      \"isOwner\": false,\n      \"isSaved\": false,\n      \"isFollowingAuthor\": false,\n      \"socialProof\": {\n        \"text\": \"Followed by Ahmed Murad and 4 others\",\n        \"count\": 5,\n        \"followers\": [\n          {\n            \"id\": \"11223344-5566-7788-9900-aabbccddeeff\",\n            \"name\": \"Ahmed Murad\",\n            \"profileUrl\": \"https://cdn.hayahbook.com/avatars/ahmed-murad.jpg\"\n          }\n        ]\n      },\n      \"commentsDisabled\": false,\n      \"shareUrl\": \"https://hayahbook.com/reels/e8a931a2-3f11-4796-bb21-c4d32a9e2f5b\",\n      \"permissions\": {\n        \"canEdit\": false,\n        \"canDelete\": false,\n        \"canComment\": true,\n        \"canShare\": true\n      },\n      \"createdAt\": \"2026-11-12T08:30:00.000Z\",\n      \"updatedAt\": \"2026-11-12T08:30:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20,\n  \"totalPages\": 1\n}"
+                      }
+                    ]
+                  }
+                },
+                {
                   "name": "react-visual - التفاعل مع محتوى مرئي أو فيديو (agree, love, applaud, insightful, disagree)",
                   "api": {
                     "id": "47000116",

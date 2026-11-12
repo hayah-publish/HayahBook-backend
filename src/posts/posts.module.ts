@@ -17,6 +17,7 @@ import { ArticlesController } from './articles.controller';
 import { SnippetsController } from './snippets.controller';
 import { QuotesController } from './quotes.controller';
 import { VisualsController } from './visuals.controller';
+import { ReelsController } from './reels.controller';
 import { ReactionsController } from './reactions.controller';
 import { UploadModule } from '../upload/upload.module';
 import { I18nModule } from '../i18n/i18n.module';
@@ -47,6 +48,7 @@ import { InterestsModule } from '../interests/interests.module';
     SnippetsController,
     QuotesController,
     VisualsController,
+    ReelsController,
     ReactionsController,
   ],
   providers: [PostsService],

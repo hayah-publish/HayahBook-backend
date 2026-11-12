@@ -179,3 +179,4 @@ export class CreateVisualDto {
   @IsOptional()
   image?: any;
 }
+
