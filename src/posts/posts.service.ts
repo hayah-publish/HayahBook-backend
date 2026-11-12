@@ -1169,6 +1169,7 @@ export class PostsService {
       content?: string;
       quote?: string;
       showBookDetails?: boolean;
+      quoteCategory?: string;
     },
   ): Promise<{ message: string; data: FormattedPost }> {
     let bookId = dto.bookId || null;
@@ -1209,6 +1210,17 @@ export class PostsService {
       resolvedBook = await this.booksRepository.findOne({ where: { id: bookId } });
     }
 
+    // Resolve quote category
+    let resolvedCategory = 'المقتطفات';
+    let resolvedCategoryId: string | null = null;
+    if (dto.quoteCategory) {
+      const catMeta = this.resolveQuoteCategory(dto.quoteCategory);
+      if (catMeta) {
+        resolvedCategory = catMeta.name_ar;
+        resolvedCategoryId = catMeta.id;
+      }
+    }
+
     const post = this.postsRepository.create({
       userId,
       type: 'snippet',
@@ -1216,7 +1228,8 @@ export class PostsService {
       contentFormat: 'plain',
       bookId: showBook ? bookId : null,
       excerptId: excerptEntity?.id || null,
-      category: 'المقتطفات',
+      category: resolvedCategory,
+      categoryId: resolvedCategoryId,
     });
 
     const saved = await this.postsRepository.save(post);
@@ -1231,6 +1244,114 @@ export class PostsService {
     return {
       message: this.i18n?.t ? this.i18n.t('snippets.published') : 'تم نشر المقتطف في ملفك الشخصي بنجاح',
       data: formatted,
+    };
+  }
+
+  /**
+   * Quote categories map for the Quotes discovery feed.
+   * Used for filtering tabs: All, Romantic, Psychological, Motivation, Sadness, etc.
+   */
+  static readonly QUOTE_CATEGORIES_MAP: {
+    id: string;
+    name_ar: string;
+    name_en: string;
+  }[] = [
+    { id: 'f1a2b3c4-d5e6-47f8-a9b0-c1d2e3f4a5b6', name_ar: 'رومانسي', name_en: 'Romantic' },
+    { id: 'a2b3c4d5-e6f7-48a9-b0c1-d2e3f4a5b6c7', name_ar: 'نفسي', name_en: 'Psychological' },
+    { id: 'b3c4d5e6-f7a8-49b0-c1d2-e3f4a5b6c7d8', name_ar: 'تحفيزي', name_en: 'Motivation' },
+    { id: 'c4d5e6f7-a8b9-40c1-d2e3-f4a5b6c7d8e9', name_ar: 'حزين', name_en: 'Sadness' },
+    { id: 'd5e6f7a8-b9c0-41d2-e3f4-a5b6c7d8e9f0', name_ar: 'ديني', name_en: 'Religious' },
+    { id: 'e6f7a8b9-c0d1-42e3-f4a5-b6c7d8e9f0a1', name_ar: 'فلسفي', name_en: 'Philosophical' },
+    { id: 'f7a8b9c0-d1e2-43f4-a5b6-c7d8e9f0a1b2', name_ar: 'أدبي', name_en: 'Literary' },
+    { id: 'a8b9c0d1-e2f3-44a5-b6c7-d8e9f0a1b2c3', name_ar: 'ملهم', name_en: 'Inspiring' },
+    { id: 'b9c0d1e2-f3a4-45b6-c7d8-e9f0a1b2c3d4', name_ar: 'حكم وأمثال', name_en: 'Proverbs' },
+    { id: 'c0d1e2f3-a4b5-46c7-d8e9-f0a1b2c3d4e5', name_ar: 'اجتماعي', name_en: 'Social' },
+  ];
+
+  /**
+   * Resolve quote category from input (id, name_ar, or name_en)
+   */
+  private resolveQuoteCategory(
+    input: string,
+  ): { id: string; name_ar: string; name_en: string } | null {
+    const val = input.trim().toLowerCase();
+    const normalize = (s: string) =>
+      s
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .trim()
+        .toLowerCase();
+
+    return (
+      PostsService.QUOTE_CATEGORIES_MAP.find((c) => {
+        if (c.id.toLowerCase() === val) return true;
+        if (c.name_ar.toLowerCase() === val || normalize(c.name_ar) === normalize(val)) return true;
+        if (c.name_en.toLowerCase() === val) return true;
+        return false;
+      }) || null
+    );
+  }
+
+  /**
+   * Get all available quote categories with localized labels
+   */
+  getQuoteCategories(lang?: string): {
+    data: Array<{
+      id: string;
+      name: string;
+      nameAr: string;
+      nameEn: string;
+    }>;
+  } {
+    const currentLang = lang || (this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar');
+    const data = PostsService.QUOTE_CATEGORIES_MAP.map((c) => ({
+      id: c.id,
+      name: currentLang === 'en' ? c.name_en : c.name_ar,
+      nameAr: c.name_ar,
+      nameEn: c.name_en,
+    }));
+    return { data };
+  }
+
+  /**
+   * Public Quotes discovery feed.
+   * Returns all published snippets from all users, with category filtering.
+   */
+  async getQuotesFeed(
+    query: PostsQueryDto,
+    currentUserId?: string,
+  ): Promise<{
+    categories: Array<{ id: string; name: string; nameAr: string; nameEn: string }>;
+    data: FormattedPost[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    // Build enriched query for snippets type
+    const enrichedQuery = Object.assign({}, query, { type: 'snippet' as const });
+
+    // If category filter provided, resolve it to match the stored value
+    if (query.category?.trim()) {
+      const catMeta = this.resolveQuoteCategory(query.category.trim());
+      if (catMeta) {
+        enrichedQuery.category = catMeta.name_ar;
+      }
+    }
+
+    const result = await this.findAll(enrichedQuery, currentUserId);
+    const currentLang = this.i18n?.getCurrentLanguage ? this.i18n.getCurrentLanguage() : 'ar';
+    const categories = PostsService.QUOTE_CATEGORIES_MAP.map((c) => ({
+      id: c.id,
+      name: currentLang === 'en' ? c.name_en : c.name_ar,
+      nameAr: c.name_ar,
+      nameEn: c.name_en,
+    }));
+
+    return {
+      categories,
+      ...result,
     };
   }
 

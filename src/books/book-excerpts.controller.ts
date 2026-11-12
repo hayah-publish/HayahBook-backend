@@ -53,6 +53,7 @@ export class BookExcerptsController {
       excerptId: id,
       content: dto.content,
       showBookDetails: dto.showBookDetails,
+      quoteCategory: dto.quoteCategory,
     });
   }
 
@@ -150,9 +151,9 @@ export class BookExcerptsController {
 }
 
 /**
- * Direct top-level controller for /v1/excerpts and /v1/quotes
+ * Direct top-level controller for /v1/excerpts
  */
-@Controller(['excerpts', 'quotes'])
+@Controller('excerpts')
 @UseGuards(JwtAuthGuard)
 export class DirectExcerptsController {
   constructor(
@@ -171,6 +172,7 @@ export class DirectExcerptsController {
       excerptId: id,
       content: dto.content,
       showBookDetails: dto.showBookDetails,
+      quoteCategory: dto.quoteCategory,
     });
   }
 

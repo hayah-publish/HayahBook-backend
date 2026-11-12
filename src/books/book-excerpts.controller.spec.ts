@@ -156,6 +156,7 @@ describe('BookExcerptsController & DirectExcerptsController', () => {
         excerptId: '1f71559f-4980-4b02-be6a-24c4ea3d7ea0',
         content: 'ملاحظة شخصية',
         showBookDetails: undefined,
+        quoteCategory: undefined,
       });
     });
   });

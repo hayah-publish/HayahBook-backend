@@ -21,4 +21,10 @@ export class ShareExcerptDto {
   })
   @IsBoolean()
   showBookDetails?: boolean = true;
+
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString({ message: 'quoteCategory must be a string' })
+  quoteCategory?: string;
 }
+

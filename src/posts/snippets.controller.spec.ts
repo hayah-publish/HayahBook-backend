@@ -133,3 +133,4 @@ describe('SnippetsController', () => {
     expect(res.success).toBe(true);
   });
 });
+

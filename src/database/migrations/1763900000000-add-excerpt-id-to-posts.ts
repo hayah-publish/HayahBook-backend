@@ -50,3 +50,4 @@ export class AddExcerptIdToPosts1763900000000 implements MigrationInterface {
     }
   }
 }
+

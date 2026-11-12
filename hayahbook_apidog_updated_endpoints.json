@@ -3273,6 +3273,10 @@
                           "showBookDetails": {
                             "type": "boolean",
                             "description": "إظهار بيانات وغلاف الكتاب (افتراضي: true)"
+                          },
+                          "quoteCategory": {
+                            "type": "string",
+                            "description": "تصنيف الاقتباس لاكتشافه في تبويبات الاقتباسات (رومانسي، نفسي، تحفيزي، حزين، ديني، فلسفي، أدبي، ملهم، حكم وأمثال، اجتماعي)"
                           }
                         }
                       },
@@ -3361,6 +3365,235 @@
                     "tags": [],
                     "status": "developing",
                     "name": "delete-snippet - حذف مقتطف منشور من الملف الشخصي"
+                  }
+                },
+                {
+                  "name": "get-quotes - استعراض اقتباسات المستخدمين العامة (Quotes Feed مع التبويبات والتصنيفات ونظام التفاعل)",
+                  "api": {
+                    "id": "47000112",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/quotes",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "category",
+                          "type": "string",
+                          "required": false,
+                          "description": "فلترة الاقتباسات بتصنيف محدد (رومانسي، نفسي، تحفيزي، حزين، ديني، فلسفي، أدبي، ملهم، حكم وأمثال، اجتماعي / Romantic, Psychological, Motivation, Sadness...)",
+                          "example": "Romantic"
+                        },
+                        {
+                          "name": "search",
+                          "type": "string",
+                          "required": false,
+                          "description": "بحث نصي في الاقتباسات والنصوص المصاحبة والكتب"
+                        },
+                        {
+                          "name": "page",
+                          "type": "integer",
+                          "required": false,
+                          "description": "رقم الصفحة (افتراضي 1)",
+                          "example": 1
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "required": false,
+                          "description": "عدد العناصر في الصفحة (افتراضي 20)",
+                          "example": 20
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000112_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success (English)",
+                        "responseId": "47000112_200",
+                        "data": "{\"categories\":[{\"id\":\"f1a2b3c4-d5e6-47f8-a9b0-c1d2e3f4a5b6\",\"name\":\"Romantic\",\"nameAr\":\"رومانسي\",\"nameEn\":\"Romantic\"},{\"id\":\"a2b3c4d5-e6f7-48a9-b0c1-d2e3f4a5b6c7\",\"name\":\"Psychological\",\"nameAr\":\"نفسي\",\"nameEn\":\"Psychological\"},{\"id\":\"b3c4d5e6-f7a8-49b0-c1d2-e3f4a5b6c7d8\",\"name\":\"Motivation\",\"nameAr\":\"تحفيزي\",\"nameEn\":\"Motivation\"},{\"id\":\"c4d5e6f7-a8b9-40c1-d2e3-f4a5b6c7d8e9\",\"name\":\"Sadness\",\"nameAr\":\"حزين\",\"nameEn\":\"Sadness\"},{\"id\":\"d5e6f7a8-b9c0-41d2-e3f4-a5b6c7d8e9f0\",\"name\":\"Religious\",\"nameAr\":\"ديني\",\"nameEn\":\"Religious\"},{\"id\":\"e6f7a8b9-c0d1-42e3-f4a5-b6c7d8e9f0a1\",\"name\":\"Philosophical\",\"nameAr\":\"فلسفي\",\"nameEn\":\"Philosophical\"},{\"id\":\"f7a8b9c0-d1e2-43f4-a5b6-c7d8e9f0a1b2\",\"name\":\"Literary\",\"nameAr\":\"أدبي\",\"nameEn\":\"Literary\"},{\"id\":\"a8b9c0d1-e2f3-44a5-b6c7-d8e9f0a1b2c3\",\"name\":\"Inspiring\",\"nameAr\":\"ملهم\",\"nameEn\":\"Inspiring\"},{\"id\":\"b9c0d1e2-f3a4-45b6-c7d8-e9f0a1b2c3d4\",\"name\":\"Proverbs\",\"nameAr\":\"حكم وأمثال\",\"nameEn\":\"Proverbs\"},{\"id\":\"c0d1e2f3-a4b5-46c7-d8e9-f0a1b2c3d4e5\",\"name\":\"Social\",\"nameAr\":\"اجتماعي\",\"nameEn\":\"Social\"}],\"data\":[{\"id\":\"992004a5-9760-461b-a9e9-8cf9b7862af2\",\"type\":\"snippet\",\"contentFormat\":\"plain\",\"content\":\"Sometimes we remain silent because we know our words will not change anything.\",\"quote\":\"Sometimes we remain silent because we know our words will not change anything.\",\"category\":\"رومانسي\",\"images\":[],\"videoUrl\":null,\"containVideo\":false,\"link\":null,\"links\":[],\"book\":{\"id\":\"27da05bd-423d-4b58-bc3a-82b1bef1c3ed\",\"title\":\"Recovery habits\",\"author\":\"Ahmed Murad\",\"narrator\":null,\"category\":\"Self Development\",\"coverUrl\":\"https://cdn.hayahbook.com/covers/recovery-habits.jpg\",\"rating\":4.8,\"views\":1250,\"readsCount\":340,\"listensCount\":0,\"type\":\"ebook\",\"hasEbook\":true,\"hasAudio\":false,\"availableFormats\":[\"ebook\"]},\"publisher\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"Ahmed Murad\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/ahmed.jpg\",\"role\":\"Author\",\"isFollowing\":false},\"mentions\":[],\"likesCount\":55,\"reactionsCount\":{\"total\":55,\"agree\":40,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"],\"userReaction\":\"agree\",\"isOwner\":false,\"isSaved\":false,\"isFollowingAuthor\":false,\"commentsDisabled\":false,\"shareUrl\":\"https://hayahbook.com/posts/992004a5-9760-461b-a9e9-8cf9b7862af2\",\"commentsCount\":80,\"sharesCount\":22,\"bookmarksCount\":15,\"createdAt\":\"2026-11-12T06:00:00.000Z\",\"updatedAt\":\"2026-11-12T06:00:00.000Z\"}],\"total\":1,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      },
+                      {
+                        "name": "Success (Arabic)",
+                        "responseId": "47000112_200",
+                        "data": "{\"categories\":[{\"id\":\"f1a2b3c4-d5e6-47f8-a9b0-c1d2e3f4a5b6\",\"name\":\"رومانسي\",\"nameAr\":\"رومانسي\",\"nameEn\":\"Romantic\"},{\"id\":\"a2b3c4d5-e6f7-48a9-b0c1-d2e3f4a5b6c7\",\"name\":\"نفسي\",\"nameAr\":\"نفسي\",\"nameEn\":\"Psychological\"},{\"id\":\"b3c4d5e6-f7a8-49b0-c1d2-e3f4a5b6c7d8\",\"name\":\"تحفيزي\",\"nameAr\":\"تحفيزي\",\"nameEn\":\"Motivation\"},{\"id\":\"c4d5e6f7-a8b9-40c1-d2e3-f4a5b6c7d8e9\",\"name\":\"حزين\",\"nameAr\":\"حزين\",\"nameEn\":\"Sadness\"},{\"id\":\"d5e6f7a8-b9c0-41d2-e3f4-a5b6c7d8e9f0\",\"name\":\"ديني\",\"nameAr\":\"ديني\",\"nameEn\":\"Religious\"},{\"id\":\"e6f7a8b9-c0d1-42e3-f4a5-b6c7d8e9f0a1\",\"name\":\"فلسفي\",\"nameAr\":\"فلسفي\",\"nameEn\":\"Philosophical\"},{\"id\":\"f7a8b9c0-d1e2-43f4-a5b6-c7d8e9f0a1b2\",\"name\":\"أدبي\",\"nameAr\":\"أدبي\",\"nameEn\":\"Literary\"},{\"id\":\"a8b9c0d1-e2f3-44a5-b6c7-d8e9f0a1b2c3\",\"name\":\"ملهم\",\"nameAr\":\"ملهم\",\"nameEn\":\"Inspiring\"},{\"id\":\"b9c0d1e2-f3a4-45b6-c7d8-e9f0a1b2c3d4\",\"name\":\"حكم وأمثال\",\"nameAr\":\"حكم وأمثال\",\"nameEn\":\"Proverbs\"},{\"id\":\"c0d1e2f3-a4b5-46c7-d8e9-f0a1b2c3d4e5\",\"name\":\"اجتماعي\",\"nameAr\":\"اجتماعي\",\"nameEn\":\"Social\"}],\"data\":[{\"id\":\"992004a5-9760-461b-a9e9-8cf9b7862af2\",\"type\":\"snippet\",\"contentFormat\":\"plain\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"quote\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"category\":\"رومانسي\",\"images\":[],\"videoUrl\":null,\"containVideo\":false,\"link\":null,\"links\":[],\"book\":{\"id\":\"27da05bd-423d-4b58-bc3a-82b1bef1c3ed\",\"title\":\"عادات التعافي\",\"author\":\"يعقوب صنوع\",\"narrator\":null,\"category\":\"تطوير الذات\",\"coverUrl\":\"https://cdn.hayahbook.com/covers/recovery-habits.jpg\",\"rating\":4.8,\"views\":1250,\"readsCount\":340,\"listensCount\":0,\"type\":\"ebook\",\"hasEbook\":true,\"hasAudio\":false,\"availableFormats\":[\"ebook\"]},\"publisher\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"أحمد مراد\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/ahmed.jpg\",\"role\":\"Author\",\"isFollowing\":false},\"mentions\":[],\"likesCount\":55,\"reactionsCount\":{\"total\":55,\"agree\":40,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"topReactions\":[\"agree\",\"love\",\"applaud\"],\"userReaction\":\"agree\",\"isOwner\":false,\"isSaved\":false,\"isFollowingAuthor\":false,\"commentsDisabled\":false,\"shareUrl\":\"https://hayahbook.com/posts/992004a5-9760-461b-a9e9-8cf9b7862af2\",\"commentsCount\":80,\"sharesCount\":22,\"bookmarksCount\":15,\"createdAt\":\"2026-11-12T06:00:00.000Z\",\"updatedAt\":\"2026-11-12T06:00:00.000Z\"}],\"total\":1,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "تغذية الاقتباسات العامة المخصصة للاكتشاف (Quotes Screen). تحتوي على قائمة التبويبات والتصنيفات (All, Romantic, Psychological, Motivation, Sadness...)، مع دعم التفاعل والتعليقات والمشاركات وحفظ المفضلة.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-quotes - استعراض اقتباسات المستخدمين العامة (Quotes Feed مع التبويبات والتصنيفات ونظام التفاعل)"
+                  }
+                },
+                {
+                  "name": "get-quote-categories - تصنيفات الاقتباسات (Quotes Categories للتبويبات)",
+                  "api": {
+                    "id": "47000113",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/quotes/categories",
+                    "parameters": {
+                      "path": [],
+                      "query": [
+                        {
+                          "name": "lang",
+                          "type": "string",
+                          "required": false,
+                          "description": "لغة العرض (ar / en)",
+                          "example": "ar"
+                        }
+                      ],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000113_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000113_200",
+                        "data": "{\"data\":[{\"id\":\"f1a2b3c4-d5e6-47f8-a9b0-c1d2e3f4a5b6\",\"name\":\"رومانسي\",\"nameAr\":\"رومانسي\",\"nameEn\":\"Romantic\"},{\"id\":\"a2b3c4d5-e6f7-48a9-b0c1-d2e3f4a5b6c7\",\"name\":\"نفسي\",\"nameAr\":\"نفسي\",\"nameEn\":\"Psychological\"},{\"id\":\"b3c4d5e6-f7a8-49b0-c1d2-e3f4a5b6c7d8\",\"name\":\"تحفيزي\",\"nameAr\":\"تحفيزي\",\"nameEn\":\"Motivation\"},{\"id\":\"c4d5e6f7-a8b9-40c1-d2e3-f4a5b6c7d8e9\",\"name\":\"حزين\",\"nameAr\":\"حزين\",\"nameEn\":\"Sadness\"},{\"id\":\"d5e6f7a8-b9c0-41d2-e3f4-a5b6c7d8e9f0\",\"name\":\"ديني\",\"nameAr\":\"ديني\",\"nameEn\":\"Religious\"},{\"id\":\"e6f7a8b9-c0d1-42e3-f4a5-b6c7d8e9f0a1\",\"name\":\"فلسفي\",\"nameAr\":\"فلسفي\",\"nameEn\":\"Philosophical\"},{\"id\":\"f7a8b9c0-d1e2-43f4-a5b6-c7d8e9f0a1b2\",\"name\":\"أدبي\",\"nameAr\":\"أدبي\",\"nameEn\":\"Literary\"},{\"id\":\"a8b9c0d1-e2f3-44a5-b6c7-d8e9f0a1b2c3\",\"name\":\"ملهم\",\"nameAr\":\"ملهم\",\"nameEn\":\"Inspiring\"},{\"id\":\"b9c0d1e2-f3a4-45b6-c7d8-e9f0a1b2c3d4\",\"name\":\"حكم وأمثال\",\"nameAr\":\"حكم وأمثال\",\"nameEn\":\"Proverbs\"},{\"id\":\"c0d1e2f3-a4b5-46c7-d8e9-f0a1b2c3d4e5\",\"name\":\"اجتماعي\",\"nameAr\":\"اجتماعي\",\"nameEn\":\"Social\"}]}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "قائمة التصنيفات الرسمية للاقتباسات مع أسماء معربة وإنجليزية ومعرفات فريدة لتغذية شريط التبويبات الأفقي.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-quote-categories - تصنيفات الاقتباسات (Quotes Categories للتبويبات)"
+                  }
+                },
+                {
+                  "name": "get-quote-by-id - استرجاع تفاصيل اقتباس محدد",
+                  "api": {
+                    "id": "47000114",
+                    "method": "get",
+                    "path": "http://localhost:3000/v1/quotes/{id}",
+                    "parameters": {
+                      "path": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true,
+                          "description": "معرف الاقتباس (UUID)",
+                          "example": "992004a5-9760-461b-a9e9-8cf9b7862af2"
+                        }
+                      ],
+                      "query": [],
+                      "header": [
+                        {
+                          "id": "header_lang",
+                          "name": "Accept-Language",
+                          "required": false,
+                          "description": "Language preference (ar / en)",
+                          "type": "string",
+                          "enable": true,
+                          "example": "ar"
+                        }
+                      ]
+                    },
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
+                      }
+                    },
+                    "responses": [
+                      {
+                        "id": "47000114_200",
+                        "code": 200,
+                        "name": "Success",
+                        "headers": [],
+                        "jsonSchema": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "itemSchema": {},
+                        "description": "",
+                        "contentType": "json",
+                        "mediaType": ""
+                      }
+                    ],
+                    "responseExamples": [
+                      {
+                        "name": "Success",
+                        "responseId": "47000114_200",
+                        "data": "{\"data\":{\"id\":\"992004a5-9760-461b-a9e9-8cf9b7862af2\",\"type\":\"snippet\",\"contentFormat\":\"plain\",\"content\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"quote\":\"أحياناً نصمت لأننا نعرف كلامنا لن يغير شيئاً\",\"category\":\"رومانسي\",\"images\":[],\"videoUrl\":null,\"containVideo\":false,\"link\":null,\"links\":[],\"book\":{\"id\":\"27da05bd-423d-4b58-bc3a-82b1bef1c3ed\",\"title\":\"عادات التعافي\",\"author\":\"يعقوب صنوع\",\"coverUrl\":\"https://cdn.hayahbook.com/covers/recovery-habits.jpg\",\"rating\":4.8},\"publisher\":{\"id\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"name\":\"Ahmed Murad\",\"profileUrl\":\"https://cdn.hayahbook.com/avatars/ahmed.jpg\",\"role\":\"user\"},\"reactionsCount\":{\"total\":55,\"agree\":40,\"love\":10,\"applaud\":5,\"insightful\":0,\"disagree\":0},\"commentsCount\":80,\"sharesCount\":22,\"bookmarksCount\":15,\"isBookmarked\":false,\"userReaction\":\"agree\",\"createdAt\":\"2026-11-12T06:00:00.000Z\",\"updatedAt\":\"2026-11-12T06:00:00.000Z\"}}"
+                      }
+                    ],
+                    "requestBody": {
+                      "type": "none",
+                      "parameters": []
+                    },
+                    "description": "استرجاع تفاصيل اقتباس محدد بواسطة معرّفه الفريد UUID مع بيانات الكتاب والناشر وإحصائيات التفاعل والتعليقات.",
+                    "tags": [],
+                    "status": "developing",
+                    "name": "get-quote-by-id - استرجاع تفاصيل اقتباس محدد"
                   }
                 }
               ]

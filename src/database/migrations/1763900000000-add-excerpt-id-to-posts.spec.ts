@@ -40,3 +40,4 @@ describe('AddExcerptIdToPosts1763900000000 migration', () => {
     );
   });
 });
+
