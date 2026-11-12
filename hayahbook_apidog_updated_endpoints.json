@@ -6892,7 +6892,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": ""
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
                       }
                     },
                     "responses": [
@@ -6908,8 +6908,9 @@
                     ],
                     "responseExamples": [
                       {
-                        "name": "Success",
-                        "data": "{\"message\":\"تم حفظ المقتطف بنجاح\",\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\"note\":\"حبيت الجملة دي اووي\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/14[chap07]!/4/2/12/1:0)\",\"createdAt\":\"2026-11-12T00:30:00.000Z\",\"updatedAt\":\"2026-11-12T00:30:00.000Z\"}}"
+                        "name": "Created",
+                        "responseId": "47000101_201",
+                        "data": "{\"message\":\"تم حفظ المقتطف بنجاح\",\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"وكانت دعوته صلى الله عليه وسلم في مكة قائمة على غرس التوحيد وتطهير القلوب وتثبيت الأخلاق الفاضلة في نفوس المؤمنين رغم شدة الأذى والاضطهاد.\",\"note\":\"مقطع مؤثر ومهم جداً يلخص جوهر الدعوة المكية والصبر والثبات.\",\"chapter\":\"الفصل الأول: العهد المكي\",\"pageNumber\":45,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/4[chap01]!/4/2/10/1:0)\",\"createdAt\":\"2026-11-10T10:00:00.000Z\",\"updatedAt\":\"2026-11-10T10:00:00.000Z\"}}"
                       }
                     ],
                     "requestBody": {
@@ -6917,13 +6918,45 @@
                       "parameters": [],
                       "jsonSchema": {
                         "type": "object",
-                        "properties": {}
+                        "properties": {
+                          "content": {
+                            "type": "string",
+                            "description": "نص المقتطف أو التمييز من الكتاب (إلزامي)"
+                          },
+                          "note": {
+                            "type": "string",
+                            "description": "ملاحظة شخصية على المقتطف (اختياري)"
+                          },
+                          "chapter": {
+                            "type": "string",
+                            "description": "اسم أو رقم الفصل (اختياري)"
+                          },
+                          "pageNumber": {
+                            "type": "integer",
+                            "description": "رقم الصفحة (اختياري)"
+                          },
+                          "color": {
+                            "type": "string",
+                            "description": "لون التمييز بصيغة HEX (افتراضي: #FF7A00)"
+                          },
+                          "cfiRange": {
+                            "type": "string",
+                            "description": "موضع النص داخل كتاب EPUB (اختياري)"
+                          }
+                        },
+                        "required": [
+                          "content"
+                        ]
                       },
                       "required": true,
                       "examples": [
                         {
-                          "name": "حفظ جملة مميزة مع ملاحظة ولون",
-                          "value": "{\n  \"content\": \"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\n  \"note\": \"حبيت الجملة دي اووي\",\n  \"chapter\": \"الفصل السابع\",\n  \"pageNumber\": 632,\n  \"color\": \"#FF7A00\",\n  \"cfiRange\": \"epubcfi(/6/14[chap07]!/4/2/12/1:0)\"\n}"
+                          "name": "حفظ تمييز مع ملاحظة ولون وفصل",
+                          "value": "{\n  \"content\": \"وكانت دعوته صلى الله عليه وسلم في مكة قائمة على غرس التوحيد وتطهير القلوب وتثبيت الأخلاق الفاضلة في نفوس المؤمنين رغم شدة الأذى والاضطهاد.\",\n  \"note\": \"مقطع مؤثر ومهم جداً يلخص جوهر الدعوة المكية والصبر والثبات.\",\n  \"chapter\": \"الفصل الأول: العهد المكي\",\n  \"pageNumber\": 45,\n  \"color\": \"#FF7A00\",\n  \"cfiRange\": \"epubcfi(/6/4[chap01]!/4/2/10/1:0)\"\n}"
+                        },
+                        {
+                          "name": "تمييز سريع بنص ولون فقط",
+                          "value": "{\n  \"content\": \"إن الصبر على المكاره والتمسك بالمبدأ هما السلاح الأقوى في مواجهة الشدائد.\",\n  \"color\": \"#4CAF50\"\n}"
                         }
                       ]
                     },
@@ -7004,7 +7037,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": ""
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
                       }
                     },
                     "responses": [
@@ -7021,7 +7054,8 @@
                     "responseExamples": [
                       {
                         "name": "Success",
-                        "data": "{\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"خلف الأبواب الموصدة\",\"author\":\"منى عبد الحليم\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/behind-closed-doors.jpg\",\"category\":\"روايات\"},\"data\":[{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\"note\":\"حبيت الجملة دي اووي\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/14[chap07]!/4/2/12/1:0)\",\"createdAt\":\"2026-11-12T00:30:00.000Z\",\"updatedAt\":\"2026-11-12T00:30:00.000Z\"},{\"id\":\"b3c2a109-87fe-4980-87a1-24c4ea3d7ea0\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"الشجرة كانت جميلة،\",\"note\":null,\"chapter\":\"الفصل الثالث\",\"pageNumber\":42,\"color\":\"#FF7A00\",\"cfiRange\":null,\"createdAt\":\"2026-11-12T00:25:00.000Z\",\"updatedAt\":\"2026-11-12T00:25:00.000Z\"}],\"total\":2,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                        "responseId": "47000102_200",
+                        "data": "{\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"الرحيق المختوم\",\"author\":\"صفي الرحمن المباركفوري\",\"coverUrl\":\"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&q=80\",\"category\":\"الكتب الدينية\"},\"data\":[{\"id\":\"c3811027-fdca-44fc-83ce-9a86f1e8f071\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"وما أرسلناك إلا رحمة للعالمين، فكانت سيرته كلها تجسيداً حياً لهذه الرحمة المهداة للبشرية جمعاء في سلمه وحربه وعفوه عند المقدرة.\",\"note\":\"الرحمة هي الأساس المحمدي في كل معاملة.\",\"chapter\":\"الفصل الثالث: الهجرة النبوية وبناء المجتمع\",\"pageNumber\":168,\"color\":\"#2196F3\",\"cfiRange\":\"epubcfi(/6/8[chap03]!/4/2/24/1:0)\",\"createdAt\":\"2026-11-10T14:15:00.000Z\",\"updatedAt\":\"2026-11-10T14:15:00.000Z\"},{\"id\":\"ccaa7a05-1f5c-48e6-a06e-e7be4bc34830\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"إن الصبر على المكاره والتمسك بالمبدأ هما السلاح الأقوى في مواجهة الشدائد وتقلبات الزمان وعتو الباطل.\",\"note\":\"حكمة عظيمة عن الصبر في رحلة الدعوة والحياة.\",\"chapter\":\"الفصل الثاني: عام الحزن والابتلاء\",\"pageNumber\":112,\"color\":\"#4CAF50\",\"cfiRange\":\"epubcfi(/6/6[chap02]!/4/2/18/1:0)\",\"createdAt\":\"2026-11-10T11:30:00.000Z\",\"updatedAt\":\"2026-11-10T11:30:00.000Z\"},{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"وكانت دعوته صلى الله عليه وسلم في مكة قائمة على غرس التوحيد وتطهير القلوب وتثبيت الأخلاق الفاضلة في نفوس المؤمنين رغم شدة الأذى والاضطهاد.\",\"note\":\"مقطع مؤثر ومهم جداً يلخص جوهر الدعوة المكية والصبر والثبات.\",\"chapter\":\"الفصل الأول: العهد المكي\",\"pageNumber\":45,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/4[chap01]!/4/2/10/1:0)\",\"createdAt\":\"2026-11-10T10:00:00.000Z\",\"updatedAt\":\"2026-11-10T10:00:00.000Z\"}],\"total\":3,\"page\":1,\"limit\":20,\"totalPages\":1}"
                       }
                     ],
                     "requestBody": {
@@ -7077,7 +7111,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": ""
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
                       }
                     },
                     "responses": [
@@ -7094,7 +7128,8 @@
                     "responseExamples": [
                       {
                         "name": "Success",
-                        "data": "{\"data\":[{\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"خلف الأبواب الموصدة\",\"author\":\"منى عبد الحليم\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/behind-closed-doors.jpg\",\"category\":\"روايات\",\"excerptsCount\":12,\"latestExcerptAt\":\"2026-11-12T00:30:00.000Z\"},{\"bookId\":\"1a31fd07-744e-4896-b787-b1d4c96ea222\",\"title\":\"موسم الهجرة إلى الشمال\",\"author\":\"الطيب صالح\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/season-migration.jpg\",\"category\":\"أدب عربي\",\"excerptsCount\":4,\"latestExcerptAt\":\"2026-11-11T21:10:00.000Z\"}],\"total\":2,\"page\":1,\"limit\":20,\"totalPages\":1}"
+                        "responseId": "47000103_200",
+                        "data": "{\"data\":[{\"bookId\":\"27da05bd-423d-4b58-bc3a-82b1bef1c3ed\",\"title\":\"العادات الذرية\",\"author\":\"جيمس كلير\",\"coverUrl\":\"https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500&q=80\",\"category\":\"تطوير الذات\",\"excerptsCount\":2,\"latestExcerptAt\":\"2026-11-11T19:00:00.000Z\"},{\"bookId\":\"557243a1-922f-4a63-8566-f7f01a4dfd8b\",\"title\":\"لأنك الله\",\"author\":\"علي بن جابر الفيفي\",\"coverUrl\":\"https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&q=80\",\"category\":\"الكتب الدينية\",\"excerptsCount\":2,\"latestExcerptAt\":\"2026-11-11T12:45:00.000Z\"},{\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"الرحيق المختوم\",\"author\":\"صفي الرحمن المباركفوري\",\"coverUrl\":\"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&q=80\",\"category\":\"الكتب الدينية\",\"excerptsCount\":3,\"latestExcerptAt\":\"2026-11-10T14:15:00.000Z\"}],\"total\":7,\"page\":1,\"limit\":20,\"totalPages\":1}"
                       }
                     ],
                     "requestBody": {
@@ -7141,7 +7176,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": ""
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
                       }
                     },
                     "responses": [
@@ -7158,7 +7193,8 @@
                     "responseExamples": [
                       {
                         "name": "Success",
-                        "data": "{\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها قبل حديث ما خرج آدم من البيت وهو يحمل خريطة قديمة وجدها بين أوراق جده.\",\"note\":\"حبيت الجملة دي اووي\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/14[chap07]!/4/2/12/1:0)\",\"createdAt\":\"2026-11-12T00:30:00.000Z\",\"updatedAt\":\"2026-11-12T00:30:00.000Z\",\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"خلف الأبواب الموصدة\",\"author\":\"منى عبد الحليم\",\"coverUrl\":\"https://cdn.hayahbook.com/books/covers/behind-closed-doors.jpg\"}}}"
+                        "responseId": "47000104_200",
+                        "data": "{\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"وكانت دعوته صلى الله عليه وسلم في مكة قائمة على غرس التوحيد وتطهير القلوب وتثبيت الأخلاق الفاضلة في نفوس المؤمنين رغم شدة الأذى والاضطهاد.\",\"note\":\"مقطع مؤثر ومهم جداً يلخص جوهر الدعوة المكية والصبر والثبات.\",\"chapter\":\"الفصل الأول: العهد المكي\",\"pageNumber\":45,\"color\":\"#FF7A00\",\"cfiRange\":\"epubcfi(/6/4[chap01]!/4/2/10/1:0)\",\"createdAt\":\"2026-11-10T10:00:00.000Z\",\"updatedAt\":\"2026-11-10T10:00:00.000Z\",\"book\":{\"id\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"title\":\"الرحيق المختوم\",\"author\":\"صفي الرحمن المباركفوري\",\"coverUrl\":\"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&q=80\"}}}"
                       }
                     ],
                     "requestBody": {
@@ -7186,7 +7222,7 @@
                           "description": "معرف المقتطف (UUID)",
                           "type": "string",
                           "enable": true,
-                          "example": "e4f8bb61-4fa3-433e-bfa3-82ef5be023b8"
+                          "example": "b7c8d9e0-f1a2-4b3c-9d5e-6f7a8b9c0d1e"
                         }
                       ],
                       "query": [],
@@ -7205,7 +7241,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": ""
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
                       }
                     },
                     "responses": [
@@ -7222,7 +7258,8 @@
                     "responseExamples": [
                       {
                         "name": "Success",
-                        "data": "{\"message\":\"تم تعديل المقتطف بنجاح\",\"data\":{\"id\":\"e4f8bb61-4fa3-433e-bfa3-82ef5be023b8\",\"bookId\":\"05bc8a29-33a3-453c-b862-0aef300ab7bd\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"كان الصباح هادئاً بشكل غريب، كأنّ المدينة تحبس أنفاسها...\",\"note\":\"ملاحظة معدلة: تعبير مجازي عميق جداً\",\"chapter\":\"الفصل السابع\",\"pageNumber\":632,\"color\":\"#2196F3\",\"updatedAt\":\"2026-11-12T00:35:00.000Z\"}}"
+                        "responseId": "47000105_200",
+                        "data": "{\"message\":\"تم تعديل المقتطف بنجاح\",\"data\":{\"id\":\"b7c8d9e0-f1a2-4b3c-9d5e-6f7a8b9c0d1e\",\"bookId\":\"27da05bd-423d-4b58-bc3a-82b1bef1c3ed\",\"userId\":\"6f955425-2969-431d-b2f5-2a10c6c8a9eb\",\"content\":\"أنت لا ترتقي إلى مستوى أهدافك، بل تهبط إلى مستوى أنظمتك وعاداتك اليومية التي تمارسها باستمرار.\",\"note\":\"تم التعديل بنجاح - ملاحظة ملهمة جداً\",\"chapter\":\"الفصل الأول: القوة المدهشة للعادات الذرية\",\"pageNumber\":27,\"color\":\"#00BCD4\",\"cfiRange\":\"epubcfi(/6/2[chap01]!/4/2/8/1:0)\",\"createdAt\":\"2026-11-11T16:20:00.000Z\",\"updatedAt\":\"2026-11-12T00:15:00.000Z\"}}"
                       }
                     ],
                     "requestBody": {
@@ -7230,13 +7267,34 @@
                       "parameters": [],
                       "jsonSchema": {
                         "type": "object",
-                        "properties": {}
+                        "properties": {
+                          "note": {
+                            "type": "string",
+                            "description": "تحديث الملاحظة الشخصية"
+                          },
+                          "color": {
+                            "type": "string",
+                            "description": "تحديث لون التمييز بصيغة HEX"
+                          },
+                          "chapter": {
+                            "type": "string",
+                            "description": "تحديث الفصل"
+                          },
+                          "pageNumber": {
+                            "type": "integer",
+                            "description": "تحديث رقم الصفحة"
+                          },
+                          "content": {
+                            "type": "string",
+                            "description": "تحديث نص المقتطف إن لزم"
+                          }
+                        }
                       },
                       "required": true,
                       "examples": [
                         {
                           "name": "تعديل الملاحظة واللون",
-                          "value": "{\n  \"note\": \"ملاحظة معدلة: تعبير مجازي عميق جداً\",\n  \"color\": \"#2196F3\"\n}"
+                          "value": "{\n  \"note\": \"تم التعديل بنجاح - ملاحظة ملهمة جداً\",\n  \"color\": \"#00BCD4\"\n}"
                         }
                       ]
                     },
@@ -7261,7 +7319,7 @@
                           "description": "معرف المقتطف (UUID)",
                           "type": "string",
                           "enable": true,
-                          "example": "e4f8bb61-4fa3-433e-bfa3-82ef5be023b8"
+                          "example": "3d796a17-61ab-4202-acf6-9bddbb541fad"
                         }
                       ],
                       "query": [],
@@ -7280,7 +7338,7 @@
                     "auth": {
                       "type": "bearer",
                       "bearer": {
-                        "token": ""
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk1NTQyNS0yOTY5LTQzMWQtYjJmNS0yYTEwYzZjOGE5ZWIiLCJyb2xlIjoidXNlciIsInRva2VuVmVyc2lvbiI6MSwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk0NDM5NTM4LCJleHAiOjE3OTcwMzE1Mzh9.uqPMboUftqP6EFeFlmLGRClihwDDzT8pMM5h46oBKjw"
                       }
                     },
                     "responses": [
@@ -7297,6 +7355,7 @@
                     "responseExamples": [
                       {
                         "name": "Success",
+                        "responseId": "47000106_200",
                         "data": "{\"message\":\"تم حذف المقتطف بنجاح\",\"success\":true}"
                       }
                     ],
